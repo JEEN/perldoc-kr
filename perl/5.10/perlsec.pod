@@ -1,0 +1,1230 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perlsec - Perl security
+
+=end original
+
+perlsec - Perl 의 시큐리티 
+
+=head1 DESCRIPTION
+
+=begin original
+
+Perl is designed to make it easy to program securely even when running
+with extra privileges, like setuid or setgid programs.  Unlike most
+command line shells, which are based on multiple substitution passes on
+each line of the script, Perl uses a more conventional evaluation scheme
+with fewer hidden snags.  Additionally, because the language has more
+builtin functionality, it can rely less upon external (and possibly
+untrustworthy) programs to accomplish its purposes.
+
+=end original
+
+Perl은, 프로그램이 setuid 나 setgid 되는 것 같은 특별한 권한을 부가되어
+실행된 때에도 시큐리티 유지가 용이하록 설계되어 있습니다.
+스크립트의 한줄마다 다중치환을 수행하는 것에 기본으로 한 대부분의
+커맨드라인셸 과는 달리, Perl 은 숨겨진 장애가 적으며,
+보다 편리한 평가방법을 사용하고 있습니다.
+그에 더해서 Perl 은 보다 많은 내장함수를 가지고 있으므로,
+어떤 목적을 달성하기 위해 (신뢰할 수 없을지 모르는)
+외부 프로그램을 사용하는 것이 적어도 됩니다.
+
+=begin original
+
+Perl automatically enables a set of special security checks, called I<taint
+mode>, when it detects its program running with differing real and effective
+user or group IDs.  The setuid bit in Unix permissions is mode 04000, the
+setgid bit mode 02000; either or both may be set.  You can also enable taint
+mode explicitly by using the B<-T> command line flag. This flag is
+I<strongly> suggested for server programs and any program run on behalf of
+someone else, such as a CGI script. Once taint mode is on, it's on for
+the remainder of your script.
+
+=end original
+
+Perl 은, 그 프로그램이 다른 실제 유저 ID, 실효 유저 ID, 실제 그룹 ID,
+실효 그룹 ID를 사용해 실행되는 것을 검출한 때에,
+자동적으로 I<오염모드> (taint mode) 라고 불리는 특별한 시큐리티 체크의
+설정을 유효화합니다.
+UNIX 퍼미션에 의한 setuid 비트는 모드 04000 으로, setgid 비트는
+모드 02000입니다.
+이것들은 중복해서 설정할 수도 있습니다.
+오염모드는, 커맨드라인플래그 B<-T> 를 사용해서 항상 유효화할 수 있습니다.
+이 플래그는 서버 프로그램이나, CGI 스크립트같은 다른 누군가에 조종되어
+실핼되는 프로그램에 사용하는 것을 B<강력하게> 추천합니다.
+
+=begin original
+
+While in this mode, Perl takes special precautions called I<taint
+checks> to prevent both obvious and subtle traps.  Some of these checks
+are reasonably simple, such as verifying that path directories aren't
+writable by others; careful programmers have always used checks like
+these.  Other checks, however, are best supported by the language itself,
+and it is these checks especially that contribute to making a set-id Perl
+program more secure than the corresponding C program.
+
+=end original
+
+이 모드로 동작하고 있을 때, Perl 은 명백한 함정과 감춰진 함정 양쪽에 대처하기
+위해 I<오염검사> (taint chekc) 라고 불리는 특별한 경계를 수행합니다.
+이것들의 체크 중 몇개인가는 단순합니다.
+path 디렉토리가 다른곳에서 쓰기 가능하지 않은 것을 검사하는 것도 그렇습니다.
+주의 깊은 프로그래머는 항상 이것들의 체크를 하고 있습니다.
+그 외의 체크는 언어자신에 의해 가장 좋게 지원되었습니다.
+그리고, 이것들의 체크는 특히 set-id 된 Perl 프로그램을 
+대응하는 C 프로그램보다도 안전하게 하는 것에 적합한 것입니다.
+
+=begin original
+
+You may not use data derived from outside your program to affect
+something else outside your program--at least, not by accident.  All
+command line arguments, environment variables, locale information (see
+L<perllocale>), results of certain system calls (C<readdir()>,
+C<readlink()>, the variable of C<shmread()>, the messages returned by
+C<msgrcv()>, the password, gcos and shell fields returned by the
+C<getpwxxx()> calls), and all file input are marked as "tainted".
+Tainted data may not be used directly or indirectly in any command
+that invokes a sub-shell, nor in any command that modifies files,
+directories, or processes, B<with the following exceptions>:
+
+=end original
+
+자신의 프로그램을 밖에서 온 데이터를 프로그램의 밖의 무엇인가에 영향을
+받기 위해 사용하는 것은, 적어도 사고가 아닌 한 불가능합니다.
+모든 커맨드라인 인수, 환경변수, 로케일 정보(L<perllocale> 을 참조),
+몇 가지의 시스템 콜의 결과(C<readdir()>, C<readlink()>, C<shmread()> 의 변수,
+C<msgrcv()> 가 반환한 메시지, 패스워드, C<getpwxxx()> 호출이 반환한
+gecos 필드와 셸필드), 모든 파일입력 같은 것은 
+"오염되었다"(tainted) 라고 인지됩니다.
+오염된 데이터는 직접, 간접을 불문하고 서브 셸을 기동하는 커맨드에 사용하는 것도
+파일이나 디렉토리, 프로세스에 견경을 가하는 따위의 커맨드에 사용 할 수도 
+없습니다.
+단 B<아래의 예외> 가 있습니다.
+
+=over 4
+
+=item *
+
+=begin original
+
+Arguments to C<print> and C<syswrite> are B<not> checked for taintedness.
+
+=end original
+
+C<print> 와 C<syswrite> 의 인수에 대한 오염검사는 B<수행되지 않습니다>.
+
+=item *
+
+=begin original
+
+Symbolic methods
+
+=end original
+
+심볼릭 메소드
+
+    $obj->$method(@args);
+
+=begin original
+
+and symbolic sub references
+
+=end original
+
+와 심볼릭 서브루틴 리퍼런스
+
+    &{$foo}(@args);
+    $foo->(@args);
+
+=begin original
+
+are not checked for taintedness.  This requires extra carefulness
+unless you want external data to affect your control flow.  Unless
+you carefully limit what these symbolic values are, people are able
+to call functions B<outside> your Perl code, such as POSIX::system,
+in which case they are able to run arbitrary external code.
+
+=end original
+
+은 오염성이 체크되지 않습니다.
+This requires extra carefulness
+unless you want external data to affect your control flow.  Unless
+you carefully limit what these symbolic values are, people are able
+to call functions B<outside> your Perl code, such as POSIX::system,
+in which case they are able to run arbitrary external code.
+(TBT)
+
+=item *
+
+=begin original
+
+Hash keys are B<never> tainted.
+
+=end original
+
+해쉬의 키는 B<결코> 오염되지 않습니다.
+
+=back
+
+=begin original
+
+For efficiency reasons, Perl takes a conservative view of
+whether data is tainted.  If an expression contains tainted data,
+any subexpression may be considered tainted, even if the value
+of the subexpression is not itself affected by the tainted data.
+
+=end original
+
+For efficiency reasons, Perl takes a conservative view of
+whether data is tainted.  If an expression contains tainted data,
+any subexpression may be considered tainted, even if the value
+of the subexpression is not itself affected by the tainted data.
+(TBT)
+
+=begin original
+
+Because taintedness is associated with each scalar value, some
+elements of an array or hash can be tainted and others not.
+The keys of a hash are B<never> tainted.
+
+=end original
+
+오염은 각 스칼라 값에 붙여지기에, 배열의 ë가지 요소가 오염되었다고 해서,
+그 외의 요소는 그렇지 않다고 할 수도 있습니다.
+해쉬의 키는 B<결코> 오염되지 않습니다.
+
+=begin original
+
+For example:
+
+=end original
+
+예를 보도록 하죠:
+
+=begin original
+
+    $arg = shift;		# $arg is tainted
+    $hid = $arg, 'bar';		# $hid is also tainted
+    $line = <>;			# Tainted
+    $line = <STDIN>;		# Also tainted
+    open FOO, "/home/me/bar" or die $!;
+    $line = <FOO>;		# Still tainted
+    $path = $ENV{'PATH'};	# Tainted, but see below
+    $data = 'abc';		# Not tainted
+
+=end original
+
+    $arg = shift;		# $arg 는 오염되었다.
+    $hid = $arg, 'bar';		# $hid 도 오염되었다.
+    $line = <>;			# 오염되었다.
+    $line = <STDIN>;		# 이것도 오염되었다.
+    open FOO, "/home/me/bar" or die $!;
+    $line = <FOO>;		# 아직 오염되었다.
+    $path = $ENV{'PATH'};	# 오염되었지만 아래를 참조
+    $data = 'abc';		# 오염되지 않았다. 
+
+=begin original
+
+    system "echo $arg";		# Insecure
+    system "/bin/echo", $arg;	# Considered insecure
+				# (Perl doesn't know about /bin/echo)
+    system "echo $hid";		# Insecure
+    system "echo $data";	# Insecure until PATH set
+
+=end original
+
+    system "echo $arg";		# 안전하지 않다.
+    system "/bin/echo", $arg;	# 안전하지 않다고 생각됨
+				# (Perl 은 /bin/echo 에 대해 알지 못함)
+    system "echo $hid";		# 안전하지 않다.
+    system "echo $data";	# PATH 를 설정하기까지는 안전하지 않다. 
+
+=begin original
+
+    $path = $ENV{'PATH'};	# $path now tainted
+
+=end original
+
+    $path = $ENV{'PATH'};	# $path 가 오염되었다. 
+
+    $ENV{'PATH'} = '/bin:/usr/bin';
+    delete @ENV{'IFS', 'CDPATH', 'ENV', 'BASH_ENV'};
+
+=begin original
+
+    $path = $ENV{'PATH'};	# $path now NOT tainted
+    system "echo $data";	# Is secure now!
+
+=end original
+
+    $path = $ENV{'PATH'};	# $path 는 오염되지 않았다.
+    system "echo $data";	# 이것으로 안전! 
+
+=begin original
+
+    open(FOO, "< $arg");	# OK - read-only file
+    open(FOO, "> $arg"); 	# Not OK - trying to write
+
+=end original
+
+    open(FOO, "< $arg");	# OK - 읽어들이기만 하는 파일
+    open(FOO, "> $arg"); 	# Not OK - 쓰려고 하고 있음.
+
+    open(FOO,"echo $arg|");	# Not OK
+    open(FOO,"-|")
+	or exec 'echo', $arg;	# Also not OK
+
+=begin original
+
+    $shout = `echo $arg`;	# Insecure, $shout now tainted
+
+=end original
+
+    $shout = `echo $arg`;	# 안전하지 않음 $shout는 오염되었다. 
+
+=begin original
+
+    unlink $data, $arg;		# Insecure
+    umask $arg;			# Insecure
+
+=end original
+
+    unlink $data, $arg;		# 안전하지 않음 
+    umask $arg;			# 안전하지 않음
+
+=begin original
+
+    exec "echo $arg";		# Insecure
+    exec "echo", $arg;		# Insecure
+    exec "sh", '-c', $arg;	# Very insecure!
+
+=end original
+
+    exec "echo $arg";		# 안전하지 않음 
+    exec "echo", $arg;		# 안전하지 않음 
+    exec "sh", '-c', $arg;	# 매우 안전하지 않음 
+
+=begin original
+
+    @files = <*.c>;		# insecure (uses readdir() or similar)
+    @files = glob('*.c');	# insecure (uses readdir() or similar)
+
+=end original
+
+    @files = <*.c>;		# 안전하지 않음(readdir()같은 것을 사용)
+    @files = glob('*.c');	# 안전하지 않음 (readdir() 같은 것을 사용)
+
+    # In Perl releases older than 5.6.0 the <*.c> and glob('*.c') would
+    # have used an external program to do the filename expansion; but in
+    # either case the result is tainted since the list of filenames comes
+    # from outside of the program.
+
+=begin original
+
+    $bad = ($arg, 23);		# $bad will be tainted
+    $arg, `true`;		# Insecure (although it isn't really)
+
+=end original
+
+    $bad = ($arg, 23);		# $bad 는 오염되어 있을 지도 모름
+    $arg, `true`;		# 안전하지 않음 (실제는 그렇지 않더라도) 
+
+=begin original
+
+If you try to do something insecure, you will get a fatal error saying
+something like "Insecure dependency" or "Insecure $ENV{PATH}".
+
+=end original
+
+안전하지 않은 것을 하려고 하면 "Insecure dependency" 나
+"Insecure $ENV{PATH}" 같은 치명적 에러가 날겁니다.
+
+=begin original
+
+The exception to the principle of "one tainted value taints the whole
+expression" is with the ternary conditional operator C<?:>.  Since code
+with a ternary conditional
+
+=end original
+
+The exception to the principle of "one tainted value taints the whole
+expression" is with the ternary conditional operator C<?:>.
+3항 조건을 사용한 코드
+
+    $result = $tainted_value ? "Untainted" : "Also untainted";
+
+=begin original
+
+is effectively
+
+=end original
+
+같은 것은 사실상
+
+    if ( $tainted_value ) {
+        $result = "Untainted";
+    } else {
+        $result = "Also untainted";
+    }
+
+=begin original
+
+it doesn't make sense for C<$result> to be tainted.
+
+=end original
+
+이기때문에, C<$result> 가 오염되었다고 생각하는 것으 의미가 없습니다.
+
+=head2 Laundering and Detecting Tainted Data
+
+(오염된 데이터의 검출과 세정)
+
+=begin original
+
+To test whether a variable contains tainted data, and whose use would
+thus trigger an "Insecure dependency" message, you can use the
+C<tainted()> function of the Scalar::Util module, available in your
+nearby CPAN mirror, and included in Perl starting from the release 5.8.0.
+Or you may be able to use the following C<is_tainted()> function.
+
+=end original
+
+어떤 변수가 오염된 데이터를 가지고 있는지를 검사하기 위해, 그리고,
+"Insecure dependency" 메시지의 원인이 될 가능성이 있는지를 검사하기 위해
+CPAN에 있고, 5.8.0 부터는 Perl 에 포함되어 있는 
+Scalar::Util 모듈의 C<tainted()> 함수를 사용할 수 있습니다.
+혹은, 아래처럼 함수 C<is_tainted()> 를 사용할 수 있습니다.
+
+    sub is_tainted {
+        return ! eval { eval("#" . substr(join("", @_), 0, 0)); 1 };
+    }
+
+=begin original
+
+This function makes use of the fact that the presence of tainted data
+anywhere within an expression renders the entire expression tainted.  It
+would be inefficient for every operator to test every argument for
+taintedness.  Instead, the slightly more efficient and conservative
+approach is used that if any tainted value has been accessed within the
+same expression, the whole expression is considered tainted.
+
+=end original
+
+이 함수는 어떤 식의 어디인가에 있는 오염된 데이터가 식 전체를 오염해버리는 것을
+이용하고 있습니다.
+이것은 모든 연산자에 대해, 그 모든 인수가 오염되어있는 지의 검사를 하기 때문에
+효율은 좋지 않습니다.
+대신에, 일부의 시기에 대해 오염된 값에 접근하고 식 전체가
+오염되었다고 간주하는 경우에는, 더욱 효율이 좋은 보수적인 방법이 사용됩니다.
+
+=begin original
+
+But testing for taintedness gets you only so far.  Sometimes you have just
+to clear your data's taintedness.  Values may be untainted by using them
+as keys in a hash; otherwise the only way to bypass the tainting
+mechanism is by referencing subpatterns from a regular expression match.
+Perl presumes that if you reference a substring using $1, $2, etc., that
+you knew what you were doing when you wrote the pattern.  That means using
+a bit of thought--don't just blindly untaint anything, or you defeat the
+entire mechanism.  It's better to verify that the variable has only good
+characters (for certain values of "good") rather than checking whether it
+has any bad characters.  That's because it's far too easy to miss bad
+characters that you never thought of.
+
+=end original
+
+하지만, 오염의 검사는 귀찮습니다.
+당신의 데이터의 오염을 없애기만 하는 것도 있을 겁니다.
+값은 해쉬의 키로써 사용하는 것도 정화됩니다; 그렇지 않으면,
+오염검사기구를 바이패스하기 위한 단 하나의 방법은,
+매치한 정규표현의 서브패턴을 참조하는 것입니다.
+Perl 은 당신이 $1, $2 등을 사용해서 부분문자열을 참조한 때에,
+당신이 패턴을 기술한 때에 뭔가를 수행하는 가를 알고 있다고 가정합니다.
+즉, 오염되지 않은 것을 동결하지 않거나, 기구전체를 무효화하는 것입니다.
+이것은 변수가 어떤 나쁜 문자를 가지고 있는 지를 검사하는 것이 아니라,
+변수가 좋은 문자만을 가지고 있는 것의 검사에 적합합니다.
+이것은 (당신이 생각하지 못할) 나쁜 문자를 놓쳐버리는 것이 너무나도
+간단하기 때문입니다.
+
+=begin original
+
+Here's a test to make sure that the data contains nothing but "word"
+characters (alphabetics, numerics, and underscores), a hyphen, an at sign,
+or a dot.
+
+=end original
+
+아래에 보이는 예제는, 데이터에 "문자"(알파벳, 숫자, 언더바)의 
+문자, 하이픈, 앳마크, 점 이외의 것이 들어 있지 않은 가를 검사하는 것입니다.
+
+    if ($data =~ /^([-\@\w.]+)$/) {
+	$data = $1; 			# $data now untainted
+    } else {
+	die "Bad data in '$data'"; 	# log this somewhere
+    }
+
+=begin original
+
+This is fairly secure because C</\w+/> doesn't normally match shell
+metacharacters, nor are dot, dash, or at going to mean something special
+to the shell.  Use of C</.+/> would have been insecure in theory because
+it lets everything through, but Perl doesn't check for that.  The lesson
+is that when untainting, you must be exceedingly careful with your patterns.
+Laundering data using regular expression is the I<only> mechanism for
+untainting dirty data, unless you use the strategy detailed below to fork
+a child of lesser privilege.
+
+=end original
+
+이것은 꽤 안전합니다.
+왜냐면, C<\w+> 는 통상 셸의 메타 문자에는 매치하지 않고, 점 이나
+대쉬 등의 셸에 있어서 특별한 의미를 가지는 것에도 매치하지 않기 때문입니다.
+C</.+/> 를 사용하는 것은, 이것은 모든 것을 통해버리는 것에 Perl 은 그것을
+체크하지 않기에, 이론적으로는 안전하지 않습니다.
+오염을 제거할 때에는, 자신의 패턴에 대해서 충분히 주의하지 않으면 안됩니다.
+정규표현을 사용한 데이터의 세정은 앞서 설명한 대로 낮은 우선순위의 아들
+프로세스를 fork 하기 위한 전력을 사용하기 까지는 오염된 데이터의
+오염제거 B<만> 의 기구입니다.
+
+=begin original
+
+The example does not untaint C<$data> if C<use locale> is in effect,
+because the characters matched by C<\w> are determined by the locale.
+Perl considers that locale definitions are untrustworthy because they
+contain data from outside the program.  If you are writing a
+locale-aware program, and want to launder data with a regular expression
+containing C<\w>, put C<no locale> ahead of the expression in the same
+block.  See L<perllocale/SECURITY> for further discussion and examples.
+
+=end original
+
+앞의 예제에서, C<use locale> 이 유효한 때에는 C<$data> 의 오염제거를 
+수행하지 않습니다.
+왜냐면, C<\w> 에 매치하는 문자는 로케일에 의해 결정되기 때문입니다.
+Perl 은, 로케일로 결정된 것을, 그것이 프로그램의 밖에서 온 데이터에서
+구성되는 이유에 의해 신용할 수 없는 것으로 간주합니다.
+만약 로케일을 고려한 프로그램을 만들고 있고, C<\w> 를 포함한 정규표현으로
+데이터의 세정을 수행하고 싶다면, 식이 놓여진 것과 같은 블록의 앞 부분에
+C<no locale> 을 둡니다.
+L<perllocale/SECURITY> 에 자세한 설명과 예제가 있습니다.
+
+=head2 Switches On the "#!" Line
+
+("#!" 줄의 스위치)
+
+=begin original
+
+When you make a script executable, in order to make it usable as a
+command, the system will pass switches to perl from the script's #!
+line.  Perl checks that any command line switches given to a setuid
+(or setgid) script actually match the ones set on the #! line.  Some
+Unix and Unix-like environments impose a one-switch limit on the #!
+line, so you may need to use something like C<-wU> instead of C<-w -U>
+under such systems.  (This issue should arise only in Unix or
+Unix-like environments that support #! and setuid or setgid scripts.)
+
+=end original
+
+스스로 만든 스크립트를 커맨드처럼 사용할 수 있도록 한 때, 시스템은
+Perl 에 대해, 스크릅트의 #! 의 줄부터 커맨드라인 스위치를 넘깁니다.
+Perl 은, setuid(혹은 setgid) 된 스크립트에 주어진 커맨드라인 스위치가
+#! 줄에 있는 것과 정말로 일치하는 가 어떤가를 검사합니다.
+일부의 UNIX 나 UNIX 풍의 환경에서는 #! 줄에는 하의 스위치만 놓을 수 없기에,
+그런 시스템에서는 C<-w -U> 같은 형식이 아닌 C<-wU> 처럼
+할 필요가 있을 겁니다(이것은 #! 를 지원하고 있고, setuid 나 setgid 스크립트가
+사용할 수 있는 UNIX 환경이나 UNIx 같은 환경에서만 수행되어지는 것입니다).
+
+=head2 Taint mode and @INC
+
+(오염검사모드와 @INC)
+
+=begin original
+
+When the taint mode (C<-T>) is in effect, the "." directory is removed
+from C<@INC>, and the environment variables C<PERL5LIB> and C<PERLLIB>
+are ignored by Perl. You can still adjust C<@INC> from outside the
+program by using the C<-I> command line option as explained in
+L<perlrun>. The two environment variables are ignored because
+they are obscured, and a user running a program could be unaware that
+they are set, whereas the C<-I> option is clearly visible and
+therefore permitted.
+
+=end original
+
+오염검사모드(C<-T>) 가 유효한 때, "." 디렉토리는 C<@INC> 부터
+없어지고, 환경변수 C<PERL5LIB> 과 C<PERLLIB> 은 Perl 에서 무시됩니다.
+그래도, L<perlrun> 에서 설명하고 있는 C<-I> 커맨드 라인 옵션을
+사용하는 것으로, 프로그램의 밖에서 C<@INC> 를 조정할 수 있습니다.
+The two environment variables are ignored because
+they are obscured, and a user running a program could be unaware that
+they are set, whereas the C<-I> option is clearly visible and
+therefore permitted.
+(TBT)
+
+=begin original
+
+Another way to modify C<@INC> without modifying the program, is to use
+the C<lib> pragma, e.g.:
+
+=end original
+
+프로그램을 수정하지 않고 C<@INC> 를 수정하는 다른 하나의 방법은
+C<lib> 프라그마를 사용하는 것입니다. 즉:
+
+  perl -Mlib=/foo program
+
+=begin original
+
+The benefit of using C<-Mlib=/foo> over C<-I/foo>, is that the former
+will automagically remove any duplicated directories, while the later
+will not.
+
+=end original
+
+The benefit of using C<-Mlib=/foo> over C<-I/foo>, is that the former
+will automagically remove any duplicated directories, while the later
+will not.
+(TBT)
+
+=begin original
+
+Note that if a tainted string is added to C<@INC>, the following
+problem will be reported:
+
+=end original
+
+Note that if a tainted string is added to C<@INC>, the following
+problem will be reported:
+(TBT)
+
+  Insecure dependency in require while running with -T switch
+
+=head2 Cleaning Up Your Path
+
+(실행경로를 청소한다)
+
+=begin original
+
+For "Insecure C<$ENV{PATH}>" messages, you need to set C<$ENV{'PATH'}> to
+a known value, and each directory in the path must be absolute and
+non-writable by others than its owner and group.  You may be surprised to
+get this message even if the pathname to your executable is fully
+qualified.  This is I<not> generated because you didn't supply a full path
+to the program; instead, it's generated because you never set your PATH
+environment variable, or you didn't set it to something that was safe.
+Because Perl can't guarantee that the executable in question isn't itself
+going to turn around and execute some other program that is dependent on
+your PATH, it makes sure you set the PATH.
+
+=end original
+
+"Insecure C<$ENV{PATH}>" 메시지에 대처하기 위해, C<$ENV{'PATH'}> 에
+즉시 알수 있는 값을 설정할 필요가 있습니다.
+그리고 path 에 포함되어 있는 각 디렉토리는 절대경로로,
+그 디렉토리의 소유자나 그룹이외의 쓰기를 금지하지 않으면 안됩니다.
+실행하려고 한 파일을 전체 경로로 쓰더라도 이 메시지가 나오기때문에,
+놀랄 지도 모릅니다. 이 메시지는 프로그램의 전체 경로를 쓰지 않았기 때문에
+출력되는 것이 아니라, 환경변수 PATH 를 설정하지 않았거나, 안전하지 않은 값을
+설정하거나 했기 때문에 출력되는 것입니다.
+Perl 은 대상이 된 실행파일이 자기자신ㅡㄹ 방향전환하거나,
+PATH 를 참조하고 별도의 프로그램을 기동하거나 할지를 알 수 없기 때문에,
+확실하게 자신이 PATH를 설정하도록 합니다.
+
+=begin original
+
+The PATH isn't the only environment variable which can cause problems.
+Because some shells may use the variables IFS, CDPATH, ENV, and
+BASH_ENV, Perl checks that those are either empty or untainted when
+starting subprocesses. You may wish to add something like this to your
+setid and taint-checking scripts.
+
+=end original
+
+이 문제를 일으키는 환경변수는 PATH 만이 아닙니다.
+일부의 셸에서는, IFS, CDPATH, ENV, BASH_ENV 같은 환경변수를
+사용하고 있기때문에, Perl 은 이런것들의 변수에서 온 것인지, 혹은
+서브프로세스가 기동한 때에 오염되지 않은 지를 체크합니다.
+setid 했거나, 오염검사를 하는 스크립트에 아래같은 줄을
+더하고 싶을 지도 모릅니다.
+
+    delete @ENV{qw(IFS CDPATH ENV BASH_ENV)};   # Make %ENV safer
+
+=begin original
+
+It's also possible to get into trouble with other operations that don't
+care whether they use tainted values.  Make judicious use of the file
+tests in dealing with any user-supplied filenames.  When possible, do
+opens and such B<after> properly dropping any special user (or group!)
+privileges. Perl doesn't prevent you from opening tainted filenames for reading,
+so be careful what you print out.  The tainting mechanism is intended to
+prevent stupid mistakes, not to remove the need for thought.
+
+=end original
+
+이 외의, 오염된 값을 사용하고 있는지 어떤지 주의를 기울이지 않는 조작에 의해
+문제가 발생할 가능성도 있습니다.
+유저가 사용할 파일이름을 취급하는 파일 검사의 사용을 현명한 것으로 합니다.
+가능하다면, 파일을 오픈한 B<그 뒤에> 적절히 스페셜 유저(그룹도!) 특권을
+없앱니다.
+Perl 은 당신이 읽어내기 위해 오염된 파일이름을 사용해 파일을 
+오픈하는 것을 막지 않기 때문에, 출력 할 때에는 주의합시다.
+오염검사기구는 어리석은 미스에 대응하기 위한 것이지.
+필요한 것을 삭제하는 것이 아닙니다.
+
+=begin original
+
+Perl does not call the shell to expand wild cards when you pass C<system>
+and C<exec> explicit parameter lists instead of strings with possible shell
+wildcards in them.  Unfortunately, the C<open>, C<glob>, and
+backtick functions provide no such alternate calling convention, so more
+subterfuge will be required.
+
+=end original
+
+Perl 은, C<system> 이나 C<exec> 에 대해서 셸의 와일드 카드가
+있을지 모르는 문자열이 아닌, 인수 리스트를 건낸 경우에는,
+와일드 카드 전개를 위해 셸을 호출하거나 하지 않습니다.
+유감스럽게도, C<open>, C<glob>, 역 따옴표 같은 것은 그런 별도의
+호출 수순을 제공하고 있지 않기 때문에 보다 많은 조작이 필요하게 됩니다.
+
+=begin original
+
+Perl provides a reasonably safe way to open a file or pipe from a setuid
+or setgid program: just create a child process with reduced privilege who
+does the dirty work for you.  First, fork a child using the special
+C<open> syntax that connects the parent and child by a pipe.  Now the
+child resets its ID set and any other per-process attributes, like
+environment variables, umasks, current working directories, back to the
+originals or known safe values.  Then the child process, which no longer
+has any special permissions, does the C<open> or other system call.
+Finally, the child passes the data it managed to access back to the
+parent.  Because the file or pipe was opened in the child while running
+under less privilege than the parent, it's not apt to be tricked into
+doing something it shouldn't.
+
+=end original
+
+Perl 은, setuid 나 setgid 된 프로그램에서 안전하게 파일이나 파이프를 
+여는 방법을 제공하고 있습니다.
+이것은 단순히, 오염된 일을 하기 위해 제한된 권리를 가진 자식 프로세스를
+생성하는 것입니다.
+우선 처음에, 파이프에 의해 부모 프로세스와 자식 프로세스를 연결하는 구문의
+특별한 C<open> 을 사용해서 자식 프로세스를 fork 합니다.
+이 때, 자식 프로세스는 그 ID 세트를 리셋하고 그 외의
+프로세스마다의 속성을 리셋해서, 오리지날 혹은 안전한 기존의 값으로 반환합니다.
+그리고 더는 아무런 특별 퍼미션도 가지고 있지 않은 아들 프로세스가 
+C<open> 등의 시스템 콜을 실행합니다.
+파일이나 파이프는 부모 프로세스 보다도 낮은 특권으로 실행되는
+자식 프로세스에서 오픈되었기 때문에, 해야할 것이 아닌 것을 
+무리해서 수행할 수는 없습니다.
+
+=begin original
+
+Here's a way to do backticks reasonably safely.  Notice how the C<exec> is
+not called with a string that the shell could expand.  This is by far the
+best way to call something that might be subjected to shell escapes: just
+never call the shell at all.  
+
+=end original
+
+아래에 보이는 것은, 안전하게 역 인용을 수행하는 방법입니다.
+어떻게 해서 C<exec> 는 셸이 전개할지도 모르는 문자열 따라서
+호출되지 않게 되어 있는 가에 주목해 주세요.
+이것은 셸을 이스케이프하는 목적에는 최선의 방법은 아닙니다.
+이것은 단순히, 셸을 호출하지 않도록 하는 것 뿐입니다.
+
+        use English '-no_match_vars';
+        die "Can't fork: $!" unless defined($pid = open(KID, "-|"));
+        if ($pid) {           # parent
+            while (<KID>) {
+                # do something
+            }
+            close KID;
+        } else {
+            my @temp     = ($EUID, $EGID);
+            my $orig_uid = $UID;
+            my $orig_gid = $GID;
+            $EUID = $UID;
+            $EGID = $GID;
+            # Drop privileges
+            $UID  = $orig_uid;
+            $GID  = $orig_gid;
+            # Make sure privs are really gone
+            ($EUID, $EGID) = @temp;
+            die "Can't drop privileges"
+                unless $UID == $EUID  && $GID eq $EGID;
+            $ENV{PATH} = "/bin:/usr/bin"; # Minimal PATH.
+	    # Consider sanitizing the environment even more.
+            exec 'myprog', 'arg1', 'arg2'
+                or die "can't exec myprog: $!";
+        }
+
+=begin original
+
+A similar strategy would work for wildcard expansion via C<glob>, although
+you can use C<readdir> instead.
+
+=end original
+
+C<readdir> 을 대신해서 사용할 수 있어도, 같은 전략이 C<glob> 를
+통한 와일드 카드의 전개에서도 유효합니다.
+
+=begin original
+
+Taint checking is most useful when although you trust yourself not to have
+written a program to give away the farm, you don't necessarily trust those
+who end up using it not to try to trick it into doing something bad.  This
+is the kind of security checking that's useful for set-id programs and
+programs launched on someone else's behalf, like CGI programs.
+
+=end original
+
+오염검사는, 제대로 된 프로그램을 기술하는 것을 자기 자신에게 맡기는 것이 아닌,
+최종적으로 그것을 사용해서 뭔가를 수행하려고 하는 누군가를 
+신뢰할 필요가 없을 때에는 가장 편리한 것입니다.
+이것은, set-id 프로그램이나, CGI 프로그램같이 누군가에 바뀌어져서
+기동될 가능성이 있는 프로그램에 편리한 보안 체크입니다.
+
+=begin original
+
+This is quite different, however, from not even trusting the writer of the
+code not to try to do something evil.  That's the kind of trust needed
+when someone hands you a program you've never seen before and says, "Here,
+run this."  For that kind of safety, check out the Safe module,
+included standard in the Perl distribution.  This module allows the
+programmer to set up special compartments in which all system operations
+are trapped and namespace access is carefully controlled.
+
+=end original
+
+하지만, 이것은 좋지 않은 뭔가를 실행하려고는 하지 않는 코드의 작성자를 
+신용하지 않는 다는 것과는 명백하게 다릅니다.
+이것은 누군가가, 프로그램을 당신이 지금까지 본 적이 없게 만져서
+"이봐, 이것을 실행해"라고 라고 말하게 할 때에 필요한 종류의 신용입니다.
+이런 종류의 안전성을 위해, Perl 의 배포 패키지에 표준으로 포함되어 있는
+Safe 모듈을 체크해 보세요. 이 모듈은 프로그래머가 모든 시스템 조작을 트랩하고,
+네임스페이스 접근이 주의깊게 제한될 특별한 부분의 설정을 허락합니다.
+
+=head2 Security Bugs
+
+(보안 버그)
+
+=begin original
+
+Beyond the obvious problems that stem from giving special privileges to
+systems as flexible as scripts, on many versions of Unix, set-id scripts
+are inherently insecure right from the start.  The problem is a race
+condition in the kernel.  Between the time the kernel opens the file to
+see which interpreter to run and when the (now-set-id) interpreter turns
+around and reopens the file to interpret it, the file in question may have
+changed, especially if you have symbolic links on your system.
+
+=end original
+
+스크립트와 같은 유연하게 특별한 권한을 시스템에게 줘버리는 것 같은 
+명백한 문제 이외에, 많은 UNIX 에서는, set-id 된 스크립트는 
+본질적으로 안전하지 ㅇ낳은 권리를 처음부터 가지고 있습니다.
+그 문제는, 커널에 의한 경합조건입니다.
+인터프리터를 실행하기 위해 커널이 파일을 여는 것과, 
+(set-id 된) 인터프리터가 기동하고 파일을 해석하기 위해 
+다시금 열려는 그 사이에, 문제의 파일이 변경될지도 모릅니다.
+특히, 사용하고 있는 시스템이 심볼릭링크를 지원하고 있는 경우에는 말이죠.
+
+=begin original
+
+Fortunately, sometimes this kernel "feature" can be disabled.
+Unfortunately, there are two ways to disable it.  The system can simply
+outlaw scripts with any set-id bit set, which doesn't help much.
+Alternately, it can simply ignore the set-id bits on scripts.  If the
+latter is true, Perl can emulate the setuid and setgid mechanism when it
+notices the otherwise useless setuid/gid bits on Perl scripts.  It does
+this via a special executable called F<suidperl> that is automatically
+invoked for you if it's needed.
+
+=end original
+
+다행인 것은 이 커널 "스펙"은 사용금지로 할 수도 있습니다.
+아쉬운 것은 금지하기 위해서는 두가지 방법이 있습니다.
+시스템은 set-id 비트가 설정되어 있는 스크립트를 단순하게 금지하는 것이
+가능하지만, 이 때는 아무것도 할 수 없습니다.
+또 하나는, 스크립트에 붙인 set-id 비트를 단순히 무시해버리는 것이 가능합니다.
+후자의 경우, Perl 스크립트에 있는 setuid/gid 비트가 쓸모없는 것이 아니면
+Perl 이 인식했을 때에, Perl 은 setuid 나 setgid 의 일을 
+모방(emulate) 할 수가 있습니다.
+이 기능은, 필요로 할 때에 자동적으로 기동되는 F<suidperl> 이라고 불리는 
+특별한 실행 파일을 통해 수행됩니다.
+
+=begin original
+
+However, if the kernel set-id script feature isn't disabled, Perl will
+complain loudly that your set-id script is insecure.  You'll need to
+either disable the kernel set-id script feature, or put a C wrapper around
+the script.  A C wrapper is just a compiled program that does nothing
+except call your Perl program.   Compiled programs are not subject to the
+kernel bug that plagues set-id scripts.  Here's a simple wrapper, written
+in C:
+
+=end original
+
+그러나, kernel set-id 스크립트 기능이 금지되어 있지 않다면, Perl 은 
+당신의 set-id 스크립트는 안전하지 않다고 끈질기게 주장할 겁니다.
+이 때, 당신은 kernel set-id 스크립트 기능을 금지할 것인가,
+스크립트를 C 의 래퍼로 싸버리든가 해야합니다.
+C 래퍼는, Perl 프로그램 호출하는 것을 빼고는 아무것도 하지 않는 프로그램입니다.
+컴파일된 프로그램은 set-id 된 스크립트에 관한 커널의 버그에는
+영향을 받지 않습니다. 다음의 예제는 C 로 쓴 단순한 래퍼입니다.
+
+    #define REAL_PATH "/path/to/script"
+    main(ac, av)
+	char **av;
+    {
+	execv(REAL_PATH, av);
+    }
+
+=begin original
+
+Compile this wrapper into a binary executable and then make I<it> rather
+than your script setuid or setgid.
+
+=end original
+
+이 래퍼를 컴파일해서 실행파일로 해, 스크립트가 아닌
+I<이 실행 파일> 을 setuid 하거나 setgid 합니다.
+
+=begin original
+
+In recent years, vendors have begun to supply systems free of this
+inherent security bug.  On such systems, when the kernel passes the name
+of the set-id script to open to the interpreter, rather than using a
+pathname subject to meddling, it instead passes I</dev/fd/3>.  This is a
+special file already opened on the script, so that there can be no race
+condition for evil scripts to exploit.  On these systems, Perl should be
+compiled with C<-DSETUID_SCRIPTS_ARE_SECURE_NOW>.  The F<Configure>
+program that builds Perl tries to figure this out for itself, so you
+should never have to specify this yourself.  Most modern releases of
+SysVr4 and BSD 4.4 use this approach to avoid the kernel race condition.
+
+=end original
+
+최근, 벤더는 이런 보안 버그에 대한 내성을 갖춘 시스템을 제공하기 시작했습니다.
+이런 시스템에서는, 인터프리터ㄹ 기동하기 위해 커널에 set-id 스크립트가 
+넘겨졌을 때에 그 경로 이름을 그대로 사용하는 것이 아니라,
+대신에 I</dev/fd/3> 를 넘겨줍니다.
+이것은 스크립트에서는, 다시금 열려져 있는 특별한 파일이기 때문에,
+사악한 스크립트를 넣기 위해 사용할 수는 없습니다.
+이런 시스템에서는, Perl 은 
+C<-DSETUID_SCRIPTS_ARE_SECURE_NOW> 를 부가해서 컴파일해야할 것입니다. 
+Perl 을 구축하는 F<configure> 프로그램은 자기자신이 이것을 
+발견하려고 하기 때문에, 당신이 특별한 뭔가를 하지 않으면 안되는 것은 아닙니다.
+SysVr4 의 최근의 릴리즈의 대부분이나 BSD4.4 는
+이 어프로치를 커널의 경합조건을 피하기 위해 사용하고 있습니다.
+
+=begin original
+
+Prior to release 5.6.1 of Perl, bugs in the code of F<suidperl> could
+introduce a security hole.
+
+=end original
+
+릴리즈 5.6.1 이전의 Perl 에서는, F<suidperl> 에 있었던 버그에 의해,
+보안 결함이 포함되어 있을 가능성이 있었습니다.
+
+=head2 Protecting Your Programs
+
+(당신의 프로그램을 지키기)
+
+=begin original
+
+There are a number of ways to hide the source to your Perl programs,
+with varying levels of "security".
+
+=end original
+
+여기에서 말하는 것은, 당신의 Perl 프로그램의 소스코드를 여러 가지
+"보안"의 레에서 숨기는 방법입니다.
+
+=begin original
+
+First of all, however, you I<can't> take away read permission, because
+the source code has to be readable in order to be compiled and
+interpreted.  (That doesn't mean that a CGI script's source is
+readable by people on the web, though.)  So you have to leave the
+permissions at the socially friendly 0755 level.  This lets 
+people on your local system only see your source.
+
+=end original
+
+하지만 우선, 처음에, 소스코드의 읽기 권한을 없애는 것은 B<불가능합니다>.
+왜냐면, 소스코드는, 컴파일이나 인터프리트 하기 위해 읽을 수 있도록 
+되어 있지 않으면 안되기 때문입니다(이것은, CGI 스크립트의 소스를
+Web 의 이용자가 볼수 없는 것과는 다릅니다).
+이 때문에, 퍼미션은 0755 레벨로 해두지 않으면 안되는 것입니다.
+이에 의해서 당신의 로컬 시스템 상의 유저는 당신의 소스를 
+보는 것만 가능합니다.
+
+=begin original
+
+Some people mistakenly regard this as a security problem.  If your program does
+insecure things, and relies on people not knowing how to exploit those
+insecurities, it is not secure.  It is often possible for someone to
+determine the insecure things and exploit them without viewing the
+source.  Security through obscurity, the name for hiding your bugs
+instead of fixing them, is little security indeed.
+
+=end original
+
+Some people mistakenly regard this as a security problem.  If your program does
+insecure things, and relies on people not knowing how to exploit those 
+insecurities, it is not secure.  It is often possible for someone to
+determine the insecure things and exploit them without viewing the
+source.  Security through obscurity, the name for hiding your bugs
+instead of fixing them, is little security indeed. <TBT>
+
+=begin original
+
+You can try using encryption via source filters (Filter::* from CPAN,
+or Filter::Util::Call and Filter::Simple since Perl 5.8).
+But crackers might be able to decrypt it.  You can try using the byte
+code compiler and interpreter described below, but crackers might be
+able to de-compile it.  You can try using the native-code compiler
+described below, but crackers might be able to disassemble it.  These
+pose varying degrees of difficulty to people wanting to get at your
+code, but none can definitively conceal it (this is true of every
+language, not just Perl).
+
+=end original
+
+소스필터(Perl 5.8부터 CPAN 에 있는 Filter::*, 
+, Filter::Util::Call and Filter::Simple)를 통해서 암호화하고 하는 것은 
+가능하지만, 크랙커가 그것을 복호화하는 것은 가능할 겁니다.
+우선, 설명한 바이트코드 컴파일러와 인터프리터를 사용하는 것도 
+가능하지만, 크랙커는 그것을 역 컴파일 하는 것이 가능할지도 모릅니다.
+네이티브 코드 컴파일러를 사ㅇ하려고 해도, 크랙커는 그것을 
+역 어셈블 할 수 있을 지도 모릅니다.
+이런 것은, 다른 사람이 당신의 프로그램을 손에 넣으려고 하는 것을 
+어렵게 하기도 하지만, 프로그램을 결정적으로 감추는 것은 
+누구도 할 수 없는 것입니다(이것은, Perl 에 한정되지 않고, 모든 언어에 
+해당됩니다).
+
+=begin original
+
+If you're concerned about people profiting from your code, then the
+bottom line is that nothing but a restrictive licence will give you
+legal security.  License your software and pepper it with threatening
+statements like "This is unpublished proprietary software of XYZ Corp.
+Your access to it does not give you permission to use it blah blah
+blah."  You should see a lawyer to be sure your licence's wording will
+stand up in court.
+
+=end original
+
+다른사람이 당신의 프로그램으로부터 받은 이익에 대해 신경쓰고 있다면, 
+제한이 붙은 라이센스가 당신의 법적인 안전을 부여할 겁니다.
+당신의 소프트웨어의 라이센스에, "이 소프트웨어는 XYZ Corp. 에 의해,
+공표되지 않은 독점적 소프트웨어입니다. 당신이 사용하기 위해
+이것에 접근하는 것은 허가되어 있지 않습니다" 같은 문구를 
+붙여 둡니다. 
+당신의 라이센스가 확실하게 유효한 것이 되도록, 변호사와 상담하는 편이
+좋을 것입니다.
+
+=head2 Unicode
+
+=begin original
+
+Unicode is a new and complex technology and one may easily overlook
+certain security pitfalls.  See L<perluniintro> for an overview and
+L<perlunicode> for details, and L<perlunicode/"Security Implications
+of Unicode"> for security implications in particular.
+
+=end original
+
+Unicode 는 새롭고 복잡한 기술로, 어떤 종류의 보안의 함정을 간단하게 
+무시해버립니다.
+개요에 대해서는 L<perluniintro> 를, 자세한 내용에 대해서는 <perlunicode>를
+그리고, 특히 보안 구성에 대해서는 
+L<perlunicode/"Security Implications of Unicode"> 를 참조해주세요.
+
+=head2 Algorithmic Complexity Attacks
+
+=begin original
+
+Certain internal algorithms used in the implementation of Perl can
+be attacked by choosing the input carefully to consume large amounts
+of either time or space or both.  This can lead into the so-called
+I<Denial of Service> (DoS) attacks.
+
+=end original
+
+Perl 의 구성에서 사용되고 있는 어떤 종류의 내부 알고리즘은 많은 시간이나 
+공간을 소비하도록 주의깊게 선택입 입력에 의해 공격가능합니다. 
+이것에 의해 <서비스거부(Denail of Service)> (DoS) 공격이라고 불리는 
+것을 일으킬 수가 있습니다. 
+
+=over 4
+
+=item *
+
+=begin original
+
+Hash Function - the algorithm used to "order" hash elements has been
+changed several times during the development of Perl, mainly to be
+reasonably fast.  In Perl 5.8.1 also the security aspect was taken
+into account.
+
+=end original
+
+Hash Function - the algorithm used to "order" hash elements has been
+changed several times during the development of Perl, mainly to be
+reasonably fast.  In Perl 5.8.1 also the security aspect was taken
+into account.
+(TBT)
+
+=begin original
+
+In Perls before 5.8.1 one could rather easily generate data that as
+hash keys would cause Perl to consume large amounts of time because
+internal structure of hashes would badly degenerate.  In Perl 5.8.1
+the hash function is randomly perturbed by a pseudorandom seed which
+makes generating such naughty hash keys harder.
+See L<perlrun/PERL_HASH_SEED> for more information.
+
+=end original
+
+In Perls before 5.8.1 one could rather easily generate data that as
+hash keys would cause Perl to consume large amounts of time because
+internal structure of hashes would badly degenerate.  In Perl 5.8.1
+the hash function is randomly perturbed by a pseudorandom seed which
+makes generating such naughty hash keys harder.
+See L<perlrun/PERL_HASH_SEED> for more information.
+(TBT)
+
+=begin original
+
+The random perturbation is done by default but if one wants for some
+reason emulate the old behaviour one can set the environment variable
+PERL_HASH_SEED to zero (or any other integer).  One possible reason
+for wanting to emulate the old behaviour is that in the new behaviour
+consecutive runs of Perl will order hash keys differently, which may
+confuse some applications (like Data::Dumper: the outputs of two
+different runs are no more identical).
+
+=end original
+
+The random perturbation is done by default but if one wants for some
+reason emulate the old behaviour one can set the environment variable
+PERL_HASH_SEED to zero (or any other integer).  One possible reason
+for wanting to emulate the old behaviour is that in the new behaviour
+consecutive runs of Perl will order hash keys differently, which may
+confuse some applications (like Data::Dumper: the outputs of two
+different runs are no more identical).
+(TBT)
+
+=begin original
+
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+
+=end original
+
+B<Perl has never guaranteed any ordering of the hash keys>, and the
+ordering has already changed several times during the lifetime of
+Perl 5.  Also, the ordering of hash keys has always been, and
+continues to be, affected by the insertion order.
+(TBT)
+
+=begin original
+
+Also note that while the order of the hash elements might be
+randomised, this "pseudoordering" should B<not> be used for
+applications like shuffling a list randomly (use List::Util::shuffle()
+for that, see L<List::Util>, a standard core module since Perl 5.8.0;
+or the CPAN module Algorithm::Numerical::Shuffle), or for generating
+permutations (use e.g. the CPAN modules Algorithm::Permute or
+Algorithm::FastPermute), or for any cryptographic applications.
+
+=end original
+
+Also note that while the order of the hash elements might be
+randomised, this "pseudoordering" should B<not> be used for
+applications like shuffling a list randomly (use List::Util::shuffle()
+for that, see L<List::Util>, a standard core module since Perl 5.8.0;
+or the CPAN module Algorithm::Numerical::Shuffle), or for generating
+permutations (use e.g. the CPAN modules Algorithm::Permute or
+Algorithm::FastPermute), or for any cryptographic applications.
+(TBT)
+
+=item *
+
+=begin original
+
+Regular expressions - Perl's regular expression engine is so called NFA
+(Non-deterministic Finite Automaton), which among other things means that
+it can rather easily consume large amounts of both time and space if the
+regular expression may match in several ways.  Careful crafting of the
+regular expressions can help but quite often there really isn't much
+one can do (the book "Mastering Regular Expressions" is required
+reading, see L<perlfaq2>).  Running out of space manifests itself by
+Perl running out of memory.
+
+=end original
+
+Regular expressions - Perl's regular expression engine is so called NFA
+(Non-deterministic Finite Automaton), which among other things means that
+it can rather easily consume large amounts of both time and space if the
+regular expression may match in several ways.  Careful crafting of the
+regular expressions can help but quite often there really isn't much
+one can do (the book "Mastering Regular Expressions" is required
+reading, see L<perlfaq2>).  Running out of space manifests itself by
+Perl running out of memory.
+(TBT)
+
+=item *
+
+=begin original
+
+Sorting - the quicksort algorithm used in Perls before 5.8.0 to
+implement the sort() function is very easy to trick into misbehaving
+so that it consumes a lot of time.  Nothing more is required than
+resorting a list already sorted.  Starting from Perl 5.8.0 a different
+sorting algorithm, mergesort, is used.  Mergesort is insensitive to
+its input data, so it cannot be similarly fooled.
+
+=end original
+
+Sorting - the quicksort algorithm used in Perls before 5.8.0 to
+implement the sort() function is very easy to trick into misbehaving
+so that it consumes a lot of time.  Nothing more is required than
+resorting a list already sorted.  Starting from Perl 5.8.0 a different
+sorting algorithm, mergesort, is used.  Mergesort is insensitive to
+its input data, so it cannot be similarly fooled.
+(TBT)
+
+=back
+
+=begin original
+
+See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
+and any computer science textbook on the algorithmic complexity.
+
+=end original
+
+See L<http://www.cs.rice.edu/~scrosby/hash/> for more information,
+and any computer science textbook on the algorithmic complexity.
+(TBT)
+
+=head1 SEE ALSO
+
+=begin original
+
+L<perlrun> for its description of cleaning up environment variables.
+
+=end original
+
+L<perlrun> 에는 환경변수를 깨끗하게 하는 방법이 기술되어 있습니다.

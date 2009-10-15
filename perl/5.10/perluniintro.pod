@@ -1,0 +1,2048 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perluniintro - Perl Unicode introduction
+
+=end original
+
+perluniintro - Perl Unicode 안내
+
+=head1 DESCRIPTION
+
+=begin original
+
+This document gives a general idea of Unicode and how to use Unicode
+in Perl.
+
+=end original
+
+이 문서는 Unicode 의 일반적인 생각과 
+Perl 에서 Unicode 를 어떻게 사용하는 가를 다룹니다.
+
+=head2 Unicode
+
+=begin original
+
+Unicode is a character set standard which plans to codify all of the
+writing systems of the world, plus many other symbols.
+
+=end original
+
+Unicode 는 문자셋의 표준입니다.
+세계 모든 문자체계와 그에 더해서, 
+많은 심볼을 체계화하는 것을 계획하고 있습니다.
+
+=begin original
+
+Unicode and ISO/IEC 10646 are coordinated standards that provide code
+points for characters in almost all modern character set standards,
+covering more than 30 writing systems and hundreds of languages,
+including all commercially-important modern languages.  All characters
+in the largest Chinese, Japanese, and Korean dictionaries are also
+encoded. The standards will eventually cover almost all characters in
+more than 250 writing systems and thousands of languages.
+Unicode 1.0 was released in October 1991, and 4.0 in April 2003.
+
+=end original
+
+Unicode 와 ISO/IEC 10646 은 잘 조정된 코드포인트를 제공하는 표준입니다.
+Unicode 는 거의 모든 현대 문자셋표준, 30이상의 글자체계와, 100가지 이상의
+언어를 망라합니다.
+모든 상업적으로 중요한 현대의 언어를 포함합니다.
+제일 큰 중국어, 일본어, 한국어, 각각의 사전의 모든 문자도 부호화되어 있습니다.
+이 표준은 최종적으로는 250 가지 글자체계와 1000 개 이상의 언어의 거의 모든 
+문자를 망라할 예정입니다.
+Unicode 1.0 은 1991년 10월에 릴리즈되어, Unicode 4.0 은 
+2003년 4월에 릴리즈되었습니다.
+
+=begin original
+
+A Unicode I<character> is an abstract entity.  It is not bound to any
+particular integer width, especially not to the C language C<char>.
+Unicode is language-neutral and display-neutral: it does not encode the
+language of the text and it does not define fonts or other graphical
+layout details.  Unicode operates on characters and on text built from
+those characters.
+
+=end original
+
+Unicode 의 I<문자>는 추상적인 존재입니다.
+Unicode 의 문자는 어떤 특정 너비에도 특히, C 언어의 C<char> 에도 
+속박되지 않습니다.
+Unicode 는 언어중립이고 표시중립입니다:
+Unicode 는 텍스트 언어를 인코딩할 수 없고, 폰트나 다른 그래피컬한 
+레이아웃의 자세한 내용을 정의할 수 없습니다.
+Unicode 는 문자와 그 문자들에서 비롯된 텍스트를 조작합니다.
+
+=begin original
+
+Unicode defines characters like C<LATIN CAPITAL LETTER A> or C<GREEK
+SMALL LETTER ALPHA> and unique numbers for the characters, in this
+case 0x0041 and 0x03B1, respectively.  These unique numbers are called
+I<code points>.
+
+=end original
+
+Unicode 는 C<LATIN CAPITAL LETTER A> 나 C<GREEK SMALL LETTER ALPHA> 같은 
+문자와, 그 문자에 대한 고유한 번호를 정의합니다.
+이 경우는 각각 0x0041 과 0x03B1 이 됩니다.
+이런 고유 번호는 I<코드포인트> 라고 부릅니다.
+
+=begin original
+
+The Unicode standard prefers using hexadecimal notation for the code
+points.  If numbers like C<0x0041> are unfamiliar to you, take a peek
+at a later section, L</"Hexadecimal Notation">.  The Unicode standard
+uses the notation C<U+0041 LATIN CAPITAL LETTER A>, to give the
+hexadecimal code point and the normative name of the character.
+
+=end original
+
+Unicode 표준은 코드 포인트에 16진 기법을 사용하는 것을 선호합니다.
+C<0x0041> 같은 번호에 ... 가 아니라면, 뒤의 섹션,
+L</"Hexadecimal Notation"> 을 ...
+Unicode 표준은 C<U+0041 LATIN CAPITAL LETTER A> 라는 표기를 사용해서,
+16진 기법의 코드 포인트와 표준적인 문자의 이름을 씁니다.
+
+=begin original
+
+Unicode also defines various I<properties> for the characters, like
+"uppercase" or "lowercase", "decimal digit", or "punctuation";
+these properties are independent of the names of the characters.
+Furthermore, various operations on the characters like uppercasing,
+lowercasing, and collating (sorting) are defined.
+
+=end original
+
+Unicode 는 또, 여러가지 문자의 I<성질>을 정의합니다.
+"대문자", "소문자",  "10진수", "구독점" 등; 
+이 성질들은 문자의 이름과 독립적입니다.
+거기에, 여러가지 문자에 대해 조작, 대문자화나 소문자화나 자리바꿈이 
+정의되어 있습니다.
+
+=begin original
+
+A Unicode character consists either of a single code point, or a
+I<base character> (like C<LATIN CAPITAL LETTER A>), followed by one or
+more I<modifiers> (like C<COMBINING ACUTE ACCENT>).  This sequence of
+base character and modifiers is called a I<combining character
+sequence>.
+
+=end original
+
+Unicode 문자는 하나의 코드 포인트나 (C<LATIN CAPITAL LETTER A> 처럼),
+I< 기본문자> 로 읽어서, 하나 이상의 (C<COMBINING ACUTE ACCENT> 같은) 
+I<수식어> 어느쪽 한쪽으로 성립됩니다.
+이 기본문자와 수식어구의 순서는 I<comining character sequence> 라고 부릅니다.
+
+=begin original
+
+Whether to call these combining character sequences "characters"
+depends on your point of view. If you are a programmer, you probably
+would tend towards seeing each element in the sequences as one unit,
+or "character".  The whole sequence could be seen as one "character",
+however, from the user's point of view, since that's probably what it
+looks like in the context of the user's language.
+
+=end original
+
+이 comining character sequence 를 "복수의 문자" 라고 부를지는 
+생각에 따라 다릅니다.
+프로그래머라면, 아마도 이 순서 각각의 요소를 하나의 단위나 "문자"로써 
+보려고 할겁니다. 
+모든 순서를 하나의 "문자"로 볼 수 있습니다.
+하지만, 유저가 생각하기에는 아마도 유저의 언어의 문맥으로 보이는 것이겠죠.
+
+=begin original
+
+With this "whole sequence" view of characters, the total number of
+characters is open-ended. But in the programmer's "one unit is one
+character" point of view, the concept of "characters" is more
+deterministic.  In this document, we take that second  point of view:
+one "character" is one Unicode code point, be it a base character or
+a combining character.
+
+=end original
+
+이 문자의 "모든 순서"를 보는 방법으로는 문자의 전체 수에는 제한이 없습니다.
+그렇지만, 프로그래머의 "하나의 단위는 하나의 문자"라는 생각에서는 "문자"의 
+개념은 보다 결정론적입니다.
+이 문서에서는 2번째의 생각을 다룹니다:
+하나의 "문자"는 하나의 Unicode 의 코드포인트이고, 그것은, 기본문자이지만, 
+combining character 이라고 합니다.
+
+=begin original
+
+For some combinations, there are I<precomposed> characters.
+C<LATIN CAPITAL LETTER A WITH ACUTE>, for example, is defined as
+a single code point.  These precomposed characters are, however,
+only available for some combinations, and are mainly
+meant to support round-trip conversions between Unicode and legacy
+standards (like the ISO 8859).  In the general case, the composing
+method is more extensible.  To support conversion between
+different compositions of the characters, various I<normalization
+forms> to standardize representations are also defined.
+
+=end original
+
+몇가지의 조합에서 I<아직 구성되지 않은> 문자가 있습니다.
+예를들면, C<LATIN CAPITAL LETTER A WITH ACUTE> 는, 
+단일 코드포인트로써 정의되어 있습니다.
+그러나, 이것들의 아직 구성되지 않은 문자는 몇가지 조합으로만 
+가능합니다.
+그리고, 그것들은 주로, Unicode 와 레거시 표준(ISO 8859 같은) 사이의 
+상호호환을 지원하는 것을 의미합니다.
+일반적인 케이스에서는, 구성하는 방법은 보다 넓습니다.
+다른 구성 사이의 변환을 지원하기 때문에, 표현을 표준화하는 여러가지 
+I<normalization forms> 도 또한 정의되어 있습니다.
+
+=begin original
+
+Because of backward compatibility with legacy encodings, the "a unique
+number for every character" idea breaks down a bit: instead, there is
+"at least one number for every character".  The same character could
+be represented differently in several legacy encodings.  The
+converse is also not true: some code points do not have an assigned
+character.  Firstly, there are unallocated code points within
+otherwise used blocks.  Secondly, there are special Unicode control
+characters that do not represent true characters.
+
+=end original
+
+레거시 인코딩과의 후방호환성을 위해서 
+"모든 문자에 고유의 번호" 라는 생각은 조금씩 무너지고 있습니다:
+그 대신에 "적어도 모든 문자에 하나의 번호"가 있습니다.
+같은 문자가 몇가지의 레거시 인코딩 안에서 다른 것처럼 표현되었습니다.
+거꾸로 참이지 않은: 코드포인트에는 문자가 할당되 않은 것도  있습니다.
+첫번째로, 사용되는 블록 안이든 상관없이, 할당되지 않은 코드포인트가 있습니다.
+두번째로 특별한 Unicode 의 컨트롤 문자가 있고, 그것들은 진짜 문자를 
+표현하지 않습니다.
+
+=begin original
+
+A common myth about Unicode is that it would be "16-bit", that is,
+Unicode is only represented as C<0x10000> (or 65536) characters from
+C<0x0000> to C<0xFFFF>.  B<This is untrue.>  Since Unicode 2.0 (July
+1996), Unicode has been defined all the way up to 21 bits (C<0x10FFFF>),
+and since Unicode 3.1 (March 2001), characters have been defined
+beyond C<0xFFFF>.  The first C<0x10000> characters are called the
+I<Plane 0>, or the I<Basic Multilingual Plane> (BMP).  With Unicode
+3.1, 17 (yes, seventeen) planes in all were defined--but they are
+nowhere near full of defined characters, yet.
+
+=end original
+
+Unicode 에 대해서 잘 알려진 신화는 Unicode 가 "16비트"라는 것입니다.
+Unicode 는 C<0x0000> 에서 C<0xFFFF> 까지로, C<0x10000>(혹은 65536) 의 
+문자를 표현하는 것 뿐이라는 것입니다.
+하지만 B<이것은 진실이 아닙니다>.
+Unicode 2.0(1996 년 7월)부터 Unicode 는 21비트(C<0x10FFFF>) 까지, 
+여러가지로 정의되었습니다.
+Unicode 3.1(2001 년 3월)부터, 문자는 C<0xFFFF> 를 넘게 정의되었습니다.
+최초의 C<0x10000> 문자는 I<Plane 0> 또는 I<Basime Multilingual Plane>(BMP)
+라고 불렸습니다. 
+Unicode 3.1 에서 전부 17개의 Plane 이 정의되었습니다. 그러나, 
+아직 정의된 모든 문자의 어디에도 아직 쉽게 찾아볼 수 없습니다.
+
+=begin original
+
+Another myth is that the 256-character blocks have something to
+do with languages--that each block would define the characters used
+by a language or a set of languages.  B<This is also untrue.>
+The division into blocks exists, but it is almost completely
+accidental--an artifact of how the characters have been and
+still are allocated.  Instead, there is a concept called I<scripts>,
+which is more useful: there is C<Latin> script, C<Greek> script, and
+so on.  Scripts usually span varied parts of several blocks.
+For further information see L<Unicode::UCD>.
+
+=end original
+
+또 다른 하나의 신ㅏ는 256문자 블록이 어떤 언어를 다룰 수가 있다 --
+각각의 블록은 언어가 언어 셋이고 사용되는 문자를 정의한다는 것이빈다.
+그러나, B<이것도 진실이 아닙니다>.
+블록에 분할된 것은 없지만, 그것은 대부분 완전하게 예상외의 것입니다.
+대신에 I<scripts> 라고 불리는 보다 유익한 컨셉이 있습니다:
+C<Latin> script 와 C<Greek> script 와 그 외의 것이 있습니다.
+scripts 는 보통 몇가지 블록 의 바뀐 부분을 측정하고 있습니다.
+자세한 내용은 L<Unicode::UCD> 를 봐주세요.
+
+=begin original
+
+The Unicode code points are just abstract numbers.  To input and
+output these abstract numbers, the numbers must be I<encoded> or
+I<serialised> somehow.  Unicode defines several I<character encoding
+forms>, of which I<UTF-8> is perhaps the most popular.  UTF-8 is a
+variable length encoding that encodes Unicode characters as 1 to 6
+bytes (only 4 with the currently defined characters).  Other encodings
+include UTF-16 and UTF-32 and their big- and little-endian variants
+(UTF-8 is byte-order independent) The ISO/IEC 10646 defines the UCS-2
+and UCS-4 encoding forms.
+
+=end original
+
+Unicode 의 코드포인트는 추상적인 숫자입니다.
+이 추상적인 숫자를 입출력하기 위해, 숫자는 I<인코드되어 있을> 필요가
+있거나 I<시리얼라이즈>되었거나 하지 않으면 안됩니다.
+Unicode 는 복수의 I<character encoding forms> 를 정의하고 있지만, 
+그 중에서 I<UTF-8> 은 아마도 제일 유명할 것입니다.
+UTF-8 은 가변길이의 인코딩으로 Unicode 문자를 1에서 6바이트
+(현재 정의되어 있는 숫자에서는 4바이트까지입니다).
+다른 인코딩은 UTF-16 과 UTF-32 와 그것들의 크고 작은 에디안의 
+변형(UTF-8 은 바이트 오더와 독립적입니다)을 포함합니다.
+ISO/IEC 10646 는 UCS-2 와 UCS-4 의 encoding forms 를 정의하고 있습니다.
+
+=begin original
+
+For more information about encodings--for instance, to learn what
+I<surrogates> and I<byte order marks> (BOMs) are--see L<perlunicode>.
+
+=end original
+
+인코딩에 대해서 -- 예를들면 I<surrogates> 와 
+I<byte order marks>(BOMs) -- 더욱 알고 싶다면 L<perlunicode> 를 
+봐주세요.
+
+=head2 Perl's Unicode Support
+
+(Perl 의 Unicode 지원)
+
+=begin original
+
+Starting from Perl 5.6.0, Perl has had the capacity to handle Unicode
+natively.  Perl 5.8.0, however, is the first recommended release for
+serious Unicode work.  The maintenance release 5.6.1 fixed many of the
+problems of the initial Unicode implementation, but for example
+regular expressions still do not work with Unicode in 5.6.1.
+
+=end original
+
+Perl 5.6.0 부터 Perl 은 Unicode 를 네이티브하게 다루는 능력을 가지고 
+있었습니다. 그러나 Perl 5.8.0 의 처음의 RC 릴리즈는 중대한 Unicode 의 
+일입니다. 유지보수된 릴리즈 5.6.1 은 최초의 Unicode 구성에서 많은 문제를 
+수정했습니다.
+그렇지만, 5.6.1에서 Unicode 로의 정규표현은 아직 움직이지 않습니다.
+
+=begin original
+
+B<Starting from Perl 5.8.0, the use of C<use utf8> is no longer
+necessary.> In earlier releases the C<utf8> pragma was used to declare
+that operations in the current block or file would be Unicode-aware.
+This model was found to be wrong, or at least clumsy: the "Unicodeness"
+is now carried with the data, instead of being attached to the
+operations.  Only one case remains where an explicit C<use utf8> is
+needed: if your Perl script itself is encoded in UTF-8, you can use
+UTF-8 in your identifier names, and in string and regular expression
+literals, by saying C<use utf8>.  This is not the default because
+scripts with legacy 8-bit data in them would break.  See L<utf8>.
+
+=end original
+
+B<Perl 5.8.0 에서 C<use utf8> 의 사용은 이제는 필요하지 않습니다>.
+처음의 릴리즈에서는 C<utf8> 프라그마는 현재의 블록이나 파일의 조작이
+Unicode 이라고 명시하는 것을 선언하기 위해 사용되었습니다.
+이 모델은 문제가 발견되었고, 모양새도 좋지 않았습니다.
+조작에 첨부하는 대신에 "Unicodeness" 는 지금은 데이터로 가지고 있습니다.
+유일하게 남아있는 명시적으로 C<use utf8> 을 사용할 필요가 있는 곳은:
+Perl 스크립트 자신이 UTF-8 으로 인코딩되어 있다면, 
+식별자의 이름, 문자의 안과 정규표현의 리터럴에 UTF-8 을 사용할 수 있습니다.
+이것은 기본값은 아닙니다.
+왜냐면, 레거시 8-bit 데이터의 스크립트가 문제가 되기 때문입니다.
+L<utf8> 을 참조해주세요.
+
+=head2 Perl's Unicode Model
+
+(Perl 의 Unicode 모델)
+
+=begin original
+
+Perl supports both pre-5.6 strings of eight-bit native bytes, and
+strings of Unicode characters.  The principle is that Perl tries to
+keep its data as eight-bit bytes for as long as possible, but as soon
+as Unicodeness cannot be avoided, the data is transparently upgraded
+to Unicode.
+
+=end original
+
+Perl 은 Perl 5.6 보다 앞에서 8비트 네이티브 바이트열의 문자열과 
+Unicode 문자의 문자열의 양쪽을 지원합니다.
+방침은 Perl 은 가능한한 길게 8비트바이트열로써 데이터를 
+가지는 것입니다.
+그렇지만 Unicodeness 는 피할수 없게 되면 곧, 
+데이터는 투과적으로 Unicode 로 업그레이드 됩니다.
+
+=begin original
+
+Internally, Perl currently uses either whatever the native eight-bit
+character set of the platform (for example Latin-1) is, defaulting to
+UTF-8, to encode Unicode strings. Specifically, if all code points in
+the string are C<0xFF> or less, Perl uses the native eight-bit
+character set.  Otherwise, it uses UTF-8.
+
+=end original
+
+내부적으로는 Perl 은 플랫폼의 8비트 문자셋(예를들면 Latin-1) 은 
+기본값은 UTF-8 이지만, Unicode 문자열로 인코드합니다.
+특히, 문자열안의 모든 코드포인트는 C<0xFF> 아래라면, 
+Perl 은 네이티브의 8비트 문자셋을 사용합니다.
+그렇지 않으면 UTF-8 을 사용합니다.
+
+=begin original
+
+A user of Perl does not normally need to know nor care how Perl
+happens to encode its internal strings, but it becomes relevant when
+outputting Unicode strings to a stream without a PerlIO layer -- one with
+the "default" encoding.  In such a case, the raw bytes used internally
+(the native character set or UTF-8, as appropriate for each string)
+will be used, and a "Wide character" warning will be issued if those
+strings contain a character beyond 0x00FF.
+
+=end original
+
+Perl 유저는 보통은 Perl 이 그 내부문자열을 때로 어떻게 
+인코드하는 가를 알 필요도 신경쓸 필요도 없지만, Unicode 문자열을 
+PerlIO 층 없이 -- "기본값의" 인코딩으로 -- 스트림에 
+출력하려고 하면 신경을 써야합니다.
+이런 케이스에서는 내부적으로 사용되는 바이트열(각각의 문자열의 필요에 
+따라, 네이티브의 문자셋이나 UTF-8) 이 사용됩니다.
+그 문자열들에 0x00FF 를 넘는 문자가 있다면 "Wide character" 의 경고가 
+출력됩니다.
+
+=begin original
+
+For example,
+
+=end original
+
+예를들면,
+
+      perl -e 'print "\x{DF}\n", "\x{0100}\x{DF}\n"'
+
+=begin original
+
+produces a fairly useless mixture of native bytes and UTF-8, as well
+as a warning:
+
+=end original
+
+네이티브 바이트열과 UTF-8 의 전혀 도움되지 않는 섞어쓰기도 
+마찬가지로 경고를 냅니다:
+
+     Wide character in print at ...
+
+=begin original
+
+To output UTF-8, use the C<:encoding> or C<:utf8> output layer.  Prepending
+
+=end original
+
+UTF-8 을 출력하 위해서 C<:encoding> 이나 C<:utf8> 출력층을 사용합니다.
+앞에서 이것을 추가하는 것으로:
+
+      binmode(STDOUT, ":utf8");
+
+=begin original
+
+to this sample program ensures that the output is completely UTF-8,
+and removes the program's warning.
+
+=end original
+
+이 샘플 프로그램이 출력이 완전하게 UTF-8 인 것을 보증하고, 
+프로그램의 경고를 삭제합니다.
+
+=begin original
+
+You can enable automatic UTF-8-ification of your standard file
+handles, default C<open()> layer, and C<@ARGV> by using either
+the C<-C> command line switch or the C<PERL_UNICODE> environment
+variable, see L<perlrun> for the documentation of the C<-C> switch.
+
+=end original
+
+C<-C> 커맨드라인스위치나, C<PERL_UNICODE> 환경변수 어느쪽 하나를 
+사용하는 것으로 표준 파일핸들과 기본 C<open()> 층과,
+C<@ARGV> 의 UTF-8 화를 자동적으로 유효하게 할 수 있습니다;
+L<perlrun> 의 C<-C> 스위치의  문서를 봐주세요.
+
+=begin original
+
+Note that this means that Perl expects other software to work, too:
+if Perl has been led to believe that STDIN should be UTF-8, but then
+STDIN coming in from another command is not UTF-8, Perl will complain
+about the malformed UTF-8.
+
+=end original
+
+이 것은 Perl 이 다른 소프트웨어의 움직임을 예측하는 것을 의미하는 것입니다:
+Perl 이 STDIN 이 UTF-8 이어야 한다고 믿도록 주도되었고, 
+다른 커맨드에서 오는 STDIN 이나UTF-8 이 아니라면, 
+Perl 은 바르지 않은 UTF-8 이라고 경고를 냅니다.
+
+=begin original
+
+All features that combine Unicode and I/O also require using the new
+PerlIO feature.  Almost all Perl 5.8 platforms do use PerlIO, though:
+you can see whether yours is by running "perl -V" and looking for
+C<useperlio=define>.
+
+=end original
+
+Unicode 와 I/O 의 결합의 특징도 또, 새로운 PerlIO 의 특징을 사용하는 것을
+필요로 합니다.
+대부분 모든 Perl 5.8 플랫폼은 PerlIO 를 사용합니다.
+:
+"perl -V" 를 돌려서 C<useperlio=define> 을 보게되면, PerlIO를 
+사용하고 있는 지 알 수 있습니다.
+
+=head2 Unicode and EBCDIC
+
+(Unicode と EBCDIC)
+
+=begin original
+
+Perl 5.8.0 also supports Unicode on EBCDIC platforms.  There,
+Unicode support is somewhat more complex to implement since
+additional conversions are needed at every step.  Some problems
+remain, see L<perlebcdic> for details.
+
+=end original
+
+Perl 5.8.0 은 EBCDIC 플랫폼에서도 Unicode 를 지원합니다.
+여기에서는 각 스텝에서 추가 변수가 필요로 하기 때문에 Unicode 지원은 
+구성이 약간 복잡하게 됩니다.
+몇가지 문제가 남아 있습니다; 자세한 내용은 L<perlebcdic> 를 참조해주세요.
+
+=begin original
+
+In any case, the Unicode support on EBCDIC platforms is better than
+in the 5.6 series, which didn't work much at all for EBCDIC platform.
+On EBCDIC platforms, the internal Unicode encoding form is UTF-EBCDIC
+instead of UTF-8.  The difference is that as UTF-8 is "ASCII-safe" in
+that ASCII characters encode to UTF-8 as-is, while UTF-EBCDIC is
+"EBCDIC-safe".
+
+=end original
+
+어쨌든 EBCDIC 플랫폼에서의 Unicode 대응은 EBCDIC 플랫폼에서는
+잘 움직이지 않는 5.6 시리즈보다는 개선되어 있습니다.
+EBCDIC 플랫폼에서는 내부 Unicode 인코딩 형식은 
+UTF-8 이 아닌 UTF-EBCDIC 입니다.
+이 차이는 ASCII 문자는 그대로 UTF-8 에 인코드되는ㄴ 점에 대해서
+"ASCII 세이프"이지만, 한편 UTF-EBCDIC 는 "EBCDIC 세이프"입니다.
+
+=head2 Creating Unicode
+
+(Unicode 의 작성)
+
+=begin original
+
+To create Unicode characters in literals for code points above C<0xFF>,
+use the C<\x{...}> notation in double-quoted strings:
+
+=end original
+
+C<0xFF> 를 넘은 코드포인트의 리터럴에서 Unicode 문자를 만들기 위해서는 
+C<\x{...}> 표기법을 쌍따옴표로 묶은 문자열 안에서 사용합니다.
+
+    my $smiley = "\x{263a}";
+
+=begin original
+
+Similarly, it can be used in regular expression literals
+
+=end original
+
+마찬가지로, 정규표현안에서도 사용할 수 있습니다.
+
+    $smiley =~ /\x{263a}/;
+
+=begin original
+
+At run-time you can use C<chr()>:
+
+=end original
+
+C<chr()> 를 사용해서 실행시에는:
+
+    my $hebrew_alef = chr(0x05d0);
+
+=begin original
+
+See L</"Further Resources"> for how to find all these numeric codes.
+
+=end original
+
+모든 이 문자 코드들을 발견하는 방법은 L</"Further Resources"> 를 
+참조해주세요.
+
+=begin original
+
+Naturally, C<ord()> will do the reverse: it turns a character into
+a code point.
+
+=end original
+
+당연히, C<ord()> 는 거꾸로 실행해주세요:
+문자의 코드포인트 바꿉니다.
+
+=begin original
+
+Note that C<\x..> (no C<{}> and only two hexadecimal digits), C<\x{...}>,
+and C<chr(...)> for arguments less than C<0x100> (decimal 256)
+generate an eight-bit character for backward compatibility with older
+Perls.  For arguments of C<0x100> or more, Unicode characters are
+always produced. If you want to force the production of Unicode
+characters regardless of the numeric value, use C<pack("U", ...)>
+instead of C<\x..>, C<\x{...}>, or C<chr()>.
+
+=end original
+
+C<0x100>(10 진수의 256) 미만의 인수인 C<^x..> (C<{}> 없이 
+두개이 16진수의 숫자만입니다)와 C<\x{...}> 과 C<chr(...)> 은 
+옛날 Perl 과의 호환성을 위 8비트의 문자열을 생성합니다.
+C<x100> 이나 그 이상의 인수에서는 항상 Unicode 문자가 생성됩니다.
+어쨌든, 숫자값인 Unicode 문자를 강제적으로 생성하고 싶었다면,
+C<\x..>, C<\x{...}>, C<chr()> 대신에 C<pack("U", ...)> 를 사용해주세요.
+
+=begin original
+
+You can also use the C<charnames> pragma to invoke characters
+by name in double-quoted strings:
+
+=end original
+
+쌍따옴표로 묶인 문자열안에서 이름으로 문자를 호출하기 위해서는,
+C<chrnames> 프라그마를 사용할 수 도 있습니다:
+
+    use charnames ':full';
+    my $arabic_alef = "\N{ARABIC LETTER ALEF}";
+
+=begin original
+
+And, as mentioned above, you can also C<pack()> numbers into Unicode
+characters:
+
+=end original
+
+그리고 위에서 기술한 대로, 숫자를 Unicode 숫자로, C<pack()> 할 수 있습니다.
+
+   my $georgian_an  = pack("U", 0x10a0);
+
+=begin original
+
+Note that both C<\x{...}> and C<\N{...}> are compile-time string
+constants: you cannot use variables in them.  if you want similar
+run-time functionality, use C<chr()> and C<charnames::vianame()>.
+
+=end original
+
+C<\x{...}> 와 C<\N{...}> 양쪽은 컴파일 시의 문자열정수입니다:
+이 안에 변수를 사용할 수는 없습니다.
+유사한 것을 실행하고 싶다면, C<chr()> 과, C<charnames::vianame()> 을 
+사용해주세요.
+
+=begin original
+
+If you want to force the result to Unicode characters, use the special
+C<"U0"> prefix.  It consumes no arguments but causes the following bytes
+to be interpreted as the UTF-8 encoding of Unicode characters:
+
+=end original
+
+결과를 Unicode 문자로 강제하고 싶다면, 특별한 C<"U0"> 접두사를 사용해주세요.
+이것은 인수를 소비하지 않지만, 계속되는 바이트열을 Unicode 문자의 
+UTF-8 인코딩으로 해석합니다:
+
+   my $chars = pack("U0W*", 0x80, 0x42);
+
+=begin original
+
+Likewise, you can stop such UTF-8 interpretation by using the special
+C<"C0"> prefix.
+
+=end original
+
+마찬가지로, 특수한 C"C0"> 접두사를 사용하는 것으로, 이런 UTF-8 의 해석을 
+정지시킬 수가 있습니다.
+
+=head2 Handling Unicode
+
+(Unicode 다루기)
+
+=begin original
+
+Handling Unicode is for the most part transparent: just use the
+strings as usual.  Functions like C<index()>, C<length()>, and
+C<substr()> will work on the Unicode characters; regular expressions
+will work on the Unicode characters (see L<perlunicode> and L<perlretut>).
+
+=end original
+
+Unicode 를 다루는 것은 많은 부분에 있어서 투과적입니다:
+문자열을 늘 그렇듯 사용하는 것 뿐입니다.
+C<index()>, C<length()>, C<substr()> 같은 함수는 Unicode 문자열로 
+움직입니다;
+정규표현도 Unicode 문자열로 움직입니다(L<perlunicode> 와 L<perlretut> 를 
+참조해주세요).
+
+=begin original
+
+Note that Perl considers combining character sequences to be
+separate characters, so for example
+
+=end original
+
+Perl 은 combining character sequences 를 다른 문자로 생각하는 것에
+주의해주세요.
+그렇기에, 예를들면
+
+    use charnames ':full';
+    print length("\N{LATIN CAPITAL LETTER A}\N{COMBINING ACUTE ACCENT}"), "\n";
+
+=begin original
+
+will print 2, not 1.  The only exception is that regular expressions
+have C<\X> for matching a combining character sequence.
+
+=end original
+
+이것은 1이 아니라, 2를 표시합니다.
+유일한 예외는 정규표현으로 combining character sequence 에 
+매치하기 위해서 C<\X> 가 있는 경우입니다.
+
+=begin original
+
+Life is not quite so transparent, however, when working with legacy
+encodings, I/O, and certain special cases:
+
+=end original
+
+그러나, 레거시 인코딩, I/O, 그리고 어떤 종류의 특수한 상황에서는 
+인생은 그렇게 투과적이지 않습니다;
+
+=head2 Legacy Encodings
+
+(레거시 인코딩)
+
+=begin original
+
+When you combine legacy data and Unicode the legacy data needs
+to be upgraded to Unicode.  Normally ISO 8859-1 (or EBCDIC, if
+applicable) is assumed.
+
+=end original
+
+레거시 데이터와 Unicode 를 조합할 때는 
+레거시 데이터를 Unicode 로 업그레이트하지 않으면 안됩니다.
+보통 ISO 8859-1(이나 필요하다면 EBCDIC)를 가정합니다.
+
+=begin original
+
+The C<Encode> module knows about many encodings and has interfaces
+for doing conversions between those encodings:
+
+=end original
+
+C<Encode> 모듈은 많은 인코ㅇ을 알고 있고, 
+그 인코딩들 사이의 변환을 하는 인터페이스를 가지고 있습니다.
+
+    use Encode 'decode';
+    $data = decode("iso-8859-3", $data); # convert from legacy to utf-8
+
+=head2 Unicode I/O
+
+=begin original
+
+Normally, writing out Unicode data
+
+=end original
+
+보통, Unicode 데이터를 써내는 것은,
+
+    print FH $some_string_with_unicode, "\n";
+
+=begin original
+
+produces raw bytes that Perl happens to use to internally encode the
+Unicode string.  Perl's internal encoding depends on the system as
+well as what characters happen to be in the string at the time. If
+any of the characters are at code points C<0x100> or above, you will get
+a warning.  To ensure that the output is explicitly rendered in the
+encoding you desire--and to avoid the warning--open the stream with
+the desired encoding. Some examples:
+
+=end original
+
+Unicode 문자열을 내부적으로 인코드 하는 것에 가끔 사용되고 있는 
+raw bytes 를 생성하는 것입니다.
+Perl 의 내부 인코딩은 그 때에 문자열에 드문드문 있는 어떤 문자와 
+마찬가지로 시스템 의존입니다.
+어느 문자도, 코으포인트가 C<0x100> 이상이라면, 경고가 나옵니다.
+출력이 명시적으로 원하는 인코딩으로 렌더링 되는 것을 
+보증하고, 경고를 피하기 위해서는 원하는 인코딩으로 스트림을
+open 해주세요.
+몇가지 예를 나타내겠습니다:
+
+    open FH, ">:utf8", "file";
+
+    open FH, ">:encoding(ucs2)",      "file";
+    open FH, ">:encoding(UTF-8)",     "file";
+    open FH, ">:encoding(shift_jis)", "file";
+
+=begin original
+
+and on already open streams, use C<binmode()>:
+
+=end original
+
+이미 열려있는 스트림에 관해서는 C<binmode()> 를 사용합니다:
+
+    binmode(STDOUT, ":utf8");
+
+    binmode(STDOUT, ":encoding(ucs2)");
+    binmode(STDOUT, ":encoding(UTF-8)");
+    binmode(STDOUT, ":encoding(shift_jis)");
+
+=begin original
+
+The matching of encoding names is loose: case does not matter, and
+many encodings have several aliases.  Note that the C<:utf8> layer
+must always be specified exactly like that; it is I<not> subject to
+the loose matching of encoding names. Also note that C<:utf8> is unsafe for
+input, because it accepts the data without validating that it is indeed valid
+UTF8.
+
+=end original
+
+인코딩이름의 매칭은 루즈합니다: 대문자소문자는 중요하지 않고,
+다른 인코딩에서는 몇가지 별명이 있습니다.
+C<:utf8> 층은 항상 제대로 지정해줘야 할 필요가 있습니다.
+이것은 인코딩 이름의 루즈한 매칭의 대상이 I<아닙니다>.
+데이터가 타당한 UTF8 인지를 검증하지 않고 받아들이기 때문에, 
+입력에 대해서는 C<:utf8> 은 안전하지 않다는 것에도 주의해주세요.
+
+=begin original
+
+See L<PerlIO> for the C<:utf8> layer, L<PerlIO::encoding> and
+L<Encode::PerlIO> for the C<:encoding()> layer, and
+L<Encode::Supported> for many encodings supported by the C<Encode>
+module.
+
+=end original
+
+C<:utf8> 층에 관해서는 L<PerlIO> 를 참조해주세요;
+C<:encoding()> 에 관해서는 L<Encode::PerlIO> 를 참조해주세요;
+C<Encode> 모듈에서 지원하고 있는 많은 인코딩에 관해서는 
+L<Encode::Supported> 를 참조해주세요.
+
+=begin original
+
+Reading in a file that you know happens to be encoded in one of the
+Unicode or legacy encodings does not magically turn the data into
+Unicode in Perl's eyes.  To do that, specify the appropriate
+layer when opening files
+
+=end original
+
+Unicode 나 레거시의 인코딩 어느쪽에서 가끔 인코드된 파일을 읽어들여도,
+Perl 의 눈으로 마법처럼 데이터가 Unicode 로 바뀌거나 하지 않습니다.
+그렇게 하기 위해서는 파일을 열 때에 적절한 레이어를 지정합니다.
+
+    open(my $fh,'<:encoding(utf8)', 'anything');
+    my $line_of_unicode = <$fh>;
+
+    open(my $fh,'<:encoding(Big5)', 'anything');
+    my $line_of_unicode = <$fh>;
+
+=begin original
+
+The I/O layers can also be specified more flexibly with
+the C<open> pragma.  See L<open>, or look at the following example.
+
+=end original
+
+I/O 레이어는 제일 유연하게 C<open> 프라그마에서도 지정할 수 있습니다.
+L<open> 을 참조하거나 다음의 예제를 봐주세요.
+
+    use open ':encoding(utf8)'; # input/output default encoding will be UTF-8
+    open X, ">file";
+    print X chr(0x100), "\n";
+    close X;
+    open Y, "<file";
+    printf "%#x\n", ord(<Y>); # this should print 0x100
+    close Y;
+
+=begin original
+
+With the C<open> pragma you can use the C<:locale> layer
+
+=end original
+
+C<open> 프라그마에서 C<:local> 레이어도 사용할 수 있습니다.
+
+    BEGIN { $ENV{LC_ALL} = $ENV{LANG} = 'ru_RU.KOI8-R' }
+    # the :locale will probe the locale environment variables like LC_ALL
+    use open OUT => ':locale'; # russki parusski
+    open(O, ">koi8");
+    print O chr(0x430); # Unicode CYRILLIC SMALL LETTER A = KOI8-R 0xc1
+    close O;
+    open(I, "<koi8");
+    printf "%#x\n", ord(<I>), "\n"; # this should print 0xc1
+    close I;
+
+=begin original
+
+These methods install a transparent filter on the I/O stream that
+converts data from the specified encoding when it is read in from the
+stream.  The result is always Unicode.
+
+=end original
+
+스트림에서 파일이 읽어질 때에 특정 인코딩에서 데이터를 변환하는 I/O
+스트림 상의 투과적인 레이어입니다.
+그 결과는 항상 Unicode 입니다.
+
+=begin original
+
+The L<open> pragma affects all the C<open()> calls after the pragma by
+setting default layers.  If you want to affect only certain
+streams, use explicit layers directly in the C<open()> call.
+
+=end original
+
+L<open> 프라그마는 기본 레이어를 지정하는 것으로 프라그마 뒤의 모든 
+C<open()> 호출에 영향을 줍니다.
+어떤 스트림에만 영향을 주고싶다면, C<open()> 호출로 명시적인 레이어를 
+사용해주세요.
+
+=begin original
+
+You can switch encodings on an already opened stream by using
+C<binmode()>; see L<perlfunc/binmode>.
+
+=end original
+
+C<binmode()> 를 사용해서, 이미 열려있는 스트림의 인코딩을 
+바꿀 수 있습니다; L<perlfunc/binmode> 를 참조해주세요.
+
+=begin original
+
+The C<:locale> does not currently (as of Perl 5.8.0) work with
+C<open()> and C<binmode()>, only with the C<open> pragma.  The
+C<:utf8> and C<:encoding(...)> methods do work with all of C<open()>,
+C<binmode()>, and the C<open> pragma.
+
+=end original
+
+C<:locale> 은, 현재(Perl 5.8.0 의 시점에서), C<open()> 과 C<binmode()> 에서는
+움직이지 않습니다.
+C<open> 프라그마에서만 움직입니다.
+C<:utf8> 과 C<:encoding(...)> 메소드는 모든 C<open()>, C<binmode()>, 
+C<open> 프라그마에서 움직입니다.
+
+=begin original
+
+Similarly, you may use these I/O layers on output streams to
+automatically convert Unicode to the specified encoding when it is
+written to the stream. For example, the following snippet copies the
+contents of the file "text.jis" (encoded as ISO-2022-JP, aka JIS) to
+the file "text.utf8", encoded as UTF-8:
+
+=end original
+
+비슷하게 스트림에 써낼 때에, 자동적으로 Unicode 를 특정의 인코딩으로 
+변환하는 출력 스트림의 I/O 레이어를 사용할지도 모릅니다.
+예를들면, 다음과 같은 코드의 단편은 (ISO-2022-JP, 또는 JIS 로 
+인코드되어 있는) "test.jis" 파일의 내용을 UTF-8 으로
+인코드된 "text.utf8" 파일로 복사합니다.
+
+    open(my $nihongo, '<:encoding(iso-2022-jp)', 'text.jis');
+    open(my $unicode, '>:utf8',                  'text.utf8');
+    while (<$nihongo>) { print $unicode $_ }
+
+=begin original
+
+The naming of encodings, both by the C<open()> and by the C<open>
+pragma allows for flexible names: C<koi8-r> and C<KOI8R> will both be
+understood.
+
+=end original
+
+C<open()> 와 C<open> 프라그마 양쪽에서 사용되는 인코딩의 이름은 
+플렉시블한 이름에서도 사용할 수 있습니다: C<koi8-r> 과, C<KOI8R> 은 
+양쪽모두 이해됩니다.
+
+=begin original
+
+Common encodings recognized by ISO, MIME, IANA, and various other
+standardisation organisations are recognised; for a more detailed
+list see L<Encode::Supported>.
+
+=end original
+
+ISO、MIME、IANA、 여러가지 다른 표준화 기관이 인식하고 있는 
+일반적인 인코딩이 인식됩니다; 보다 자세한 리스트는 
+L<Encode::Supported> 를 참조해주세요.
+
+=begin original
+
+C<read()> reads characters and returns the number of characters.
+C<seek()> and C<tell()> operate on byte counts, as do C<sysread()>
+and C<sysseek()>.
+
+=end original
+
+C<read()> 는 문자를 일고, 문자수를 반환합니다.
+C<seek()> 와 C<tell()> 은 바이트 카운트에 관해서 조작합니다.
+C<sysread> 와 C<sysseek()> 도 마찬가지입니다.
+
+=begin original
+
+Notice that because of the default behaviour of not doing any
+conversion upon input if there is no default layer,
+it is easy to mistakenly write code that keeps on expanding a file
+by repeatedly encoding the data:
+
+=end original
+
+기본 레이어가 없으면, 입력에 어떤 변환도 하지 않은 것이 기본 행동이
+되기 때문에, 반복 데이터를 인코딩하는 것으로, 
+파일을 계속 전개하는 코드를 잘못 쓰기 쉽습니다.
+
+    # BAD CODE WARNING
+    open F, "file";
+    local $/; ## read in the whole file of 8-bit characters
+    $t = <F>;
+    close F;
+    open F, ">:encoding(utf8)", "file";
+    print F $t; ## convert to UTF-8 on output
+    close F;
+
+=begin original
+
+If you run this code twice, the contents of the F<file> will be twice
+UTF-8 encoded.  A C<use open ':encoding(utf8)'> would have avoided the
+bug, or explicitly opening also the F<file> for input as UTF-8.
+
+=end original
+
+이 코드를 2번 실행하면, F<file> 의 내용은, UTF-8 에 , 2번 인코딩됩니다.
+C<use open 'encoding(utf8)'> 은 버그를 피할 것입니다;
+혹은, UTF-8 으로 입력하기 위해서는 F<File> 을 명시적으로 여는 것입니다.
+
+=begin original
+
+B<NOTE>: the C<:utf8> and C<:encoding> features work only if your
+Perl has been built with the new PerlIO feature (which is the default
+on most systems).
+
+=end original
+
+B<주의>: C<:utf8> 와 C<:encoding> 의 기능은 Perl 이 새로운 PerlIO 의 기능으로
+빌드되어 있는 경우(대부분의 시스템에서 그것이 기본값입니다)에만 
+동작합니다.
+
+=head2 Displaying Unicode As Text
+
+(Unicode 를 텍스트로 표시하기)
+
+=begin original
+
+Sometimes you might want to display Perl scalars containing Unicode as
+simple ASCII (or EBCDIC) text.  The following subroutine converts
+its argument so that Unicode characters with code points greater than
+255 are displayed as C<\x{...}>, control characters (like C<\n>) are
+displayed as C<\x..>, and the rest of the characters as themselves:
+
+=end original
+
+Unicode 를 포함한 Perl 의 스칼라를 단순한 ASCII(나 EBCDIC) 의 
+텍스트로써 표시하고 싶을지도 모릅니다.
+아래의 서브루틴은 인수를 변환해서 255보다 큰 코드포인트의 
+Unicode 문자를 C<\x{...}> 로 표시하, (C<\n> 같은) 제어문자는 
+C<\x..> 로 표시합니다.
+남은 문자는 그대로 표시합니다:
+
+   sub nice_string {
+       join("",
+         map { $_ > 255 ?                  # if wide character...
+               sprintf("\\x{%04X}", $_) :  # \x{...}
+               chr($_) =~ /[[:cntrl:]]/ ?  # else if control character ...
+               sprintf("\\x%02X", $_) :    # \x..
+               quotemeta(chr($_))          # else quoted or as themselves
+         } unpack("W*", $_[0]));           # unpack Unicode characters
+   }
+
+=begin original
+
+For example,
+
+=end original
+
+예를들면,
+
+   nice_string("foo\x{100}bar\n")
+
+=begin original
+
+returns the string
+
+=end original
+
+은 다음과 같은 문자열이 되고:
+
+   'foo\x{0100}bar\x0A'
+
+=begin original
+
+which is ready to be printed.
+
+=end original
+
+표시가능하게 됩니다.
+
+=head2 Special Cases
+
+(특수한 상황)
+
+=over 4
+
+=item *
+
+=begin original
+
+Bit Complement Operator ~ And vec()
+
+=end original
+
+연산자 ~ 와, vec() 에 대한 보충
+
+=begin original
+
+The bit complement operator C<~> may produce surprising results if
+used on strings containing characters with ordinal values above
+255. In such a case, the results are consistent with the internal
+encoding of the characters, but not with much else. So don't do
+that. Similarly for C<vec()>: you will be operating on the
+internally-encoded bit patterns of the Unicode characters, not on
+the code point values, which is very probably not what you want.
+
+=end original
+
+연산자 C<~> 는 255를 넘은 서수의 값의 문자를 포함한 문자열로 사용되면, 
+놀랄만한 결과가 될겁니다.
+그런 케이스에서는 그 결과는 문자의 내부적인 인코딩에서 일관성이 있습니다.
+그러나, 다른 많은 것과는 다릅니다.
+그렇기에, 그런 것은 하지 말아주세요.
+C<vec()> 도 마찬가지입니다: 코드 포인트의 값이 아니라, 내부적으로 인코드된
+Unicode 문자열의 비트패턴을 조작하게 됩니다:
+아마도, 그것을 바라는 것이 아니겠죠.
+
+=item *
+
+=begin original
+
+Peeking At Perl's Internal Encoding
+
+=end original
+
+Perl 의 내부 인코딩을 훔쳐보기
+
+=begin original
+
+Normal users of Perl should never care how Perl encodes any particular
+Unicode string (because the normal ways to get at the contents of a
+string with Unicode--via input and output--should always be via
+explicitly-defined I/O layers). But if you must, there are two
+ways of looking behind the scenes.
+
+=end original
+
+Perl 이 어떻게 특정 Unicode 문자열을 인코드하고 있는가를 
+Perl 의 보통 유저는 신경쓰지 않아도 됩니다
+(Unicode 로 문자열의 내용에 달하는 보통의 방법 -- 입출력에 의해 -- 은 ,
+항상 명시적으로 정의된 I/O 층을 경유해야하기 때문입니다).
+그렇지만, 만약 필요하다면, 숨겨진 안쪽을 보는 2가지 방법이 있습니다.
+
+=begin original
+
+One way of peeking inside the internal encoding of Unicode characters
+is to use C<unpack("C*", ...> to get the bytes of whatever the string
+encoding happens to be, or C<unpack("U0..", ...)> to get the bytes of the
+UTF-8 encoding:
+
+=end original
+
+Unicode 문자의 내부 인코딩의 안쪽을 보는 방법 중 하나는 
+인코딩이 무엇이어도 문자열의 바이트열을 얻기 위해서 
+C<unpack("C*", ...> 를 사용하거나, UTF-8 인코딩의 바이트열을 얻기 위해
+C<unpack("U0..", ...)> 를 사용하는 것입니다:
+
+    # this prints  c4 80  for the UTF-8 bytes 0xc4 0x80
+    print join(" ", unpack("U0(H2)*", pack("U", 0x100))), "\n";
+
+=begin original
+
+Yet another way would be to use the Devel::Peek module:
+
+=end original
+
+다른 하나의 방법은 Devel::Peek 모듈을 사용하는 것입니다:
+
+    perl -MDevel::Peek -e 'Dump(chr(0x100))'
+
+=begin original
+
+That shows the C<UTF8> flag in FLAGS and both the UTF-8 bytes
+and Unicode characters in C<PV>.  See also later in this document
+the discussion about the C<utf8::is_utf8()> function.
+
+=end original
+
+이것은 FLAGS 의 C<UTF8> 플래그와 UTF-8 바이트와 C<PV> 안의 
+Unicode 문자의 양쪽을 볼 수 있습니다.
+이 문서의 뒤에 있는 C<utf8::is_utf8()>  기능에 대한 의논도 
+참조해주세요.
+
+=back
+
+=head2 Advanced Topics
+
+(발전한 화제)
+
+=over 4
+
+=item *
+
+=begin original
+
+String Equivalence
+
+=end original
+
+문자열의 등가성 
+
+=begin original
+
+The question of string equivalence turns somewhat complicated
+in Unicode: what do you mean by "equal"?
+
+=end original
+
+문자열의 등가성의 의문은 Unicode 로 꽤 복잡하게 됩니다.
+"등가" 란 무엇을 의미할까요?
+
+=begin original
+
+(Is C<LATIN CAPITAL LETTER A WITH ACUTE> equal to
+C<LATIN CAPITAL LETTER A>?)
+
+=end original
+
+(IS C<LATIN CAPITAL LETTER A WITH ACCUTE> 와
+C<LATIN CAPITAL LETTER A>는 같은 것일까요?)
+
+=begin original
+
+The short answer is that by default Perl compares equivalence (C<eq>,
+C<ne>) based only on code points of the characters.  In the above
+case, the answer is no (because 0x00C1 != 0x0041).  But sometimes, any
+CAPITAL LETTER As should be considered equal, or even As of any case.
+
+=end original
+
+짧게 답하면 다음과 같습니다.
+기본값에서는 Perl 은(C<eq> 와 C<ne> 로) 등가성을 
+비교하지만, 이것들은 문자의 코드포인트에만 기반합니다.
+위의 케이스에서는 답은 "아니오"입니다(0x00C1 != 0x0041 이기에).
+그러나 어떤 CAPITAL LETTER A 도 같다고는 생각해야할 때랑 
+대문자 소문자에 상관없이 어떤 A 도 같다고 생각해야할 때도 있습니다.
+
+=begin original
+
+The long answer is that you need to consider character normalization
+and casing issues: see L<Unicode::Normalize>, Unicode Technical
+Reports #15 and #21, I<Unicode Normalization Forms> and I<Case
+Mappings>, http://www.unicode.org/unicode/reports/tr15/ and
+http://www.unicode.org/unicode/reports/tr21/
+
+=end original
+
+길게 답하면, 문자의 정규화와 대문자소문자의 문제를 생각할 필요가 있습니다:
+L<Unicode::Normalize>, Unicode 테크니컬 레포트 #15 와 #21 에 있는 
+I<Unicodde Normalization Forms> 와 I<Case Mappings>
+( http://www.unicode.org/unicode/reports/tr15/,
+http://www.unicode.org/unicode/reports/tr21/ ) 을 참조해주세요.
+
+=begin original
+
+As of Perl 5.8.0, the "Full" case-folding of I<Case
+Mappings/SpecialCasing> is implemented.
+
+=end original
+
+Perl 5.8.0 에서 I<Case Mappings/SpecialCasing> 의 
+"Full" 케이스 폴딩이 구성되어 있습니다.
+
+=item *
+
+=begin original
+
+String Collation
+
+=end original
+
+문자열의 조합(Collation)
+
+=begin original
+
+People like to see their strings nicely sorted--or as Unicode
+parlance goes, collated.  But again, what do you mean by collate?
+
+=end original
+
+문자열이 잘 정렬되어있는(혹은 Unicode 업계용어를 사용하면,
+조합되어있는(collated)) 것을 선호합니다.
+그런데 조합이란 무슨 의미일까요?
+
+=begin original
+
+(Does C<LATIN CAPITAL LETTER A WITH ACUTE> come before or after
+C<LATIN CAPITAL LETTER A WITH GRAVE>?)
+
+=end original
+
+(C<LATIN CAPITAL LETTER A WITH ACUTE> 는
+C<LATIN CAPITAL LETTER A WITH GRAVE> 보다
+앞일까요 뒤일까요?)
+
+=begin original
+
+The short answer is that by default, Perl compares strings (C<lt>,
+C<le>, C<cmp>, C<ge>, C<gt>) based only on the code points of the
+characters.  In the above case, the answer is "after", since
+C<0x00C1> > C<0x00C0>.
+
+=end original
+
+짧게 답하면 다음과 같습니다.
+Perl 은 문자열을 (C<lt>, C<le>, C<cmp>, C<ge>, C<gt>) 로 비교하지만, 
+이것들은 문자의 코드포인트에만 기반되어 있습니다.
+위의 케이스에서는 답은 C<0x001> > <0x00C0> 이기에 "뒤"가 됩니다.
+
+=begin original
+
+The long answer is that "it depends", and a good answer cannot be
+given without knowing (at the very least) the language context.
+See L<Unicode::Collate>, and I<Unicode Collation Algorithm>
+http://www.unicode.org/unicode/reports/tr10/
+
+=end original
+
+길게 답하면 "의존하고" 있습니다.
+좋은 답은 (아주 적어도) 언어의 컨텍스트를 알지 못하고는 줄 수 없습니다.
+L<Unicode::Collate>, I<Unicode Collation Algorithm>
+http://www.unicode.org/unicode/reports/tr10/ 를 참조해주세요.
+
+=back
+
+=head2 Miscellaneous
+
+(그 외)
+
+=over 4
+
+=item *
+
+=begin original
+
+Character Ranges and Classes
+
+=end original
+
+문자의 범위와 클래스 
+
+=begin original
+
+Character ranges in regular expression character classes (C</[a-z]/>)
+and in the C<tr///> (also known as C<y///>) operator are not magically
+Unicode-aware.  What this means that C<[A-Za-z]> will not magically start
+to mean "all alphabetic letters"; not that it does mean that even for
+8-bit characters, you should be using C</[[:alpha:]]/> in that case.
+
+=end original
+
+정규표현의 문자클래스(C</[a-z]/>) 안과 C<tr///><C<y///> 로도 알려진) 
+연산자 안에서는 자동적으로는 Unicode 대응이 되지 않습니다.
+이것이 의미하는 것은 C<[A-Za-z]> 는 자동적으로 "모든 알파벳 문자"를 의미하는
+것이 아닙니다; 8비트의 문자를 의미합니다;
+이 케이스에서는 C</[[:alpha:]]/> 를 사용해야합니다.
+
+=begin original
+
+For specifying character classes like that in regular expressions,
+you can use the various Unicode properties--C<\pL>, or perhaps
+C<\p{Alphabetic}>, in this particular case.  You can use Unicode
+code points as the end points of character ranges, but there is no
+magic associated with specifying a certain range.  For further
+information--there are dozens of Unicode character classes--see
+L<perlunicode>.
+
+=end original
+
+정규표현의 이런 특정 문자 클래스에 여러 Unicode 속성 --
+C<\pL> 또는 이 특별한 케이스에서는 아마 C<\p{Alphabetic}> 을 
+사용할 수 있습니다.
+문자의 범위의 끝의 포인트로, Unicode 의 코드포인트를 
+사용할 수 있습니다.
+그러나, 어느 범위를 특정하는 것에 연결된 어떤 마법도 필요없습니다.
+자세한 것은 -- 여러 다스의 Unicode 문자 클래스가 있습니다 --
+L<perlunicode> 를 봐주세요.
+
+=item *
+
+=begin original
+
+String-To-Number Conversions
+
+=end original
+
+문자열에서 숫자로의 변환
+
+=begin original
+
+Unicode does define several other decimal--and numeric--characters
+besides the familiar 0 to 9, such as the Arabic and Indic digits.
+Perl does not support string-to-number conversion for digits other
+than ASCII 0 to 9 (and ASCII a to f for hexadecimal).
+
+=end original
+
+Unicode 는 아라비아나 인도의 숫자같은 0 에서 9에 붙여 
+복수의 다른 10진수 --와 숫자의--문자를 정의합니다.
+Perl 은 ASCII 의 0 에서 9(와 16진수의 ASCII 의 a 에서 f)이외의 숫자인 
+문자열에서 수로의 변환을 지원하지 않습니다.
+
+=back
+
+=head2 Questions With Answers
+
+(질문과 답변)
+
+=over 4
+
+=item *
+
+=begin original
+
+Will My Old Scripts Break?
+
+=end original
+
+낡은 스크립트는 깨질까요?
+
+=begin original
+
+Very probably not.  Unless you are generating Unicode characters
+somehow, old behaviour should be preserved.  About the only behaviour
+that has changed and which could start generating Unicode is the old
+behaviour of C<chr()> where supplying an argument more than 255
+produced a character modulo 255.  C<chr(300)>, for example, was equal
+to C<chr(45)> or "-" (in ASCII), now it is LATIN CAPITAL LETTER I WITH
+BREVE.
+
+=end original
+
+아마, 깨지지 않습니다.
+어떻게 해서, Unicode 문자를 생성하지 않는 다면, 낡은 움직임은 보호됩니다.
+행동이 변경되고, Unicode 를 생성하기 시작하는 유일한 것은 옛 C<chr()> 은
+인수로써 255를 넘는 값이 정의되면, 255를 법으로한 문자가 생성되는 것입니다.
+예를들면 C<chr(300)>은 C<chr(45)> 혹은 (ASCII 의) "-" 과 같았습니.
+지금은 그것은 LATIN CAPITAL LETTER I WITH BREVE 입니다.
+
+=item *
+
+=begin original
+
+How Do I Make My Scripts Work With Unicode?
+
+=end original
+
+제 스크립트를 Unicode 로 움직이기 위해서는?
+
+=begin original
+
+Very little work should be needed since nothing changes until you
+generate Unicode data.  The most important thing is getting input as
+Unicode; for that, see the earlier I/O discussion.
+
+=end original
+
+Unicode 데이터를 생성하기까지 거의 아무것도 할 필요는 없습니다.
+제일 중요한 것은 Unicode 로써 입력을 얻는 것입니다;
+그렇기에, 이전의 I/O 의논을 봐주세요.
+
+=item *
+
+=begin original
+
+How Do I Know Whether My String Is In Unicode?
+
+=end original
+
+Unicode 의 문자열인지 어떤지를 알기 위해서는?
+
+=begin original
+
+You shouldn't care.  No, you really shouldn't.  No, really.  If you
+have to care--beyond the cases described above--it means that we
+didn't get the transparency of Unicode quite right.
+
+=end original
+
+신경쓸 필요 없습니다.
+정말로 신경써야하는 것도 아닙니다.
+신경쓸 필요가 있다면 -- 이 케이스는 위에 쓰여있습니다 --
+정말 바르게 Unicode 의 투과성을 얻지 않은 것을 의미합니다.
+
+=begin original
+
+Okay, if you insist:
+
+=end original
+
+뭐, 어떻게든 상관없다면:
+
+    print utf8::is_utf8($string) ? 1 : 0, "\n";
+
+=begin original
+
+But note that this doesn't mean that any of the characters in the
+string are necessary UTF-8 encoded, or that any of the characters have
+code points greater than 0xFF (255) or even 0x80 (128), or that the
+string has any characters at all.  All the C<is_utf8()> does is to
+return the value of the internal "utf8ness" flag attached to the
+C<$string>.  If the flag is off, the bytes in the scalar are interpreted
+as a single byte encoding.  If the flag is on, the bytes in the scalar
+are interpreted as the (multi-byte, variable-length) UTF-8 encoded code
+points of the characters.  Bytes added to an UTF-8 encoded string are
+automatically upgraded to UTF-8.  If mixed non-UTF-8 and UTF-8 scalars
+are merged (double-quoted interpolation, explicit concatenation, and
+printf/sprintf parameter substitution), the result will be UTF-8 encoded
+as if copies of the byte strings were upgraded to UTF-8: for example,
+
+=end original
+
+그러나, 이것은 문자열의 모든 문자가 UTF-8 으로 인코딩되어 있거나, 
+모든 문자가 0xFF(255)(혹은 0x80(128)) 보다 큰 코드포인트를 가지거나,
+문자열에 문자가 포함되어 있는 지를 의미하는 것이 아니라는 것을 주의해주세요.
+C<is_utf8()> 이 하는 모든 것ㅡㄴ C<$string> 에 관한 내부의 "utf8ness" 
+플래그의 값을 반환하는 것입니다.
+플래그가 무효하다면 스칼라 안의 바이트열은 싱글바이트 인코딩으로 해석됩니다.
+플래그가 유효하다면, 스칼라 안의 바이트 열은 (멀티바이트, 가변길이의) 
+UTF-8 으로 인코딩된 문자의 코드포인트로 해석됩니다.
+(쌍따옴표로 묶여진 어구, 명시적인 연결, printf/sprintf 파라메터 치환에 의해)
+비 UTF-8 과 UTF-8 의 스칼라가 머지된 경우, 이 결과는, 
+바이트 문자열의 복사가 UTF-8 으로 업그레이드 되도록,
+UTF-8 으로 인코딩됩니다: 예를들어,
+
+    $a = "ab\x80c";
+    $b = "\x{100}";
+    print "$a = $b\n";
+
+=begin original
+
+the output string will be UTF-8-encoded C<ab\x80c = \x{100}\n>, but
+C<$a> will stay byte-encoded.
+
+=end original
+
+출력하는 문자열은 UTF-8 인코딩된 C<ab\x80c = \x{100}\n> 이 되지만, 
+C<$a> 는 바이트 인코딩되어 있습니다.
+
+=begin original
+
+Sometimes you might really need to know the byte length of a string
+instead of the character length. For that use either the
+C<Encode::encode_utf8()> function or the C<bytes> pragma and its only
+defined function C<length()>:
+
+=end original
+
+문자열의 길이가 아닌, 문자열의 바이트열을 알고 있을 필요가 있을지도 모릅니다.
+그렇게 하기 위해서는 C<Encode::encode_utf()> 함수가 C<bytes> 프라그마의 
+어느쪽을 사용하고, 정의된 C<length()> 함수를 사용하는 것 뿐입니다:
+
+    my $unicode = chr(0x100);
+    print length($unicode), "\n"; # will print 1
+    require Encode;
+    print length(Encode::encode_utf8($unicode)), "\n"; # will print 2
+    use bytes;
+    print length($unicode), "\n"; # will also print 2
+                                  # (the 0xC4 0x80 of the UTF-8)
+
+=item *
+
+=begin original
+
+How Do I Detect Data That's Not Valid In a Particular Encoding?
+
+=end original
+
+어떤 인코딩으로 데이터가 타당하지 않은 지를 검출하기 위해서는?
+
+=begin original
+
+Use the C<Encode> package to try converting it.
+For example,
+
+=end original
+
+C<Encode> 패키지를 사용해서, 그것을 변환해주세요.
+예를들어,
+
+    use Encode 'decode_utf8';
+    eval { decode_utf8($string, Encode::FB_CROAK) };
+    if ($@) {
+        # $string is valid utf8
+    } else {
+        # $string is not valid utf8
+    }
+
+=begin original
+
+Or use C<unpack> to try decoding it:
+
+=end original
+
+또는 C<unpack> 을 사용해서 디코딩해보세요:
+
+    use warnings;
+    @chars = unpack("C0U*", $string_of_bytes_that_I_think_is_utf8);
+
+=begin original
+
+If invalid, a C<Malformed UTF-8 character> warning is produced. The "C0" means
+"process the string character per character".  Without that, the
+C<unpack("U*", ...)> would work in C<U0> mode (the default if the format
+string starts with C<U>) and it would return the bytes making up the UTF-8
+encoding of the target string, something that will always work.
+
+=end original
+
+타당하지 않으면, C<Malformed UTF-8 character> 라는 경고가 나옵니다.
+"C0" 는 "문자열을 문자단위로 처리한다" 는 것을 의미합니다.
+그 이외에서는 C<unpack("U*", ...)> 은 (포맷 문자열이 C<U> 로 
+시작하는 경우의 기본값입니다)C<U0> 모드로 동작하고, 타겟 문자열인 
+UTF-8 인코딩으로 바이트 수를 반환하고, 이런 것은 항상 동작합니다.
+
+=item *
+
+=begin original
+
+How Do I Convert Binary Data Into a Particular Encoding, Or Vice Versa?
+
+=end original
+
+바이너리 데이터를 특정의 인코딩으로 변환하기 위해서는? 또, 그 반대는?
+
+=begin original
+
+This probably isn't as useful as you might think.
+Normally, you shouldn't need to.
+
+=end original
+
+아마 생각하기에는 유익하지 않을까요?
+보통은 필요하지는 않습니다.
+
+=begin original
+
+In one sense, what you are asking doesn't make much sense: encodings
+are for characters, and binary data are not "characters", so converting
+"data" into some encoding isn't meaningful unless you know in what
+character set and encoding the binary data is in, in which case it's
+not just binary data, now is it?
+
+=end original
+
+어떤 의미에서는 당신이 물어보고자 하는 것은 거의 의미는 없습니다:
+인코딩은 문자를 위한 것이고, 바이너리 데이터는 "문자"가 아니기 때문에,
+"데이터"를 어떤 인코딩으로 변환하는 것은 
+바이너리 데이터의 문자셋과 인코딩을 알지 못하는 한 의미가 없습니다;
+그리고 알고 있다면 그것은 단순한 바이너리데이터는 아니겠죠?
+
+=begin original
+
+If you have a raw sequence of bytes that you know should be
+interpreted via a particular encoding, you can use C<Encode>:
+
+=end original
+
+어느 인코딩으로 해석되어야 하는가 알고 있는 raw bytes 가 있는 경우, 
+C<Encode> 를 사용할 수 있습니다:
+
+    use Encode 'from_to';
+    from_to($data, "iso-8859-1", "utf-8"); # from latin-1 to utf-8
+
+=begin original
+
+The call to C<from_to()> changes the bytes in C<$data>, but nothing
+material about the nature of the string has changed as far as Perl is
+concerned.  Both before and after the call, the string C<$data>
+contains just a bunch of 8-bit bytes. As far as Perl is concerned,
+the encoding of the string remains as "system-native 8-bit bytes".
+
+=end original
+
+C<from_to()> 의 호출은 C<$data> 의 바이트열을 변경하지만, Perl 이 
+관여하는 한 문자열의 성질은 아무것도 바뀌지 않습니다.
+호출 전후의 양쪽에서 문자열 C<$data> 는 단순히 8비트 바이트 덩어리입니다.
+Perl 이 관여하는 한, 문자열의 인코딩은 
+"시스템에 네이티브한 8비트의 바이트열"일 뿐입니다.
+
+=begin original
+
+You might relate this to a fictional 'Translate' module:
+
+=end original
+
+이것은 가공의 'Translate' 모듈과 관련지을 수도 있습니다:
+
+   use Translate;
+   my $phrase = "Yes";
+   Translate::from_to($phrase, 'english', 'deutsch');
+   ## phrase now contains "Ja"
+
+=begin original
+
+The contents of the string changes, but not the nature of the string.
+Perl doesn't know any more after the call than before that the
+contents of the string indicates the affirmative.
+
+=end original
+
+문자열의 내용은 바뀌지만, 문자열의 성질은 바뀌지 않스비다.
+Perl 은 문자열의 내용이 배정을 의미하는 호출 이전의 상태보다 많고, 
+호출에 의해 뭔가를 알 수는 없습니다. 
+
+=begin original
+
+Back to converting data.  If you have (or want) data in your system's
+native 8-bit encoding (e.g. Latin-1, EBCDIC, etc.), you can use
+pack/unpack to convert to/from Unicode.
+
+=end original
+
+데이터의 변환으로 돌아갑니다.
+만약 시스템의 네이티브한 8비트 인코딩(예를들어, Latin-1, EBCDIC 등)의 
+데이터를 가지고 있는(혹은 원하는) 경우는, Unicode 로의 변환에 
+pack/unpack 을 사용할 수 있습니다.
+
+    $native_string  = pack("W*", unpack("U*", $Unicode_string));
+    $Unicode_string = pack("U*", unpack("W*", $native_string));
+
+=begin original
+
+If you have a sequence of bytes you B<know> is valid UTF-8,
+but Perl doesn't know it yet, you can make Perl a believer, too:
+
+=end original
+
+당신은 바이트열이 타당한 UTF-8 이라고 B<알고 있어도>,  Perl 이 
+알지 못하는 경우, Perl 에 알려 줄 수 있습니다.
+
+    use Encode 'decode_utf8';
+    $Unicode = decode_utf8($bytes);
+
+=begin original
+
+or:
+
+=end original
+
+또는:
+
+    $Unicode = pack("U0a*", $bytes);
+
+=begin original
+
+You can convert well-formed UTF-8 to a sequence of bytes, but if
+you just want to convert random binary data into UTF-8, you can't.
+B<Any random collection of bytes isn't well-formed UTF-8>.  You can
+use C<unpack("C*", $string)> for the former, and you can create
+well-formed Unicode data by C<pack("U*", 0xff, ...)>.
+
+=end original
+
+정형된 UTF-8 바이트열로 변환할 수 있지만, 단순히 랜덤한 바이너리 데이터를 
+UTF-8 으로 변환하고 싶다면, 그것은 불가능합니다.
+B<모든 랜덤한 바이트열이 정형된 UTF-8 로 되지 않습니다>.
+전자를 위해서는 C<unpack("C*", $string)> 을 사용할 수 있고,
+C<pack("U", 0xff, ...)> 을 사용해서 정형된 Unicode 데이터를 사용할 수 있습니다.
+
+=item *
+
+=begin original
+
+How Do I Display Unicode?  How Do I Input Unicode?
+
+=end original
+
+Unicode 를 어떻게 표시하는지? Unicode 를 어떻게 입력하는지?
+
+=begin original
+
+See http://www.alanwood.net/unicode/ and
+http://www.cl.cam.ac.uk/~mgk25/unicode.html
+
+=end original
+
+http://www.alanwood.net/unicode/ 과
+http://www.cl.cam.ac.uk/~mgk25/unicode.html 을 참조해주세요.
+
+=item *
+
+=begin original
+
+How Does Unicode Work With Traditional Locales?
+
+=end original
+
+전통적인 로케일과 Unicode 는 어떻게 움직이는가요?
+
+=begin original
+
+In Perl, not very well.  Avoid using locales through the C<locale>
+pragma.  Use only one or the other.  But see L<perlrun> for the
+description of the C<-C> switch and its environment counterpart,
+C<$ENV{PERL_UNICODE}> to see how to enable various Unicode features,
+for example by using locale settings.
+
+=end original
+
+Perl 에서는 그다지 잘 되지 않습니다.
+C<locale> 프라그마에서 로케일을 사용하는 것을 자제하세요.
+어느쪽이ㄴ 한쪽만을 사용해주세요.
+그러나 C<-C> 스위치와 그것에 대응하는 환경변수인 
+C<$ENV{PERL_UNICODE}> 의 설명을 위해 L<perlrun> 을 참조해주세요;
+여러가지 Unicode 기능이 어떻게 가능하게 되는 가는
+로케일의 설정에 따라서 알 수 있습니다.
+
+=back
+
+=head2 Hexadecimal Notation
+
+(16진 표기법)
+
+=begin original
+
+The Unicode standard prefers using hexadecimal notation because
+that more clearly shows the division of Unicode into blocks of 256 characters.
+Hexadecimal is also simply shorter than decimal.  You can use decimal
+notation, too, but learning to use hexadecimal just makes life easier
+with the Unicode standard.  The C<U+HHHH> notation uses hexadecimal,
+for example.
+
+=end original
+
+Unicode 표준은 16진수 표기법을 사용하는 것을 선호합니다.
+그것은 256 문자의 블록에 Unicode 를 분할하는 것이지만, 
+다른 표기보다 알기 쉽기 때문입니다.
+10진수 표기법을 사용할 수 있지만, 16진수 표기법을 사용하는 것을 
+배우면, Unicode 표준과의 생활이 편해집니다.
+예를들면 C<U+HHHH> 의 표기는 16진 표기법을 사용합니다.
+
+=begin original
+
+The C<0x> prefix means a hexadecimal number, the digits are 0-9 I<and>
+a-f (or A-F, case doesn't matter).  Each hexadecimal digit represents
+four bits, or half a byte.  C<print 0x..., "\n"> will show a
+hexadecimal number in decimal, and C<printf "%x\n", $decimal> will
+show a decimal number in hexadecimal.  If you have just the
+"hex digits" of a hexadecimal number, you can use the C<hex()> function.
+
+=end original
+
+C<0x> 접두사는 16진수를 의미하고 있습니다.
+숫자는 0-9 I<및> a-f(나, A-F 대문자 소문자를 불문하고) 입니다.
+각각의 16진수는 4비트 1/2 바이트를 나타냅니다.
+C<print 0x..., "\n"> 는 16진수를 10진수로 나타냅니다.
+"hex digits" 의 16진수가 있다면, C<hex()> 함수를 사용할 수 있습니다.
+
+    print 0x0009, "\n";    # 9
+    print 0x000a, "\n";    # 10
+    print 0x000f, "\n";    # 15
+    print 0x0010, "\n";    # 16
+    print 0x0011, "\n";    # 17
+    print 0x0100, "\n";    # 256
+
+    print 0x0041, "\n";    # 65
+
+    printf "%x\n",  65;    # 41
+    printf "%#x\n", 65;    # 0x41
+
+    print hex("41"), "\n"; # 65
+
+=head2 Further Resources
+
+(여러가 리소스들)
+
+=over 4
+
+=item *
+
+Unicode Consortium
+
+http://www.unicode.org/
+
+=item *
+
+Unicode FAQ
+
+http://www.unicode.org/unicode/faq/
+
+=item *
+
+Unicode Glossary
+
+http://www.unicode.org/glossary/
+
+=item *
+
+Unicode Useful Resources
+
+http://www.unicode.org/unicode/onlinedat/resources.html
+
+=item *
+
+Unicode and Multilingual Support in HTML, Fonts, Web Browsers and Other Applications
+
+http://www.alanwood.net/unicode/
+
+=item *
+
+UTF-8 and Unicode FAQ for Unix/Linux
+
+http://www.cl.cam.ac.uk/~mgk25/unicode.html
+
+=item *
+
+Legacy Character Sets
+
+http://www.czyborra.com/
+http://www.eki.ee/letter/
+
+=item *
+
+=begin original
+
+The Unicode support files live within the Perl installation in the
+directory
+
+=end original
+
+Unicode 지원 파일은 Perl 을 인스톨한 디렉토리 안에 있습니다;
+
+    $Config{installprivlib}/unicore
+
+=begin original
+
+in Perl 5.8.0 or newer, and
+
+=end original
+
+Perl 5.8.0 이상에서는 여기입니다;
+
+    $Config{installprivlib}/unicode
+
+=begin original
+
+in the Perl 5.6 series.  (The renaming to F<lib/unicore> was done to
+avoid naming conflicts with lib/Unicode in case-insensitive filesystems.)
+The main Unicode data file is F<UnicodeData.txt> (or F<Unicode.301> in
+Perl 5.6.1.)  You can find the C<$Config{installprivlib}> by
+
+=end original
+
+Perl 5.6 시리즈에서는 여기입니다.
+(대문자소문자를 구별하지 안흔ㄴ 파일시스템에서는 lib/Unicode 와의 이름의 
+충돌을 피하기 위해서 F<lib/unicore> 로 이름이 바꿔졌습니다)
+메인 Unicode 데이터 파일은 F<UnicodeData.txt>( 나, Perl 5.6.1 의 
+F<Unicode.301>) 이ㅂ니다.
+다음처럼 해서 C<$Config{installprivlib}> 를 발견할 수 있습니다.
+
+    perl "-V:installprivlib"
+
+=begin original
+
+You can explore various information from the Unicode data files using
+the C<Unicode::UCD> module.
+
+=end original
+
+C<Unicode::UCD> 모듈을 사용해서, Unicode 데이터 파일에서 
+여러가지 정보를 조사할 수 있습니다.
+
+=back
+
+=head1 UNICODE IN OLDER PERLS
+
+(옛날 Perl 에서의 Unicode)
+
+=begin original
+
+If you cannot upgrade your Perl to 5.8.0 or later, you can still
+do some Unicode processing by using the modules C<Unicode::String>,
+C<Unicode::Map8>, and C<Unicode::Map>, available from CPAN.
+If you have the GNU recode installed, you can also use the
+Perl front-end C<Convert::Recode> for character conversions.
+
+=end original
+
+Perl 5.8.0 이후로 업그레이드 할 수 없어도, 아직, CPAN 에서 이용할 수 있는
+C<Unicode::String>, C<Unicode::Mmap8>, C<bUnicode::Map> 을 사용해서, 
+몇가지 Unicode 처리를 할 수 있습니다.
+GNU recode 가 인스톨 되어 있다면, 그것의 Perl 프론트엔드인 
+C<Convert::Recode> 를 문자변환하기 위해 사용할 수 있습니다.
+
+=begin original
+
+The following are fast conversions from ISO 8859-1 (Latin-1) bytes
+to UTF-8 bytes and back, the code works even with older Perl 5 versions.
+
+=end original
+
+아래의 것은 ISO 8859-1 (Latin-1) 바이트열에서 UTF-8 바이트열로 
+(혹은 그 반대로) 빠르게 변환하는 것입니다.
+이 코드는 옛날 Perl 5 에서도 움직입니다.
+
+    # ISO 8859-1 to UTF-8
+    s/([\x80-\xFF])/chr(0xC0|ord($1)>>6).chr(0x80|ord($1)&0x3F)/eg;
+
+    # UTF-8 to ISO 8859-1
+    s/([\xC2\xC3])([\x80-\xBF])/chr(ord($1)<<6&0xC0|ord($2)&0x3F)/eg;
+
+=head1 SEE ALSO
+
+L<perlunitut>, L<perlunicode>, L<Encode>, L<open>, L<utf8>, L<bytes>,
+L<perlretut>, L<perlrun>, L<Unicode::Collate>, L<Unicode::Normalize>,
+L<Unicode::UCD>
+
+=head1 ACKNOWLEDGMENTS
+
+Thanks to the kind readers of the perl5-porters@perl.org,
+perl-unicode@perl.org, linux-utf8@nl.linux.org, and unicore@unicode.org
+mailing lists for their valuable feedback.
+
+=head1 AUTHOR, COPYRIGHT, AND LICENSE
+
+Copyright 2001-2002 Jarkko Hietaniemi E<lt>jhi@iki.fiE<gt>
+
+This document may be distributed under the same terms as Perl itself.
+

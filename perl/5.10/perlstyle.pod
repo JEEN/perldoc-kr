@@ -1,0 +1,715 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perlstyle - Perl style guide
+
+=end original
+
+perlstyle - Perl 스타일 가이드
+
+=head1 DESCRIPTION
+
+=begin original
+
+Each programmer will, of course, have his or her own preferences in
+regards to formatting, but there are some general guidelines that will
+make your programs easier to read, understand, and maintain.
+
+=end original
+
+프로그래머는 물론 사람마다 좋아하는 포맷이 있을 겁니다.
+그러나 몇 가지의 가이드라인에 따르는 것에 의해 프로그램의 가독성이나 
+보수성을 높일 수 있습니다.
+
+=begin original
+
+The most important thing is to run your programs under the B<-w>
+flag at all times.  You may turn it off explicitly for particular
+portions of code via the C<no warnings> pragma or the C<$^W> variable
+if you must.  You should also always run under C<use strict> or know the
+reason why not.  The C<use sigtrap> and even C<use diagnostics> pragmas
+may also prove useful.
+
+=end original
+
+더욱 중요한 것은 항상 프로그램을 B<-w> 플래그를 붙여서 움직이는 것입니다.
+필요하다면 C<no warnings> 프라그마나 C<$^W> 변수를 사용해서 코의 
+일부만으로 경고를 명시적으로 끌 수 있습니다.
+또, 항상 C<use strict> 를 사용해야 합니다.
+만약  C<use strict> 를 사용하지 않으면 그 이유를 충분히 이해해두어야 합니다.
+C<use sigtrap> 이나 C<use diagnostics> 프라그마도 편리합니다.
+
+=begin original
+
+Regarding aesthetics of code lay out, about the only thing Larry
+cares strongly about is that the closing curly bracket of
+a multi-line BLOCK should line up with the keyword that started the construct.
+Beyond that, he has other preferences that aren't so strong:
+
+=end original
+
+코드레이아웃의 미관에 관해서는 Larry 가 강하게 주의를 기울이는 단 하나,
+여러줄의 BLOCK을 닫는 중괄호는 그 구조를 개시한 키워드와 같은 위치에 
+없어서는 안된다는 것 뿐입니다.
+그것은 별도로 하고, 그렇게 강하지 않은 그의 취향은 아래와 같습니다.
+
+=over 4
+
+=item *
+
+=begin original
+
+4-column indent.
+
+=end original
+
+4 칼럼의 인덴트.
+
+=item *
+
+=begin original
+
+Opening curly on same line as keyword, if possible, otherwise line up.
+
+=end original
+
+가능하다면, 시작 중괄호와 키워드를 같은 줄에.
+그렇지 않으면 시작을 같은 줄에.
+
+=item *
+
+=begin original
+
+Space before the opening curly of a multi-line BLOCK.
+
+=end original
+
+여러줄의 BLOCK 의 시작 중괄호 앞에 스페이스.
+
+=item *
+
+=begin original
+
+One-line BLOCK may be put on one line, including curlies.
+
+=end original
+
+1 줄의 BLOCK 은 중괄호도 포함해서 1줄로.
+
+=item *
+
+=begin original
+
+No space before the semicolon.
+
+=end original
+
+세미콜론의 앞에 공백앞음.
+
+=item *
+
+=begin original
+
+Semicolon omitted in "short" one-line BLOCK.
+
+=end original
+
+"짧은" 1줄의 블록에서는 세미콜론을 생략.
+
+=item *
+
+=begin original
+
+Space around most operators.
+
+=end original
+
+대부분의 연산자의 앞뒤에 스페이스.
+
+=item *
+
+=begin original
+
+Space around a "complex" subscript (inside brackets).
+
+=end original
+
+"복잡한" 대입(브라켓 안)의 앞뒤에는 스페이스.
+
+=item *
+
+=begin original
+
+Blank lines between chunks that do different things.
+
+=end original
+
+다른 일을 하는 청크의 사이에는 빈 줄.
+
+=item *
+
+=begin original
+
+Uncuddled elses.
+
+=end original
+
+else 를 붙이지 않는다.
+
+=item *
+
+=begin original
+
+No space between function name and its opening parenthesis.
+
+=end original
+
+함수이름과 시작 괄호의 사이에는 스페이스 없음.
+
+=item *
+
+=begin original
+
+Space after each comma.
+
+=end original
+
+콤마의 뒤에는 스페이스.
+
+=item *
+
+=begin original
+
+Long lines broken after an operator (except C<and> and C<or>).
+
+=end original
+
+긴 줄은 연산자의 뒤에서 줄바꿈한다(C<and> 와 C<or> 를 빼고).
+
+=item *
+
+=begin original
+
+Space after last parenthesis matching on current line.
+
+=end original
+
+줄의 마지막의 괄호의 뒤에 스페이스.
+
+=item *
+
+=begin original
+
+Line up corresponding items vertically.
+
+=end original
+
+대응하는 요소의 시작위치를 세운다.
+
+=item *
+
+=begin original
+
+Omit redundant punctuation as long as clarity doesn't suffer.
+
+=end original
+
+장황한 표현은 이해하기 어렵지 않는 한 생략.
+
+=back
+
+=begin original
+
+Larry has his reasons for each of these things, but he doesn't claim that
+everyone else's mind works the same as his does.
+
+=end original
+
+Larry 에게는 이것들 각각을 선호하는 이유가 있습니다만, 그 이외의 사람이 
+이것과 완전 같을 필요는 없다고 말합니다.
+
+=begin original
+
+Here are some other more substantive style issues to think about:
+
+=end original
+
+다른 보다 중요한 스타일의 문제가 있습니다:
+
+=over 4
+
+=item *
+
+=begin original
+
+Just because you I<CAN> do something a particular way doesn't mean that
+you I<SHOULD> do it that way.  Perl is designed to give you several
+ways to do anything, so consider picking the most readable one.  For
+instance
+
+=end original
+
+뭔가를 어떤 방법으로 I<할수있다>고 해서 그렇게 I<해야하는> 것은 아닙니다.
+Perl 은 하나의 일을 여러가지 방법으로 할 수 있도록 설계되어 있기 때문에,
+보다 자세히 예를 들면.
+
+    open(FOO,$foo) || die "Can't open $foo: $!";
+
+=begin original
+
+is better than
+
+=end original
+
+이라는 것은 아래처럼 해도 됩니다.
+
+    die "Can't open $foo: $!" unless open(FOO,$foo);
+
+=begin original
+
+because the second way hides the main point of the statement in a
+modifier.  On the other hand
+
+=end original
+
+왜냐면 2번째줄에서는 이 구문의 주요부분이 수식자에 숨어버리기 때문입니다.
+거꾸로,
+
+    print "Starting analysis\n" if $verbose;
+
+=begin original
+
+is better than
+
+=end original
+
+라는 것은 아래보다 좋습니다:
+
+    $verbose && print "Starting analysis\n";
+
+=begin original
+
+because the main point isn't whether the user typed B<-v> or not.
+
+=end original
+
+이 구문의 주요부분은 유저가 B<-v> 를 타이핑했느냐 어쨌느냐가 아니기 때문입니다.
+
+=begin original
+
+Similarly, just because an operator lets you assume default arguments
+doesn't mean that you have to make use of the defaults.  The defaults
+are there for lazy systems programmers writing one-shot programs.  If
+you want your program to be readable, consider supplying the argument.
+
+=end original
+
+이처럼 어떤 연산자가 기본 인수를 상정하고 있다고 해서, 그 기본값을 
+사용하지 않는 것은 아닙니.
+이 기본값이 있는 것은 게으른 시스템 프로그래머가 한방의 프로그램을 
+쓰기 위해 있습니다.
+프로그램을 읽기 쉽게하기에는 인수를 생략하지 않도록 합시다.
+
+=begin original
+
+Along the same lines, just because you I<CAN> omit parentheses in many
+places doesn't mean that you ought to:
+
+=end original
+
+이처럼 많은 장소에서 괄호를 생략 I<할 수 있습니다>만, 아래처럼 
+너무 생략하는 것은 의미하는 바를 모르게 됩니다.
+
+    return print reverse sort num values %array;
+    return print(reverse(sort num (values(%array))));
+
+=begin original
+
+When in doubt, parenthesize.  At the very least it will let some poor
+schmuck bounce on the % key in B<vi>.
+
+=end original
+
+의심스러울 때는 괄호를 써 주세요.
+적어도, 잘못된 부분은 B<vi> 의 % 키로 하이라이트할 수 있습니다.
+
+=begin original
+
+Even if you aren't in doubt, consider the mental welfare of the person
+who has to maintain the code after you, and who will probably put
+parentheses in the wrong place.
+
+=end original
+
+의심이 들지 않을 때도 나중에 그 코드를 유지보수하는 사람의 생활을 생각해주세요.
+잘못된 부분에 괄호를 넣어버릴지도 모릅니다.
+
+=item *
+
+=begin original
+
+Don't go through silly contortions to exit a loop at the top or the
+bottom, when Perl provides the C<last> operator so you can exit in
+the middle.  Just "outdent" it a little to make it more visible:
+
+=end original
+
+루프의 맨앞이랑 ë끝에서 뽑아낸 것에 이상한 코드를 쓰지 마세요.
+Perl 에는 C<last> 연산자가 있기때문에 도중에 빠져나올 수가 있습니다.
+조금만 읽기 쉽게하려면 "아웃덴트" 합니다:
+
+    LINE:
+	for (;;) {
+	    statements;
+	  last LINE if $foo;
+	    next LINE if /^#/;
+	    statements;
+	}
+
+=item *
+
+=begin original
+
+Don't be afraid to use loop labels--they're there to enhance
+readability as well as to allow multilevel loop breaks.  See the
+previous example.
+
+=end original
+
+루프의 라벨은 적극적으로 사용합시다 -- 가능성을 주는 것과 함께, 여러 계층의
+루프 이탈도 가능하게 됩니다.
+앞의 예를 봐주세요.
+
+=item *
+
+=begin original
+
+Avoid using C<grep()> (or C<map()>) or `backticks` in a void context, that is,
+when you just throw away their return values.  Those functions all
+have return values, so use them.  Otherwise use a C<foreach()> loop or
+the C<system()> function instead.
+
+=end original
+
+C<grep()> (나 C<map()>) 또 '역따옴표' 를 무효컨텍스트, 즉 반환값을 
+무시하는 구문에서 사용하지 마세요.
+이 함수들은 모든 반환값을 가지고 있기 때문에, 그것을 사용해주세요.
+필요없다면, C<foreac()> 루프나 C<system()> 함수를 사용해주세요.
+
+=item *
+
+=begin original
+
+For portability, when using features that may not be implemented on
+every machine, test the construct in an eval to see if it fails.  If
+you know what version or patchlevel a particular feature was
+implemented, you can test C<$]> (C<$PERL_VERSION> in C<English>) to see if it
+will be there.  The C<Config> module will also let you interrogate values
+determined by the B<Configure> program when Perl was installed.
+
+=end original
+
+포터빌리티를 위해 모든 머신에서 구성되어 있지 않을 지도 모르는 기능을 
+사용할 때는 그것을 eval 로 감싸고, 실패할 지 어떨지를 체크해주세요.
+어떤 기능이 어떤 버젼이랑 패치레벨에서 구성되어 있는 지 알고 있는 경우에는 
+C<$]> (C<English> 모듈에서는 C<$PERL_VERSION>) 을 체크할 수도 있습니다.
+C<Config> 모듈을 사용하면, Perl 설치 시의 C<Configure> 프로그램에의해
+지정된 값을 조사할 수 있습니다.
+
+=item *
+
+=begin original
+
+Choose mnemonic identifiers.  If you can't remember what mnemonic means,
+you've got a problem.
+
+=end original
+
+mnemonic 한 식별자를 골라주세요.
+이 mnemonic이 무엇을 의미하는 가 생각나지 않는 다면 문제입니다.
+
+=item *
+
+=begin original
+
+While short identifiers like C<$gotit> are probably ok, use underscores to
+separate words in longer identifiers.  It is generally easier to read
+C<$var_names_like_this> than C<$VarNamesLikeThis>, especially for
+non-native speakers of English. It's also a simple rule that works
+consistently with C<VAR_NAMES_LIKE_THIS>.
+
+=end original
+
+C<$gotit> 같은 ㅉ랍은 식별자라면 ok 입니다만 in longer identifiers 단어를
+구분하기에는 언더바를 사용해주세요.
+일반적으로 특히 영어의 네이티브 스피커가 아닌 사람에게는 C<$var_names_like_this> 쪽이 C<$VarNamesLikeThis> 보다 읽기 쉽습니다.
+이 룰은 C<VAR_NAMES_LIKE_THIS> 에 대해서도 똑같이 해당됩니다.
+
+=begin original
+
+Package names are sometimes an exception to this rule.  Perl informally
+reserves lowercase module names for "pragma" modules like C<integer> and
+C<strict>.  Other modules should begin with a capital letter and use mixed
+case, but probably without underscores due to limitations in primitive
+file systems' representations of module names as files that must fit into a
+few sparse bytes.
+
+=end original
+
+패키지이름은 이 룰의 예외가 될 수 있습니다.
+Perl 은 소문자의 모듈이름을 C<integer> 나 C<strict> 같은 "프라그마" 모듈을 
+위해 예약하고 있습니다.
+그 외의 모듈은 대문자로 시작해서 소문자를 섞어서 써야하지만,
+언더바는 사용하지 않습니다.
+프리미티브한 파일 시스템에서는 모듈이름을 파일로써 표현할 때에는 
+바이트 수의 제한이 있기 때문입니다.
+
+=item *
+
+=begin original
+
+You may find it helpful to use letter case to indicate the scope
+or nature of a variable. For example:
+
+=end original
+
+변수의 영역이나 성질을 표현하는 것에 대문자소문자를 사용하면 편리할 겁니다.
+예를들면:
+
+=begin original
+
+    $ALL_CAPS_HERE   constants only (beware clashes with perl vars!)
+    $Some_Caps_Here  package-wide global/static
+    $no_caps_here    function scope my() or local() variables
+
+=end original
+
+    $ALL_CAPS_HERE   변수만 (perl 변수와의 충돌에 주의!)
+    $Some_Caps_Here  패키지와이드한 글로벌/스태틱 변수
+    $no_caps_here    함수 영역의 my(), local() 변수 
+
+=begin original
+
+Function and method names seem to work best as all lowercase.
+E.g., C<$obj-E<gt>as_string()>.
+
+=end original
+
+함수와 메소드의 이름은 모두 소문자인 것이 최고입니다.
+예를들면 C<$obj-E<gt>as_string()>.
+
+=begin original
+
+You can use a leading underscore to indicate that a variable or
+function should not be used outside the package that defined it.
+
+=end original
+
+맨 앞에 언더바를 붙이는 것에 의해 변수나 함수를 정의한 패키지 밖에서 
+사용해야하는 것이 아닌 것을 정의할 수 있습니다.
+
+=item *
+
+=begin original
+
+If you have a really hairy regular expression, use the C</x> modifier and
+put in some whitespace to make it look a little less like line noise.
+Don't use slash as a delimiter when your regexp has slashes or backslashes.
+
+=end original
+
+정말로 엉망인 정규표현을 사용할 경우에는 C</x> 수식자를 사용해서 
+스페이스를 넣고, 쓰레기처럼 보이지 않도록 해주세요.
+정규표현에 슬래쉬나 백슬래쉬가 있을 때에는 딜리미터에 슬ㅐ쉬를 
+사용하지 않도록 해주세요.
+
+=item *
+
+=begin original
+
+Use the new C<and> and C<or> operators to avoid having to parenthesize
+list operators so much, and to reduce the incidence of punctuation
+operators like C<&&> and C<||>.  Call your subroutines as if they were
+functions or list operators to avoid excessive ampersands and parentheses.
+
+=end original
+
+새로운 C<and> 와 C<or> 연산자를 사용해서, 리스트 연산자의 괄호가 많아지거나
+C<&&> 나 C<||> 가 대량으로 발생하는 것을 피해주세요.
+서브루틴은 함수나 리스트 연산자인 것처럼 다루고, 앰퍼센트나 괄호가 
+대량발생하는 것을 피해주세요.
+
+=item *
+
+=begin original
+
+Use here documents instead of repeated C<print()> statements.
+
+=end original
+
+C<print()> 문을 반복하지 않고, here document 를 사용해주세요.
+
+=item *
+
+=begin original
+
+Line up corresponding things vertically, especially if it'd be too long
+to fit on one line anyway.
+
+=end original
+
+대응하는 부분의 개시위치는 정리해주세요. 특히 한줄에 한줄에 장황하게 늘어놓는 것.
+
+    $IDX = $ST_MTIME;
+    $IDX = $ST_ATIME 	   if $opt_u;
+    $IDX = $ST_CTIME 	   if $opt_c;
+    $IDX = $ST_SIZE  	   if $opt_s;
+
+    mkdir $tmpdir, 0700	or die "can't mkdir $tmpdir: $!";
+    chdir($tmpdir)      or die "can't chdir $tmpdir: $!";
+    mkdir 'tmp',   0777	or die "can't mkdir $tmpdir/tmp: $!";
+
+=item *
+
+=begin original
+
+Always check the return codes of system calls.  Good error messages should
+go to C<STDERR>, include which program caused the problem, what the failed
+system call and arguments were, and (VERY IMPORTANT) should contain the
+standard system error message for what went wrong.  Here's a simple but
+sufficient example:
+
+=end original
+
+시스템 호출의 반환 코드는 항상 체크해주세요.
+좋은 에러 메시지는 C<STDERR> 에 써내고, 문제를 발생시키는 프로그램이름이나 
+실패한 시스템 호출과 인수, 그리고 (매우 중요) 표준 시스템 에러 메시지를 
+포함해야 합니다.
+아래는 심플하지만 충분한 예제입니다:
+
+    opendir(D, $dir)	 or die "can't opendir $dir: $!";
+
+=item *
+
+=begin original
+
+Line up your transliterations when it makes sense:
+
+=end original
+
+보기 쉬울 경우에는 tr 의 개시위치를 정리해주세요.
+
+    tr [abc]
+       [xyz];
+
+=item *
+
+=begin original
+
+Think about reusability.  Why waste brainpower on a one-shot when you
+might want to do something like it again?  Consider generalizing your
+code.  Consider writing a module or object class.  Consider making your
+code run cleanly with C<use strict> and C<use warnings> (or B<-w>) in
+effect.  Consider giving away your code.  Consider changing your whole
+world view.  Consider... oh, never mind.
+
+=end original
+
+재이용성을 고려해봅시다.
+같은 것을 나중에 할지도 모를 때에, 뇌의 힘을 한방의 프로그램으로 
+쓸데없이 할 필요는 있을까요?
+코드의 일반화를 고려해서, 모듈이나 오브젝트 클래스를 쓰는 것을 고려합시다.
+코드가 C<use strict> 와 C<use warnings> (혹은 B<-w>) 가 유효하더라도 
+제대로 움직이는 가를 고려합시다.
+코드를 버리는 것도 고려합시다.
+세계를 보는 방법을 바꾸는 것을 생각해봅시다.
+다른 것도... 아. 뭐 괜찮습니다.
+
+=item *
+
+=begin original
+
+Try to document your code and use Pod formatting in a consistent way. Here
+are commonly expected conventions:
+
+=end original
+
+Try to document your code and use Pod formatting in a consistent way. Here
+are commonly expected conventions:
+(TBT)
+
+=over 4
+
+=item *
+
+=begin original
+
+use C<CE<lt>E<gt>> for function, variable and module names (and more
+generally anything that can be considered part of code, like filehandles
+or specific values). Note that function names are considered more readable
+with parentheses after their name, that is C<function()>.
+
+=end original
+
+use C<CE<lt>E<gt>> for function, variable and module names (and more
+generally anything that can be considered part of code, like filehandles
+or specific values). Note that function names are considered more readable
+with parentheses after their name, that is C<function()>.
+(TBT)
+
+=item *
+
+=begin original
+
+use C<BE<lt>E<gt>> for commands names like B<cat> or B<grep>.
+
+=end original
+
+use C<BE<lt>E<gt>> for commands names like B<cat> or B<grep>.
+(TBT)
+
+=item *
+
+=begin original
+
+use C<FE<lt>E<gt>> or C<CE<lt>E<gt>> for file names. C<FE<lt>E<gt>> should
+be the only Pod code for file names, but as most Pod formatters render it
+as italic, Unix and Windows paths with their slashes and backslashes may
+be less readable, and better rendered with C<CE<lt>E<gt>>.
+
+=end original
+
+use C<FE<lt>E<gt>> or C<CE<lt>E<gt>> for file names. C<FE<lt>E<gt>> should
+be the only Pod code for file names, but as most Pod formatters render it
+as italic, Unix and Windows paths with their slashes and backslashes may
+be less readable, and better rendered with C<CE<lt>E<gt>>.
+(TBT)
+
+=back
+
+=item *
+
+=begin original
+
+Be consistent.
+
+=end original
+
+항상 일관성을.
+
+=item *
+
+=begin original
+
+Be nice.
+
+=end original
+
+항상 훌륭하게.
+
+=back
+

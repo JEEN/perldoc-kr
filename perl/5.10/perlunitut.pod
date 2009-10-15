@@ -1,0 +1,508 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perlunitut - Perl Unicode Tutorial
+
+=end original
+
+perlunitut - Perl 에서의 Unicode 튜토리얼
+
+=head1 DESCRIPTION
+
+=begin original
+
+The days of just flinging strings around are over. It's well established that
+modern programs need to be capable of communicating funny accented letters, and
+things like euro symbols. This means that programmers need new habits. It's
+easy to program Unicode capable software, but it does require discipline to do
+it right.
+
+=end original
+
+문자열을 단순히 뽑아내는 나날은 끝났습니다.
+요즘 프로그램에서는 조금 다른 액센트를 붙인 문자나, 유로 마크 같은 것을 통신할 수 있도록 확립되었습니다.
+이것은 프로그래머에게 새로운 의마가 필요하다는 것을 의미합니다.
+Unicode지원 소프트웨어를 프로그램하는 것은 간단하지만, 그것을 바르게 수행하는 것은 훈련이 필요합니다.
+
+=begin original
+
+There's a lot to know about character sets, and text encodings. It's probably
+best to spend a full day learning all this, but the basics can be learned in
+minutes. 
+
+=end original
+
+문자집합과 텍스트 인코딩에 관해서는 배워야 할 것이 많이 있습니다.
+아마도 이 모든 것들을 배우는 것은 꼬박 하루를 써야되겠지만, 기본은 몇 분안으로 배울 수 있습니다.
+
+=begin original
+
+These are not the very basics, though. It is assumed that you already
+know the difference between bytes and characters, and realise (and accept!)
+that there are many different character sets and encodings, and that your
+program has to be explicit about them. Recommended reading is "The Absolute
+Minimum Every Software Developer Absolutely, Positively Must Know About Unicode
+and Character Sets (No Excuses!)" by Joel Spolsky, at
+L<http://joelonsoftware.com/articles/Unicode.html>.
+
+=end original
+
+그러나, 너무 기본적인 것은 아닙니다.
+당신이 이미 바이트와 문자의 차이를 알고 있고, 여러 문자집합과 인코딩이 있다는 것을 
+자각하고 있고(거기에 받아들이고 있고!),
+당신의 프로그램이 이것들을 명시적으로 할 필요가 있다 고 가정하고 있습니다.
+이에 관련해서 추천할 만한 컬럼이 Joel Spolsky 의
+"The Absolute
+Minimum Every Software Developer Absolutely, Positively Must Know About Unicode
+and Character Sets (No Excuses!)" 
+L<http://joelonsoftware.com/articles/Unicode.html> 입니다.
+
+=begin original
+
+This tutorial speaks in rather absolute terms, and provides only a limited view
+of the wealth of character string related features that Perl has to offer. For
+most projects, this information will probably suffice.
+
+=end original
+
+이 튜토리얼은 독립된 용어를 사용하고 있고, Perl 이 
+제공하는 풍부한 문자열에 관한 기능 중에 한정된 시선만을 다룹니다.
+대부분의 프로젝트에서는 아마도 이 정보만으로도 충분할 겁니다. 
+
+=head2 Definitions
+
+(정의)
+
+=begin original
+
+It's important to set a few things straight first. This is the most important
+part of this tutorial. This view may conflict with other information that you
+may have found on the web, but that's mostly because many sources are wrong.
+
+=end original
+
+우선 몇가지 명확하게 짚고 넘어가야 할 것이 있습니다.
+이것은 튜토리얼에서 가장 중요한 부분입ㄴ디ㅏ.
+이 생각은 당신이 Web 에서 발견한 다른 정보와 모순할지도 모르지만,
+대부분의 경우, 그것은 Web 에서 발견한 정보가 틀렸기 때문이라고 생각해주세요.
+
+=begin original
+
+You may have to re-read this entire section a few times...
+
+=end original
+
+이 섹션 전체를 몇번이나 다시 읽을 필요는 없습니다.
+
+=head3 Unicode
+
+=begin original
+
+B<Unicode> is a character set with room for lots of characters. The ordinal
+value of a character is called a B<code point>. 
+
+=end original
+
+B<Unicode> 는 대량의 문자를 표현할 ㅜ 있는 문자집합입니다.
+문자의 서수는 B<코드포인트> 라고 불립니다.
+
+=begin original
+
+There are many, many code points, but computers work with bytes, and a byte can
+have only 256 values. Unicode has many more characters, so you need a method
+to make these accessible.
+
+=end original
+
+코드 포인트는 정말 많이 있지만, 컴퓨터는 바이트단위로 움직이고, 
+바이트는 256 가지의 값만을 가집니다.
+Unicode 는 더욱 많은 문자를 가질 수 있기 때문에, 이것들에 접근할 수 있는 수법이 필요합니다.
+
+=begin original
+
+Unicode is encoded using several competing encodings, of which UTF-8 is the
+most used. In a Unicode encoding, multiple subsequent bytes can be used to
+store a single code point, or simply: character.
+
+=end original
+
+Unicode 는 몇가지 경합하는 인코딩을 사용해서 인코드되어 있고,
+UTF-8 이 제일 많이 사용되고 있습니다.
+Unicode 의 인코딩에서는 복수의 바이트열을 하나의 코드 포인트
+(혹은 단순히 "문자")를 보관하는 데 사용합니다.
+
+=head3 UTF-8
+
+=begin original
+
+B<UTF-8> is a Unicode encoding. Many people think that Unicode and UTF-8 are
+the same thing, but they're not. There are more Unicode encodings, but much of
+the world has standardized on UTF-8. 
+
+=end original
+
+B<UTF-8> 은 Unicode 인코딩입니다.
+많은 사람들은 Unicode 와 UTF-8 은 같은 것이라고 생각하지만, 다릅니다.
+Unicode 의 인코딩에는 다른 것도 있지만, 세계 대부분에서 표준으로 
+UTF-8 이 사용되고 있습니다.
+
+=begin original
+
+UTF-8 treats the first 128 codepoints, 0..127, the same as ASCII. They take
+only one byte per character. All other characters are encoded as two or more
+(up to six) bytes using a complex scheme. Fortunately, Perl handles this for
+us, so we don't have to worry about this.
+
+=end original
+
+UTF-8 는 최초의 128 코드포인트(0..127)을 ASCII 처럼 다룹니다.
+문자마다 1바이트만 소비합니다.
+그 외의 문자는 복잡한 구조를 사용해서 2 또는 그 이상(최대 6)의 바이트를 사용합니다.
+다행히, Perl 이 그 작업을 하기 때문에, 우리들이 그것에 대해서 걱정할 필요는 없습니다.
+
+=head3 Text strings (character strings)
+
+(텍스트문자열(문자의 문자열)
+
+=begin original
+
+B<Text strings>, or B<character strings> are made of characters. Bytes are
+irrelevant here, and so are encodings. Each character is just that: the
+character.
+
+=end original
+
+B<텍스트 문자열>、또는 B<문자의 문자열> 은 문자에서 비롯됩니다.
+바이트열은 여기에서는 의미없고, 인코딩이 있습니다.
+각 문자는 단순한 문자입니다.
+
+=begin original
+
+Text strings are also called B<Unicode strings>, because in Perl, every text
+string is a Unicode string.
+
+=end original
+
+텍스트 문자열은 B<Unicode 문자열> 이라고도 불립니다;
+왜냐면 Perl 에서는 텍스트 문자열은 Unicode 문자열이기 때문입니다.
+
+=begin original
+
+On a text string, you would do things like:
+
+=end original
+
+텍스트 문자열에서는 아래처럼 합니다.
+
+    $text =~ s/foo/bar/;
+    if ($string =~ /^\d+$/) { ... }
+    $text = ucfirst $text;
+    my $character_count = length $text;
+
+=begin original
+
+The value of a character (C<ord>, C<chr>) is the corresponding Unicode code
+point.
+
+=end original
+
+문자의 값 (C<ord>, C<chr>) 은 지원하는 Unicode 코드 포인트입니다.
+
+=head3 Binary strings (byte strings)
+
+(바이너리 문자열(바이트문자열))
+
+=begin original
+
+B<Binary strings>, or B<byte strings> are made of bytes. Here, you don't have
+characters, just bytes. All communication with the outside world (anything
+outside of your current Perl process) is done in binary.
+
+=end original
+
+B<바이너리 문자열>、또는 B<바이트문자여> 은 바이트에서 시작합니다.
+여기에서는 문자는 없고, 단순히 바이트만이 있습니다.
+바깥쪽의 세계(현재의 Perl 프로세스 바깥쪽의 모든 것)와의 통신은 바이너리로 움직입니다.
+
+=begin original
+
+On a binary string, you would do things like:
+
+=end original
+
+바이너리 문자열에서는 아래처럼 합니다.
+
+    my (@length_content) = unpack "(V/a)*", $binary;
+    $binary =~ s/\x00\x0F/\xFF\xF0/;  # for the brave :)
+    print {$fh} $binary;
+    my $byte_count = length $binary;
+
+=head3 Encoding
+
+(인코딩)
+
+=begin original
+
+B<Encoding> (as a verb) is the conversion from I<text> to I<binary>. To encode,
+you have to supply the target encoding, for example C<iso-8859-1> or C<UTF-8>.
+Some encodings, like the C<iso-8859> ("latin") range, do not support the full
+Unicode standard; characters that can't be represented are lost in the
+conversion.
+
+=end original
+
+B<인코딩> 은 I<텍스트> 에서 I<바이너리> 로의 변환입니다.
+인코딩하기 위해서는 C<iso-8859-1>이나 C<UTF-8>같은 인코드의 인코딩이 필요합니다.
+C<iso-8859>("latin")같은 일부의 인코딩은 Unicode 표준으로 완전히 지원하고 있지 않습니다.
+표현할 수 없는 문자는 변환시에 잃게 됩니다.
+
+=head3 Decoding
+
+(디코딩)
+
+=begin original
+
+B<Decoding> is the conversion from I<binary> to I<text>. To decode, you have to
+know what encoding was used during the encoding phase. And most of all, it must
+be something decodable. It doesn't make much sense to decode a PNG image into a
+text string.
+
+=end original
+
+B<디코딩> 은 I<바이너리> 에서 I<텍스트> 로의 변환입니다.
+디코딩하기 위해서는 인코딩 시에 사용된 인코딩이 뭔가를 알고 있어야할 필요가 있습니다.
+그리고 원래, 그것은 디코딩 가능할 필요가 있습니다.
+PNG 이미지를 텍스트 문자열로 디코딩해도 대부분 의미는 없습니다.
+
+=head3 Internal format
+
+(내부형식)
+
+=begin original
+
+Perl has an B<internal format>, an encoding that it uses to encode text strings
+so it can store them in memory. All text strings are in this internal format.
+In fact, text strings are never in any other format!
+
+=end original
+
+Perl 에는  B<내부형식> 이라고 불리는 텍스트 문자열을 메모리에 넣을 수 있도록 
+인코딩을 수행하기 위해 사용하는 인코딩이 있습니다.
+모든 텍스트 문자열은 이 내부형식이 됩니다.
+실제로, 텍스트문자열이 다른 형식이 되는 것은 절대로 없습니다.
+
+=begin original
+
+You shouldn't worry about what this format is, because conversion is
+automatically done when you decode or encode.
+
+=end original
+
+이 형식이 어떤 것인가를 궁금해할 필요는 없습니다;
+왜냐면 변환은 디코드나 인코드 시에 자동적으로 수행되기 때문입니다.
+
+=head2 Your new toolkit
+
+(새로운 툴킷)
+
+=begin original
+
+Add to your standard heading the following line:
+
+=end original
+
+당신의 표준 헤더에 아래의 줄을 추가했습니다:
+
+    use Encode qw(encode decode);
+
+=begin original
+
+Or, if you're lazy, just:
+
+=end original
+
+혹은 당신이 나태한 사람이라면 간단히 아래처럼 합니다:
+
+    use Encode;
+
+=head2 I/O flow (the actual 5 minute tutorial)
+
+(I/O 의 흐름(실제 5분간 튜토리얼))
+
+=begin original
+
+The typical input/output flow of a program is:
+
+=end original
+
+전형적인 프로그램의 입출력 흐름은 아래와 같습니다.
+
+=begin original
+
+    1. Receive and decode
+    2. Process
+    3. Encode and output
+
+=end original
+
+    1. 수신해서 디코드
+    2. 처리
+    3. 인코드해서 출력
+
+=begin original
+
+If your input is binary, and is supposed to remain binary, you shouldn't decode
+it to a text string, of course. But in all other cases, you should decode it.
+
+=end original
+
+만약 입력이 바이너리이고, 바이너리인채로 둘 필요가 있다면,
+이것을 텍스트 문자열로 디코드해야 하는 것은 아닙니다.
+그러나 그 이외의 모든 경우에서는 디코드해야합니다.
+
+=begin original
+
+Decoding can't happen reliably if you don't know how the data was encoded. If
+you get to choose, it's a good idea to standardize on UTF-8.
+
+=end original
+
+만약 데이터가 어떻게 인코드 되었는지 알 수 없을 경우라면, 
+디코드에는 신뢰성이 없습니다.
+만약 당신이 선택한 것이라면, UTF-8 으로 표준화하는 것은 좋은 생각입니다.
+
+    my $foo   = decode('UTF-8', get 'http://example.com/');
+    my $bar   = decode('ISO-8859-1', readline STDIN);
+    my $xyzzy = decode('Windows-1251', $cgi->param('foo'));
+
+=begin original
+
+Processing happens as you knew before. The only difference is that you're now
+using characters instead of bytes. That's very useful if you use things like
+C<substr>, or C<length>.
+
+=end original
+
+처리는 지금까지 하던대로 수행합니다.
+유일한 차이점은 바이트가 아닌 문자를 사용하는 것입니다.
+이것은 C<substr>이나 C<length> 같은 것을 사용할 때에 매우 편리합니다.
+
+=begin original
+
+It's important to realize that there are no bytes in a text string. Of course,
+Perl has its internal encoding to store the string in memory, but ignore that.
+If you have to do anything with the number of bytes, it's probably best to move
+that part to step 3, just after you've encoded the string. Then you know
+exactly how many bytes it will be in the destination string.
+
+=end original
+
+텍스트 문자열에는 바이트 열은 없다는 것을 자각하는 것이 중요합니다.
+물론 Perl 은 문자열을 메모리에 보관하기 위한 내부형식을 사용하지만,
+이것은 무시해주세요.
+만약 바이트수로 다루는 어떤 일을 할 필요가 있다면, 아마도 그 부분을 스텝 3의 
+문자열을 인코드한 직후에 옮기는 것이 제일 좋습니다.
+거기에서 목적한 문자열이 몇 바이트가 되는 지를 정화갛게 알 수 있습니다.
+
+=begin original
+
+The syntax for encoding text strings to binary strings is as simple as decoding:
+
+=end original
+
+텍스트 문자열을 바이너리 문자열로 하기 위한 문법은 디코드 때와 마찬가지로 
+단순합니다.
+
+    $body = encode('UTF-8', $body);
+
+=begin original
+
+If you needed to know the length of the string in bytes, now's the perfect time
+for that. Because C<$body> is now a byte string, C<length> will report the
+number of bytes, instead of the number of characters. The number of
+characters is no longer known, because characters only exist in text strings.
+
+=end original
+
+만약 문자열의 바이트 수가 필요하다면, 지금이 그것을 할 가장 좋은 타이밍입니다.
+왜냐면 C<$body> 는 바이트 문자열이기 때문에, C<length>는 문자열이 아닌 
+바이트 수를 반환합니다.
+문자라는 것은 텍스트 문자열에서만 존재하기 때문에 더이상 문자수라는 것은 
+알 수 없어집니다.
+
+    my $byte_count = length $body;
+
+=begin original
+
+And if the protocol you're using supports a way of letting the recipient know
+which character encoding you used, please help the receiving end by using that
+feature! For example, E-mail and HTTP support MIME headers, so you can use the
+C<Content-Type> header. They can also have C<Content-Length> to indicate the
+number of I<bytes>, which is always a good idea to supply if the number is
+known.
+
+=end original
+
+그리고 만약 당신이 사용하고 있는 프로토콜이 당신이 사용한 인코딩을 상대에게 전달하는 
+방법을 지원하고 있다면, 그 기능을 사용해서 수신측을 도와주세요.
+예를들어, E-mail 과 HTTP 는 MIME 헤더를 지원하기 때문에,
+C<Content-Type> 헤더를 사용할 수 있습니다.
+I<바이트> 수를 나타내기 위한 C<Content-Length> 도 있기 때문에,
+만약 바이트 수를 알았다면, 이것을 붙이는 것은 좋은 생각입니다.
+
+    "Content-Type: text/plain; charset=UTF-8",
+    "Content-Length: $byte_count"
+
+=head1 SUMMARY
+
+(정리)
+
+=begin original
+
+Decode everything you receive, encode everything you send out. (If it's text
+data.)
+
+=end original
+
+(다루고 있는 것이 텍스트 데이터라면) 받아들인 모든 것을 디코드해서,
+내보낼 때 인코드합시다.
+
+=head1 Q and A (or FAQ)
+
+=begin original
+
+After reading this document, you ought to read L<perlunifaq> too. 
+
+=end original
+
+이 문서를 읽은 뒤 L<perlunifaq> 도 읽어야 합니다.
+
+=head1 ACKNOWLEDGEMENTS
+
+Thanks to Johan Vromans from Squirrel Consultancy. His UTF-8 rants during the
+Amsterdam Perl Mongers meetings got me interested and determined to find out
+how to use character encodings in Perl in ways that don't break easily.
+
+Thanks to Gerard Goossen from TTY. His presentation "UTF-8 in the wild" (Dutch
+Perl Workshop 2006) inspired me to publish my thoughts and write this tutorial.
+
+Thanks to the people who asked about this kind of stuff in several Perl IRC
+channels, and have constantly reminded me that a simpler explanation was
+needed.
+
+Thanks to the people who reviewed this document for me, before it went public.
+They are: Benjamin Smith, Jan-Pieter Cornet, Johan Vromans, Lukas Mai, Nathan
+Gray.
+
+=head1 AUTHOR
+
+Juerd Waalboer <#####@juerd.nl>
+
+=head1 SEE ALSO
+
+L<perlunifaq>, L<perlunicode>, L<perluniintro>, L<Encode>
+

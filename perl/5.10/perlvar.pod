@@ -1,0 +1,3929 @@
+
+=encoding utf8
+
+=head1 NAME
+
+=begin original
+
+perlvar - Perl predefined variables
+
+=end original
+
+perlvar - Perl “¿¡“¼­“ÀÇ “¹Ì“¸®“Á¤“ÀÇ“µÈ “º¯“¼ö 
+
+=head1 DESCRIPTION
+
+=head2 Predefined Names
+
+(“¹Ì“¸® “Á¤“ÀÇ“µÈ “º¯“¼ö)
+
+=begin original
+
+The following names have special meaning to Perl.  Most 
+punctuation names have reasonable mnemonics, or analogs in the
+shells.  Nevertheless, if you wish to use long variable names,
+you need only say
+
+=end original
+
+“¾Æ“·¡“ÀÇ “ÀÌ“¸§“Àº Perl “¿¡“¼­“´Â “Æ¯“º°“ÇÑ “ÀÇ“¹Ì“¸¦ “°¡“Áı“´Ï“´Ù.
+“±â“È£“Àû“ÀÎ “ÀÌ“¸§“ÀÇ “¸¹“Àº “±â“¾ï“¹ı“ÀÌ “ÀÖ“Áö“¸¸, “¼Ğ“¿¡“¼­“ÀÇ “À¯“Ãß“°¡ “°¡“´É“ÇÕ“´Ï“´Ù. 
+“±×“·¡“µµ “±ä “ÀÌ“¸§“À» “»ç“¿ë“ÇÏ“°í “½Í“Àº “°æ“¿ì“¿¡“´Â 
+
+    use English;
+
+=begin original
+
+at the top of your program. This aliases all the short names to the long
+names in the current package. Some even have medium names, generally
+borrowed from B<awk>. In general, it's best to use the
+
+=end original
+
+“¶ó“°í “ÇÁ“·Î“±×“·¥“ÀÇ “¸Ç “Ã³“À½“¿¡ “½á“ÁÖ“¼¼“¿ä.
+“ÀÌ“°Í“Àº “¸ğ“µç “Âª“Àº “ÀÌ“¸§“ÀÇ “º°“¸í“À¸“·Î“½á
+“ÃÖ“±Ù “ÆĞ“Å°“Áö“¿¡“¼­“ÀÇ “±ä “ÀÌ“¸§“À» “ºÙ“ÀÏ “¼ö “ÀÖ“½À“´Ï“´Ù.
+B<awk> “¿¡“¼­ “°¡“Áö“°í “¿Â “Áß“°£“Àû“ÀÎ “ÀÌ“¸§“À» “°¡“Áö“°í “ÀÖ“´Â “°Í“µµ “ÀÖ“½À“´Ï“´Ù.
+“ÀÏ“¹İ“Àû“À¸“·Î “Á¦“ÀÏ “ÁÁ“Àº “¹æ“¹ı“Àº:
+
+    use English '-no_match_vars';
+
+=begin original
+
+invocation if you don't need $PREMATCH, $MATCH, or $POSTMATCH, as it avoids
+a certain performance hit with the use of regular expressions. See
+L<English>.
+
+=end original
+
+invocation if you don't need $PREMATCH, $MATCH, or $POSTMATCH, as it avoids
+a certain performance hit with the use of regular expressions.
+L<English> “ªò‘²Î“ğÎ“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+(TBT)
+
+=begin original
+
+Variables that depend on the currently selected filehandle may be set by
+calling an appropriate object method on the IO::Handle object, although
+this is less efficient than using the regular built-in variables. (Summary
+lines below for this contain the word HANDLE.) First you must say
+
+=end original
+
+“Çö“Àç “¼±“ÅÃ“µÈ “ÆÄ“ÀÏ“ÇÚ“µé“¿¡ 
+“Á¸“Àç“ÇÏ“´Â “º¯“¼ö“ÀÎ “°æ“¿ì“¿¡“´Â “´ë“½Å“¿¡ IO::Handle “¿À“ºê“Á§“Æ®“¿¡ “°ü“ÇÑ 
+“¿À“ºê“Á§“Æ®“¸Ş“¼Ò“µå“¸¦ “È£“Ãâ“ÇØ“¼­ “¼³“Á¤“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù“¸¸, 
+“ÀÏ“¹İ“Àû“ÀÎ “³»“Àå“º¯“¼ö“º¸“´Ù“´Â “È¿“À²“ÀÌ “¶³“¾î“Áı“´Ï“´Ù.
+(“¾Æ“·¡“ÀÇ “¿ä“¾à“¿¡“¼­“´Â HANDLE “ÀÌ“¶ó“´Â “´Ü“¾î“¸¦ “Æ÷“ÇÔ“ÇÏ“°í “ÀÖ“½À“´Ï“´Ù).
+“¿ì“¼± “¸Ç“Ã³“À½“¿¡ “¹İ“µå“½Ã
+
+    use IO::Handle;
+
+=begin original
+
+after which you may use either
+
+=end original
+
+“¶ó“°í “¾²“°í, “±× “µÚ“¿¡ “¾Æ“·¡“Ã³“·³ “¾²“°Å“³ª
+
+    method HANDLE EXPR
+
+=begin original
+
+or more safely,
+
+=end original
+
+“È¤“Àº “º¸“´Ù “¾È“Àü“ÇÏ“°Ô “¾Æ“·¡“Ã³“·³ “¾µ “¼ö “ÀÖ“½À“´Ï“´Ù:
+
+    HANDLE->method(EXPR)
+
+=begin original
+
+Each method returns the old value of the IO::Handle attribute.
+The methods each take an optional EXPR, which, if supplied, specifies the
+new value for the IO::Handle attribute in question.  If not supplied,
+most methods do nothing to the current value--except for
+autoflush(), which will assume a 1 for you, just to be different.
+
+=end original
+
+“°¢“°¢“ÀÇ “¸Ş“¼Ò“µå“´Â IO::Handle “¼Ó“¼º“ÀÇ “¿¾ “°ª“À» “¹İ“È¯“ÇÕ“´Ï“´Ù.
+“¸Ş“¼Ò“µå“´Â “°¢“°¢ EXPR “À» “¾ò“À» “¼ö “ÀÖ“°í, “¼³“Á¤“ÇÑ “°æ“¿ì“¿¡“´Â 
+“¹®“Á¦“ÀÇ IO::Handle “¼Ó“¼º“ÀÇ “»õ“·Î“¿î “°ª“À» “Áö“Á¤“ÇÏ“°Ô “µË“´Ï“´Ù.
+“¼³“Á¤“ÇÑ “°æ“¿ì“¿¡“´Â “¸¹“Àº “¸Ş“¼Ò“µå“¿¡“¼­“´Â “Çö“Àç“ÀÇ “°ª“¿¡ “´ë“ÇØ“¼­ “¾Æ“¹«“°Í“µµ “ÇÏ“Áö “¾Ê“½À“´Ï“´Ù“¸¸,
+autoflush() “¿¡“¼­“´Â 1“À» “Áö“Á¤“ÇÑ “°Í“À¸“·Î “ÇÕ“´Ï“´Ù.
+
+=begin original
+
+Because loading in the IO::Handle class is an expensive operation, you should
+learn how to use the regular built-in variables.
+
+=end original
+
+IO::Handle “Å¬“·¡“½º“¸¦ “ÀĞ“´Â “°Í“Àº “ºñ“¿ë“ÀÌ “³ô“Àº “Á¶“ÀÛ“ÀÌ“±â“¿¡, 
+“ÀÏ“¹İ“Àû“ÀÎ “³»“Àå“ÇÔ“¼ö“ÀÇ “»ç“¿ë“¹ı“À» “±â“¾ï“ÇØ“µÖ“¾ß “ÇÕ“´Ï“´Ù.
+
+=begin original
+
+A few of these variables are considered "read-only".  This means that if
+you try to assign to this variable, either directly or indirectly through
+a reference, you'll raise a run-time exception.
+
+=end original
+
+“ÀÌ“°Í“Àº “º¯“¼ö“ÀÇ “¾È“¿¡“¼­“´Â "read-only" “·Î “Ãë“±Ş“µÇ“´Â “°Í“µµ “ÀÖ“½À“´Ï“´Ù.
+“Áï, “±×“·± “º¯“¼ö“¿¡ “´ë“ÇØ, “Á÷“Á¢ “¸®“ÆÛ“·±“½º“¸¦ “°Ç“¤§“¸®“µç “°£“Á¢“Àû“À¸“·Î “ÇÏ“µç 
+“´ë“ÀÔ“À» “¼ö“Çà“ÇÏ“·Á“°í “ÇÑ “°æ“¿ì“¿¡“´Â “½Ç“Çà“½Ã“¿¡ “¿¹“¿Ü“Ã³“¸®“°¡ “±â“µ¿“µË“´Ï“´Ù.
+
+=begin original
+
+You should be very careful when modifying the default values of most
+special variables described in this document. In most cases you want
+to localize these variables before changing them, since if you don't,
+the change may affect other modules which rely on the default values
+of the special variables that you have changed. This is one of the
+correct ways to read the whole file at once:
+
+=end original
+
+You should be very careful when modifying the default values of most
+special variables described in this document. In most cases you want
+to localize these variables before changing them, since if you don't,
+the change may affect other modules which rely on the default values
+of the special variables that you have changed. This is one of the
+correct ways to read the whole file at once:
+(TBT)
+
+    open my $fh, "foo" or die $!;
+    local $/; # enable localized slurp mode
+    my $content = <$fh>;
+    close $fh;
+
+=begin original
+
+But the following code is quite bad:
+
+=end original
+
+“±×“·¯“³ª “¾Æ“·¡“ÀÇ “ÄÚ“µå“´Â “¿Ï“Àü“È÷ “³ª“»Û “°Í“ÀÔ“´Ï“´Ù:
+
+    open my $fh, "foo" or die $!;
+    undef $/; # enable slurp mode
+    my $content = <$fh>;
+    close $fh;
+
+=begin original
+
+since some other module, may want to read data from some file in the
+default "line mode", so if the code we have just presented has been
+executed, the global value of C<$/> is now changed for any other code
+running inside the same Perl interpreter.
+
+=end original
+
+since some other module, may want to read data from some file in the
+default "line mode", so if the code we have just presented has been
+executed, the global value of C<$/> is now changed for any other code
+running inside the same Perl interpreter.
+(TBT)
+
+=begin original
+
+Usually when a variable is localized you want to make sure that this
+change affects the shortest scope possible. So unless you are already
+inside some short C<{}> block, you should create one yourself. For
+example:
+
+=end original
+
+Usually when a variable is localized you want to make sure that this
+change affects the shortest scope possible. So unless you are already
+inside some short C<{}> block, you should create one yourself. For
+example:
+(TBT)
+
+    my $content = '';
+    open my $fh, "foo" or die $!;
+    {
+        local $/;
+        $content = <$fh>;
+    }
+    close $fh;
+
+=begin original
+
+Here is an example of how your own code can go broken:
+
+=end original
+
+“¾Æ“·¡“´Â “¾î“¶»“°Ô “ÀÚ“½Å“ÀÇ “ÄÚ“µå“°¡ “¹«“³Ê“Áö“´Â “°¡“ÇÏ“´Â “¿¹“Á¦“ÀÔ“´Ï“´Ù:
+
+    for (1..5){
+        nasty_break();
+        print "$_ ";
+    }
+    sub nasty_break {
+        $_ = 5;
+        # do something with $_
+    }
+
+=begin original
+
+You probably expect this code to print:
+
+=end original
+
+“¾Æ“¸¶“µµ “ÀÌ “ÄÚ“µå“´Â “¾Æ“·¡“Ã³“·³ “Ç¥“½Ã“µÇ“´Â “°Í“À» “±â“´ë“ÇÏ“°í “ÀÖ“½À“´Ï“´Ù:
+
+    1 2 3 4 5
+
+=begin original
+
+but instead you get:
+
+=end original
+
+“±×“·¯“³ª “¾Æ“·¡“Ã³“·³ “µË“´Ï“´Ù:
+
+    5 5 5 5 5
+
+=begin original
+
+Why? Because nasty_break() modifies C<$_> without localizing it
+first. The fix is to add local():
+
+=end original
+
+“¿Ö “±×“·²“±î“¿ä?
+nasty_break() “´Â C<$_> “À» “·Î“ÄÃ“È­“ÇÏ“±â “Àü“¿¡ “º¯“°æ“ÇÏ“±â “¶§“¹®“ÀÔ“´Ï“´Ù.
+“¼ö“Á¤“ÇÏ“±â“¿¡“´Â local()  “À» “Ãß“°¡“ÇÕ“´Ï“´Ù.
+
+        local $_ = 5;
+
+=begin original
+
+It's easy to notice the problem in such a short example, but in more
+complicated code you are looking for trouble if you don't localize
+changes to the special variables.
+
+=end original
+
+It's easy to notice the problem in such a short example, but in more
+complicated code you are looking for trouble if you don't localize
+changes to the special variables.
+(TBT)
+
+=begin original
+
+The following list is ordered by scalar variables first, then the
+arrays, then the hashes.
+
+=end original
+
+“¾Æ“·¡“ÀÇ “¸®“½º“Æ®“´Â “¿ì“¼± “½º“Ä®“¶ó “º¯“¼ö, “±×“¸®“°í “¹è“¿­, “ÇØ“½¬“ÀÇ “¼ø“À¸“·Î “³ª“¿­“ÇÕ“´Ï“´Ù.
+
+=over 8
+
+=item $ARG
+
+=item $_
+X<$_> X<$ARG>
+
+=begin original
+
+The default input and pattern-searching space.  The following pairs are
+equivalent:
+
+=end original
+
+“±â“º»ê“ÀÇ “ÀÔ“·Â“°ú “ÆĞ“ÅÏ “°Ë“»ö“ÀÇ “½º“Æä“ÀÌ“½º, “¾Æ“·¡“ÀÇ 2“°¡“Áö“´Â “°°“Àº “°ª“ÀÔ“´Ï“´Ù.
+
+    while (<>) {...}	# equivalent only in while!
+    while (defined($_ = <>)) {...}
+
+    /^Subject:/
+    $_ =~ /^Subject:/
+
+    tr/a-z/A-Z/
+    $_ =~ tr/a-z/A-Z/
+
+    chomp
+    chomp($_)
+
+=begin original
+
+Here are the places where Perl will assume $_ even if you
+don't use it:
+
+=end original
+
+Perl “ÀÌ (“´ç“½Å“ÀÌ “»ç“¿ë“ÇÏ“°í “½Í“Áö “¾Ê“¾Æ“µµ) $_ “À» “°¡“Á¤“ÇÏ“´Â “°æ“¿ì“°¡ “¸î“°¡“Áö “ÀÖ“½À“´Ï“´Ù:
+
+=over 3
+
+=item *
+
+=begin original
+
+Various unary functions, including functions like ord() and int(), as well
+as the all file tests (C<-f>, C<-d>) except for C<-t>, which defaults to
+STDIN.
+
+=end original
+
+“¿©“·¯“°¡“Áö “´Ü“Ç×“ÇÔ“¼ö. ord() “³ª int() “¶Ç“´Â C<-t> “ÀÌ“¿Ü“ÀÇ “¸ğ“µç 
+“ÆÄ“ÀÏ“Å×“½º“Æ®(C<-f>, C<-d>) “µî, C<-t> “ÀÇ “±â“º»“°ª“Àº STDIN “ÀÔ“´Ï“´Ù.
+
+=item *
+
+=begin original
+
+Various list functions like print() and unlink().
+
+=end original
+
+print() “³ª unlink() “µî“ÀÇ “¿©“·¯“°¡“Áö “¸®“½º“Æ®“ÇÔ“¼ö.
+
+=item *
+
+=begin original
+
+The pattern matching operations C<m//>, C<s///>, and C<tr///> when used
+without an C<=~> operator.
+
+=end original
+
+C<=~> “¿¬“»ê“ÀÚ“¾ø“ÀÌ “»ç“¿ë“µÈ “ÆĞ“ÅÏ“¸Å“Ä¡“¿¬“»ê C<m//>, C<s///>, C<tr///>.
+
+=item *
+
+=begin original
+
+The default iterator variable in a C<foreach> loop if no other
+variable is supplied.
+
+=end original
+
+C<foreach> “·ç“ÇÁ“¿¡“¼­“ÀÇ “´Ù“¸¥ “º¯“¼ö“°¡ “º¸“Á¶“ÇÏ“Áö “¾Ê“´Â “°æ“¿ì“ÀÇ “±â“º» “¹İ“º¹ “º¯“¼ö.
+
+=item *
+
+=begin original
+
+The implicit iterator variable in the grep() and map() functions.
+
+=end original
+
+grep() “ÇÔ“¼ö“¿Í map() “ÇÔ“¼ö“ÀÇ “¾Ï“¹¬“Àû“ÀÎ “¹İ“º¹“º¯“¼ö.
+
+=item *
+
+=begin original
+
+The default place to put an input record when a C<< <FH> >>
+operation's result is tested by itself as the sole criterion of a C<while>
+test.  Outside a C<while> test, this will not happen.
+
+=end original
+
+C<< <FH> >> “°¡ “´Ü“µ¶“À¸“·Î C<while> “Å×“½º“Æ®“¿¡“¼­ “Å×“½º“Æ®“µÈ “°æ“¿ì“ÀÇ “°á“°ú“¸¦ 
+“³Ö“´Â “±â“º»“°ª“ÀÇ “Àå“¼Ò. C<while> “Å×“½º“Æ®“ÀÌ“¿Ü“¿¡“¼­“´Â “ÀÌ“°Í“Àº “¹ß“»ı“ÇÏ“Áö “¾Ê“½À“´Ï“´Ù.
+
+=back
+
+=begin original
+
+As C<$_> is a global variable, this may lead in some cases to unwanted
+side-effects.  As of perl 5.9.1, you can now use a lexical version of
+C<$_> by declaring it in a file or in a block with C<my>.  Moreover,
+declaring C<our $_> restores the global C<$_> in the current scope.
+
+=end original
+
+As C<$_> is a global variable, this may lead in some cases to unwanted
+side-effects.  As of perl 5.9.1, you can now use a lexical version of
+C<$_> by declaring it in a file or in a block with C<my>.  Moreover,
+declaring C<our $_> restores the global C<$_> in the current scope.
+(TBT)
+
+=begin original
+
+(Mnemonic: underline is understood in certain operations.)
+
+=end original
+
+(“±â“¾ï“¹ı: “¹Ø“ÁÙ“ÀÌ “ÀÖ“´Â “Á¶“ÀÛ“¹ı“À» “±â“¾ï“ÇÏ“±â “À§“ÇØ)
+
+=back
+
+=over 8
+
+=item $a
+
+=item $b
+X<$a> X<$b>
+
+=begin original
+
+Special package variables when using sort(), see L<perlfunc/sort>.
+Because of this specialness $a and $b don't need to be declared
+(using use vars, or our()) even when using the C<strict 'vars'> pragma.
+Don't lexicalize them with C<my $a> or C<my $b> if you want to be
+able to use them in the sort() comparison block or function.
+
+=end original
+
+Special package variables when using sort(), see L<perlfunc/sort>.
+Because of this specialness $a and $b don't need to be declared
+(using use vars, or our()) even when using the C<strict 'vars'> pragma.
+Don't lexicalize them with C<my $a> or C<my $b> if you want to be
+able to use them in the sort() comparison block or function.
+(TBT)
+
+=back
+
+=over 8
+
+=item $<I<digits>>
+X<$1> X<$2> X<$3>
+
+=begin original
+
+Contains the subpattern from the corresponding set of capturing
+parentheses from the last pattern match, not counting patterns
+matched in nested blocks that have been exited already.  (Mnemonic:
+like \digits.)  These variables are all read-only and dynamically
+scoped to the current BLOCK.
+
+=end original
+
+“¸¶“Áö“¸·“ÀÇ “ÆĞ“ÅÏ“¸Å“Ä¡“¿¡“¼­ “´ë“ÀÀ“ÇÏ“´Â “°ı“È£“ÀÇ “¼­“ºê“ÆĞ“ÅÏ“¿¡ “¸Å“Ä¡“ÇÑ “¹®“ÀÚ“¿­“ÀÌ 
+“µé“¾î“ÀÖ“Áö“¸¸, “ÀÌ“¹Ì “ºü“Á®“³ª“¿Â “ºí“·Ï“¿¡“¼­“ÀÇ “ÆĞ“ÅÏ“¸Å“Äª“Àº “°è“»ê“¿¡ “³Ö“Áö “¾Ê“½À“´Ï“´Ù.
+(“±â“¾ï“¹ı : \(“¼ı“ÀÚ) “¿Í “°°“Àº “°Í)
+“ÀÌ “º¯“¼ö“µé“Àº “¸ğ“µÎ read-only “·Î, “Çö“Àç“ÀÇ BLOCK “¿¡ “µ¿“Àû“ÀÎ “¿µ“¿ª“À» “°¡“Áı“´Ï“´Ù.
+
+=item $MATCH
+
+=item $&
+X<$&> X<$MATCH>
+
+=begin original
+
+The string matched by the last successful pattern match (not counting
+any matches hidden within a BLOCK or eval() enclosed by the current
+BLOCK).  (Mnemonic: like & in some editors.)  This variable is read-only
+and dynamically scoped to the current BLOCK.
+
+=end original
+
+“¸¶“Áö“¸·“¿¡ “¼º“°ø“ÇÑ “ÆĞ“ÅÏ “¸Å“Äª“ÇÑ “¹®“ÀÚ“¿­ (“Çö“Àç“ÀÇ BLOCK “¿¡“¼­ “°¨“½Î“Áø BLOCK “ÀÌ“³ª
+eval() “¿¡“¼­ “°¨“½Î“Áø “ºÎ“ºĞ“¿¡“¼­“ÀÇ “¸Å“Ä¡“´Â “°è“»ê“¿¡ “³Ö“Áö “¾Ê“½À“´Ï“´Ù).
+(“±â“¾ï“¹ı : “¾î“¶² “¿¡“µğ“ÅÍ“ÀÇ & “°°“Àº “°Í)
+“ÀÌ “º¯“¼ö“´Â read-only “¿¡“¼­ “Çö“Àç“ÀÇ BLOCK “¿¡ “µ¿“Àû“ÀÎ “¿µ“¿ª“À» “°¡“Áı“´Ï“´Ù.
+
+=begin original
+
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See L</BUGS>.
+
+=end original
+
+“ÀÌ “º¯“¼ö“¸¦ “ÇÁ“·Î“±×“·¥“ÀÇ “¾î“µò“°¡“¿¡“¼­ “»ç“¿ë“ÇÏ“¸é “ÇÁ“·Î“±×“·¥ “¾È“ÀÇ “¸ğ“µç “Á¤“±Ô“Ç¥“Çö 
+“¸Å“Äª“¿¡ “´ë“ÇØ“¼­ “²Ï “¼­“´É“Àú“ÇÏ“¸¦ “ÀÏ“À¸“Å³ “¼ö “ÀÖ“½À“´Ï“´Ù.
+L</BUGS> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=begin original
+
+See L</@-> for a replacement.
+
+=end original
+
+“Ä¡“È¯“À» “À§“ÇØ“¼­“´Â L</@-> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item ${^MATCH}
+X<${^MATCH}>
+
+=begin original
+
+This is similar to C<$&> (C<$POSTMATCH>) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+
+=end original
+
+This is similar to C<$&> (C<$POSTMATCH>) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+(TBT)
+
+=item $PREMATCH
+
+=item $`
+X<$`> X<$PREMATCH>
+
+=begin original
+
+The string preceding whatever was matched by the last successful
+pattern match (not counting any matches hidden within a BLOCK or eval
+enclosed by the current BLOCK).  (Mnemonic: C<`> often precedes a quoted
+string.)  This variable is read-only.
+
+=end original
+
+“¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ “ÆĞ“ÅÏ“¸Å“Ä¡ (“Çö“Àç“ÀÇ BLOCK “¿¡“¼­ “°¨“½Î“Áø BLOCK “ÀÌ“³ª eval() “¿¡
+“¼û“°Ü“Áø “ºÎ“ºĞ“¿¡“¼­“ÀÇ “¸Å“Ä¡“´Â “°è“»ê“¿¡ “³Ö“Áö “¾Ê“½À“´Ï“´Ù) “¿¡“¼­ “¸Å“Ä¡“ÇÑ “ºÎ“ºĞ“ÀÇ “¾Õ“ÀÇ “¹®“ÀÚ“¿­.
+(“±â“¾ï“¹ı : C<`> “Àº “¸¹“Àº “°æ“¿ì “ÀÎ“¿ë“µÈ “¹®“ÀÚ“¿­“ÀÇ “¾Õ“¿¡ “ÀÖ“½À“´Ï“´Ù)
+“ÀÌ “º¯“¼ö“´Â read-only “ÀÔ“´Ï“´Ù.
+
+=begin original
+
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See L</BUGS>.
+
+=end original
+
+“ÀÌ “º¯“¼ö“¸¦ “ÇÁ“·Î“±×“·¥“ÀÇ “¾î“µò“°¡“¿¡“¼­ “»ç“¿ë“ÇÏ“¸é, “ÇÁ“·Î“±×“·¥ “¾È“ÀÇ “¸ğ“µç “Á¤“±Ô“Ç¥“Çö “¸Å“Äª“¿¡ 
+“´ë“ÇØ“¼­ “»ó“´ç“ÇÑ “¼º“´É“Àú“ÇÏ“¸¦ “ÀÏ“À¸“Åµ“´Ï“´Ù.
+L</BUGS> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=begin original
+
+See L</@-> for a replacement.
+
+=end original
+
+“Ä¡“È¯“À» “À§“ÇØ“¼­“´Â L</@-> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item ${^PREMATCH}
+X<${^PREMATCH}>
+
+=begin original
+
+This is similar to C<$`> ($PREMATCH) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+
+=end original
+
+This is similar to C<$`> ($PREMATCH) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+(TBT)
+
+=item $POSTMATCH
+
+=item $'
+X<$'> X<$POSTMATCH>
+
+=begin original
+
+The string following whatever was matched by the last successful
+pattern match (not counting any matches hidden within a BLOCK or eval()
+enclosed by the current BLOCK).  (Mnemonic: C<'> often follows a quoted
+string.)  Example:
+
+=end original
+
+“¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ “ÆĞ“ÅÏ“¸Å“Äª (“Çö“Àç“ÀÇ BLOCK “À¸“·Î “°¨“½Î“Áø BLOCK “ÀÌ“³ª 
+eval() “ÀÇ “¼û“°Ü“Áø “ºÎ“ºĞ“¿¡“¼­“ÀÇ “¸Å“Ä¡“´Â “°è“»ê“¿¡ “³Ö“Áö “¾È“½À“´Ï“´Ù) “¿¡“¼­ 
+“¸Å“Ä¡“ÇÑ “ºÎ“ºĞ“¿¡ “°è“¼Ó“µÇ“´Â “¹®“ÀÚ“¿­.
+(“±â“¾ï“¹ı: C<'> “´Â “´ë“ºÎ“ºĞ“ÀÇ “°æ“¿ì “ÀÎ“¿ë“µÈ “¹®“ÀÚ“¿­“ÀÇ “µÚ“¿¡ “ÀÖ“½À“´Ï“´Ù) 
+“¿¹“Á¦:
+
+    local $_ = 'abcdefghi';
+    /def/;
+    print "$`:$&:$'\n";  	# prints abc:def:ghi
+
+=begin original
+
+This variable is read-only and dynamically scoped to the current BLOCK.
+
+=end original
+
+“ÀÌ “º¯“¼ö“´Â read-only “·Î, “Çö“Àç“ÀÇ BLOCK “¿¡ “µ¿“Àû“ÀÎ “¿µ“¿ª“À» “°¡“Áı“´Ï“´Ù.
+
+=begin original
+
+The use of this variable anywhere in a program imposes a considerable
+performance penalty on all regular expression matches.  See L</BUGS>.
+
+=end original
+
+“ÀÌ “º¯“¼ö“¸¦ “ÇÁ“·Î“±×“·¥“ÀÇ “¾î“µò“°¡“¿¡“¼­ “»ç“¿ë“ÇÏ“¸é “ÇÁ“·Î“±×“·¥ “¾È“ÀÇ “¸ğ“µç “Á¤“±Ô“Ç¥“Çö
+“¸Å“Äª“¿¡ “´ë“ÇØ“¼­ “»ó“´ç“ÇÑ “¼º“´É“Àú“ÇÏ“¸¦ “ÀÏ“À¸“Å³ “¼ö “ÀÖ“½À“´Ï“´Ù.
+L</BUGS> “¸¦ “Âü“Á¶“ÇÏ“¼¼“¿ä.
+
+=begin original
+
+See L</@-> for a replacement.
+
+=end original
+
+“Ä¡“È¯“À» “À§“ÇØ“¼­“´Â L<@-> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item ${^POSTMATCH}
+X<${^POSTMATCH}>
+
+=begin original
+
+This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+
+=end original
+
+This is similar to C<$'> (C<$POSTMATCH>) except that it does not incur the
+performance penalty associated with that variable, and is only guaranteed
+to return a defined value when the pattern was compiled or executed with
+the C</p> modifier.
+(TBT)
+
+=item $LAST_PAREN_MATCH
+
+=item $+
+X<$+> X<$LAST_PAREN_MATCH>
+
+=begin original
+
+The text matched by the last bracket of the last successful search pattern.
+This is useful if you don't know which one of a set of alternative patterns
+matched. For example:
+
+=end original
+
+“¸¶“Áö“¸·“À¸“·Î “°Ë“»ö“µÈ “ÆĞ“ÅÏ“ÀÇ “¸¶“Áö“¸·“ÀÇ “°ı“È£“¿¡ “¸Å“Ä¡“ÇÑ “¹®“ÀÚ“¿­. 
+“ÀÌ“°Í“Àº “¸î“°³“ÀÇ “¼±“ÅÃ“Áö “¾È“¿¡“¼­ “¾î“´À“°Í“ÀÌ “¸Å“Ä¡“ÇÏ“´Â “°¡ “¾Ë “¼ö “¾ø“´Â “°æ“¿ì“¿¡ 
+“»ç“¿ë“ÇÏ“¸é “Æí“¸®“ÇÕ“´Ï“´Ù. “¿¹“¸¦“µé“¸é:
+
+    /Version: (.*)|Revision: (.*)/ && ($rev = $+);
+
+=begin original
+
+(Mnemonic: be positive and forward looking.)
+This variable is read-only and dynamically scoped to the current BLOCK.
+
+=end original
+
+(“±â“¾ï“¹ı: “±à“Á¤“Àû“ÀÎ)
+“ÀÌ “º¯“¼ö“´Â read-only “·Î, “Çö“Àç“ÀÇ BLOCK “¿¡ “µ¿“Àû“ÀÎ “¿µ“¿ª“À» “°¡“Áı“´Ï“´Ù.
+
+=item $LAST_SUBMATCH_RESULT
+
+=item $^N
+X<$^N>
+
+=begin original
+
+The text matched by the used group most-recently closed (i.e. the group
+with the rightmost closing parenthesis) of the last successful search
+pattern.  (Mnemonic: the (possibly) Nested parenthesis that most
+recently closed.)
+
+=end original
+
+The text matched by the used group most-recently closed (i.e. the group
+with the rightmost closing parenthesis) of the last successful search
+pattern.  (Mnemonic: the (possibly) Nested parenthesis that most
+recently closed.)
+(TBT)
+
+=begin original
+
+This is primarily used inside C<(?{...})> blocks for examining text
+recently matched. For example, to effectively capture text to a variable
+(in addition to C<$1>, C<$2>, etc.), replace C<(...)> with
+
+=end original
+
+This is primarily used inside C<(?{...})> blocks for examining text
+recently matched. For example, to effectively capture text to a variable
+(in addition to C<$1>, C<$2>, etc.), replace C<(...)> with
+(TBT)
+
+     (?:(...)(?{ $var = $^N }))
+
+=begin original
+
+By setting and then using C<$var> in this way relieves you from having to
+worry about exactly which numbered set of parentheses they are.
+
+=end original
+
+By setting and then using C<$var> in this way relieves you from having to
+worry about exactly which numbered set of parentheses they are.
+(TBT)
+
+=begin original
+
+This variable is dynamically scoped to the current BLOCK.
+
+=end original
+
+“ÀÌ “º¯“¼ö“´Â “Çö“Àç“ÀÇ BLOCK “¿¡ “µ¿“Àû“ÀÎ “¿µ“¿ª“À» “°¡“Áı“´Ï“´Ù.
+
+=item @LAST_MATCH_END
+
+=item @+
+X<@+> X<@LAST_MATCH_END>
+
+=begin original
+
+This array holds the offsets of the ends of the last successful
+submatches in the currently active dynamic scope.  C<$+[0]> is
+the offset into the string of the end of the entire match.  This
+is the same value as what the C<pos> function returns when called
+on the variable that was matched against.  The I<n>th element
+of this array holds the offset of the I<n>th submatch, so
+C<$+[1]> is the offset past where $1 ends, C<$+[2]> the offset
+past where $2 ends, and so on.  You can use C<$#+> to determine
+how many subgroups were in the last successful match.  See the
+examples given for the C<@-> variable.
+
+=end original
+
+“ÀÌ “¹è“¿­“Àº “Çö“Àç“ÀÇ “¾×“Æ¼“ºê“ÇÑ “µ¿“Àû “¿µ“¿ª“¿¡“¼­ “¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ “¼­“ºê“¸Å“Ä¡“ÀÇ
+“¸¶“Áö“¸·“À¸“·Î“ÀÇ “¿À“ÇÁ“¼Â“À» “°¡“Áı“´Ï“´Ù.
+C<$+[0]> “Àº “¸Å“Ä¡ “Àü“Ã¼“ÀÇ “¹®“ÀÚ“¿­“ÀÇ “³¡“À¸“·Î“ÀÇ “¿À“ÇÁ“¼Â“ÀÔ“´Ï“´Ù.
+“ÀÌ“°Í“Àº “¸Å“Ä¡“ÇÑ “º¯“¼ö“¿¡ “´ë“ÇØ“¼­ C<pos> “ÇÔ“¼ö“¸¦ “È£“Ãâ“ÇÑ “¶§“ÀÇ “¹İ“È¯“°ª“°ú “°°“½À“´Ï“´Ù.
+“ÀÌ “¹è“¿­“ÀÇ I<n> “¹ø“Â°“ÀÇ “¿ä“¼Ò“´Â I<n> “¹ø“Â°“ÀÇ “¼­“ºê“¸Å“Ä¡“ÀÇ “¿À“ÇÁ“¼Â“À» “°¡“Áö“°í “ÀÖ“±â“¿¡
+C<$+[1]> “Àº “°ú“°Å“ÀÇ $1 “ÀÇ “³¡“ÀÇ “¿À“ÇÁ“¼Â, C<$+[2]> “´Â $2 “ÀÇ “¿À“ÇÁ“¼Â “ÀÌ“¶ó“´Â 
+“Çü“ÅÂ“°¡ “µË“´Ï“´Ù.
+C<$#+> “´Â “¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ “¸Å“Ä¡“¿¡“¼­ “¸î“°³“ÀÇ “¼­“ºê“·ç“ÇÁ“°¡ “ÀÖ“´Â “°¡“¸¦ “°á“Á¤“ÇÏ“´Â 
+“µ¥“¿¡ “»ç“¿ë“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù.
+C<@-> “º¯“¼ö“ÀÇ “¿¹“¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item %+
+X<%+>
+
+=begin original
+
+Similar to C<@+>, the C<%+> hash allows access to the named capture
+buffers, should they exist, in the last successful match in the
+currently active dynamic scope.
+
+=end original
+
+Similar to C<@+>, the C<%+> hash allows access to the named capture
+buffers, should they exist, in the last successful match in the
+currently active dynamic scope.
+(TBT)
+
+=begin original
+
+For example, C<$+{foo}> is equivalent to C<$1> after the following match:
+
+=end original
+
+“¿¹“¸¦ “µé“¾î, C<$+{foo}> “´Â “¾Æ“·¡“ÀÇ “¸Å“Äª“ÀÇ “µÚ“¿¡ C<$1> “¿Í “°°“½À“´Ï“´Ù:
+
+  'foo' =~ /(?<foo>foo)/;
+
+=begin original
+
+The keys of the C<%+> hash list only the names of buffers that have
+captured (and that are thus associated to defined values).
+
+=end original
+
+The keys of the C<%+> hash list only the names of buffers that have
+captured (and that are thus associated to defined values).
+(TBT)
+
+=begin original
+
+The underlying behaviour of C<%+> is provided by the
+L<Tie::Hash::NamedCapture> module.
+
+=end original
+
+C<%+> “ÀÇ “±â“ÃÊ“°¡ “µÇ“´Â “Çà“µ¿“Àº L<Tie::Hash::NamedCapture> “¸ğ“µâ“¿¡“¼­ 
+“Á¦“°ø“µÇ“°í “ÀÖ“½À“´Ï“´Ù.
+
+=begin original
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes, then the results may be
+surprising.
+
+=end original
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes, then the results may be
+surprising.
+(TBT)
+
+=item HANDLE->input_line_number(EXPR)
+
+=item $INPUT_LINE_NUMBER
+
+=item $NR
+
+=item $.
+X<$.> X<$NR> X<$INPUT_LINE_NUMBER> X<line number>
+
+=begin original
+
+Current line number for the last filehandle accessed.
+
+=end original
+
+“¸¶“Áö“¸·“À¸“·Î “Á¢“±Ù“µÈ “ÆÄ“ÀÏ“ÇÚ“µé“ÀÇ “Çö“Àç“ÀÇ “Çà“¹ø“È£.
+
+=begin original
+
+Each filehandle in Perl counts the number of lines that have been read
+from it.  (Depending on the value of C<$/>, Perl's idea of what
+constitutes a line may not match yours.)  When a line is read from a
+filehandle (via readline() or C<< <> >>), or when tell() or seek() is
+called on it, C<$.> becomes an alias to the line counter for that
+filehandle.
+
+=end original
+
+Perl “ÀÇ “°¢ “ÆÄ“ÀÏ“ÇÚ“µé“Àº “°Å“±â“¿¡“¼­ “ÀĞ“¾î“µé“ÀÎ “Çà“¼ö“¸¦ “¼Á“´Ï“´Ù.
+(Depending on the value of C<$/>, Perl's idea of what
+constitutes a line may not match yours.)  When a line is read from a
+filehandle (via readline() or C<< <> >>), or when tell() or seek() is
+called on it, C<$.> becomes an alias to the line counter for that
+filehandle.
+(TBT)
+
+=begin original
+
+You can adjust the counter by assigning to C<$.>, but this will not
+actually move the seek pointer.  I<Localizing C<$.> will not localize
+the filehandle's line count>.  Instead, it will localize perl's notion
+of which filehandle C<$.> is currently aliased to.
+
+=end original
+
+You can adjust the counter by assigning to C<$.>, but this will not
+actually move the seek pointer.  I<Localizing C<$.> will not localize
+the filehandle's line count>.  Instead, it will localize perl's notion
+of which filehandle C<$.> is currently aliased to.
+(TBT)
+
+=begin original
+
+C<$.> is reset when the filehandle is closed, but B<not> when an open
+filehandle is reopened without an intervening close().  For more
+details, see L<perlop/"IE<sol>O Operators">.  Because C<< <> >> never does
+an explicit close, line numbers increase across ARGV files (but see
+examples in L<perlfunc/eof>).
+
+=end original
+
+C<$.> “Àº “ÆÄ“ÀÏ“ÇÚ“µé“ÀÌ “´İ“È÷“¸é “¸®“¼Â“µÇ“Áö“¸¸, “¿­“·Á“ÀÖ“´Â “ÆÄ“ÀÏ“ÇÚ“µé“ÀÌ close() “µÇ“´Â “ÀÏ
+“¾ø“ÀÌ “´Ù“½Ã “¿À“ÇÂ“µÈ “°æ“¿ì“¿¡“´Â “¸®“¼Â B<“µÇ“Áö “¾Ê“½À“´Ï“´Ù>.
+“º¸“´Ù “ÀÚ“¼¼“ÇÑ “³»“¿ë“¿¡ “´ë“ÇØ“¼­“´Â L<perlop"IE<sol>O Operators"> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+Because C<< <> >> never does
+an explicit close, line numbers increase across ARGV files (but see
+examples in L<perlfunc/eof>).
+(TBT)
+
+=begin original
+
+You can also use C<< HANDLE->input_line_number(EXPR) >> to access the
+line counter for a given filehandle without having to worry about
+which handle you last accessed.
+
+=end original
+
+You can also use C<< HANDLE->input_line_number(EXPR) >> to access the
+line counter for a given filehandle without having to worry about
+which handle you last accessed.
+(TBT)
+
+=begin original
+
+(Mnemonic: many programs use "." to mean the current line number.)
+
+=end original
+
+(“±â“¾ï“¹ı: “¸¹“Àº “ÇÁ“·Î“±×“·¥“¿¡“¼­ "." “ÀÌ “Çö“Àç“ÀÇ “Çà“¹ø“È£“¸¦ “³ª“Å¸“³»“´Â “µ¥ “»ç“¿ë“µË“´Ï“´Ù)
+
+=item IO::Handle->input_record_separator(EXPR)
+
+=item $INPUT_RECORD_SEPARATOR
+
+=item $RS
+
+=item $/
+X<$/> X<$RS> X<$INPUT_RECORD_SEPARATOR>
+
+=begin original
+
+The input record separator, newline by default.  This 
+influences Perl's idea of what a "line" is.  Works like B<awk>'s RS
+variable, including treating empty lines as a terminator if set to
+the null string.  (An empty line cannot contain any spaces
+or tabs.)  You may set it to a multi-character string to match a
+multi-character terminator, or to C<undef> to read through the end
+of file.  Setting it to C<"\n\n"> means something slightly
+different than setting to C<"">, if the file contains consecutive
+empty lines.  Setting to C<""> will treat two or more consecutive
+empty lines as a single empty line.  Setting to C<"\n\n"> will
+blindly assume that the next input character belongs to the next
+paragraph, even if it's a newline.  (Mnemonic: / delimits
+line boundaries when quoting poetry.)
+
+=end original
+
+“ÀÔ“·Â“·¹“ÄÚ“µå “±¸“ºĞ“ÀÚ“¿¡“¼­ “±â“º»“°ª“¿¡“¼­“´Â “°³“Çà“¹®“ÀÚ.
+“ÀÌ“°Í“Àº Perl “¿¡“ÀÇ "“Çà" “ÀÌ“¶ó“´Â “°Í“¿¡ “¿µ“Çâ“À» “Áİ“´Ï“´Ù.
+“ºó “¹®“ÀÚ“¿­“¿¡ “¼³“Á¤“µÇ“¸é, “°³“Çà“À» “±¸“ºĞ“ÀÚ“·Î “´Ù“·ç“´Â “°Í“À» “Æ÷“ÇÔ“ÇØ“¼­, 
+B<awk> “ÀÇ “º¯“¼ö RS “Ã³“·³ “¿ò“Á÷“ÀÔ“´Ï“´Ù.
+(“ºó “ÁÙ“Àº “½º“Æä“ÀÌ“½º“³ª “ÅÇ“À» “Æ÷“ÇÔ“ÇØ“¼­“´Â “¾È“µË“´Ï“´Ù)
+“º¹“¼ö“¹®“ÀÚ“ÀÇ “±¸“ºĞ“¹®“ÀÚ“¸¦ “³ª“Å¸“³»“±â “À§“ÇØ“¼­“´Â “¹®“ÀÚ“¿­“À» “¼³“Á¤“ÇÒ “¼ö“µµ “ÀÖ“½À“´Ï“´Ù.
+“¶Ç, “ÆÄ“ÀÏ“ÀÇ “³¡“±î“Áö “ÀĞ“±â“À§“ÇØ“¼­ undef “¸¦ “Áö“Á¤“ÇÒ “¼ö“µµ “ÀÖ“½À“´Ï“´Ù.
+“ÀÌ “º¯“¼ö“´Â C<"\n\n"> “¸¦ “¼³“Á¤“ÇÏ“¸é, “ºó“ÁÙ“ÀÌ “°è“¼Ó“µÇ“´Â “°æ“¿ì“¿¡ “´ë“ÇØ“¼­ 
+C<""> “¸¦ “¼³“Á¤“ÇÑ “°æ“¿ì“¿Í “È®“¿¬“È÷ “´Ù“¸¥ “µ¿“ÀÛ“À» “ÇÏ“°Ô “µË“´Ï“´Ù.
+C<""> “¸¦ “¼³“Á¤“ÇÑ “°æ“¿ì“¿¡“´Â “º¹“¼ö“ÀÇ “ºó“ÁÙ“µµ “ÇÏ“³ª“ÀÇ “ºó“ÁÙ“ÀÎ “°Í“Ã³“·³ “´Ù“·ì“´Ï“´Ù.
+C<"\n\n"> “¸¦ “¼³“Á¤“ÇÑ “°æ“¿ì“¿¡“´Â, “´Ü“¼ø“È÷ “´Ù“À½“ÀÇ “¹®“ÀÚ“°¡ (“¿¹“¸¦“µé“¾î “°³“Çà“¹®“ÀÚ“¶ó“µµ)
+“´Ù“À½“ÀÇ “´Ü“¶ô“¿¡ “Æ÷“ÇÔ“µÇ“´Â “°Í“À¸“·Î “´Ù“·ì“´Ï“´Ù.
+(“±â“¾ï“¹ı: /“´Â “½Ã“¸¦ “ÀÎ“¿ë“ÇÒ “¶§“¿¡ “Çà“ÀÇ “±¸“ºĞ“À» “³ª“Å¸“³À“´Ï“´Ù)
+
+    local $/;           # enable "slurp" mode
+    local $_ = <FH>;    # whole file now here
+    s/\n[ \t]+/ /g;
+
+=begin original
+
+Remember: the value of C<$/> is a string, not a regex.  B<awk> has to be
+better for something. :-)
+
+=end original
+
+“ÁÖ“ÀÇ: C<$/> “´Â “¹®“ÀÚ“¿­“ÀÌ“Áö “Á¤“±Ô“Ç¥“Çö“ÀÌ “¾Æ“´Õ“´Ï“´Ù.
+B<awk> “´Â “¹º“°¡ “´õ“¿í “Àß“ÇÏ“Áö “¾Ê“À¸“¸é “¾È“µË“´Ï“´Ù :-)
+
+=begin original
+
+Setting C<$/> to a reference to an integer, scalar containing an integer, or
+scalar that's convertible to an integer will attempt to read records
+instead of lines, with the maximum record size being the referenced
+integer.  So this:
+
+=end original
+
+C<$/> “¿¡ “Á¤“¼ö, “Á¤“¼ö“¸¦ “Æ÷“ÇÔ“ÇÑ “½º“Ä®“¶ó, “Á¤“¼ö“·Î “º¯“È¯“ÇÒ “¼ö “ÀÖ“´Â “½º“Ä®“¶ó “Áß 
+“¾î“´À“°Í“À¸“·Î“ÀÇ “¸®“ÆÛ“·±“½º“¸¦ “¼³“Á¤“ÇÏ“¸é, “Çà“À» “ÀĞ“´Â “´ë“½Å“¿¡ “·¹“ÄÚ“µå“¸¦ “ÀĞ“À¸“·Á“°í “ÇÕ“´Ï“´Ù.
+“ÀÌ “°æ“¿ì, “ÃÖ“´ë “·¹“ÄÚ“µå “»ç“ÀÌ“Áî“´Â “¸®“ÆÛ“·±“½º“¿¡“¼­“ÀÇ “Á¤“¼ö“°ª“ÀÌ “µË“´Ï“´Ù. “Áï:
+
+    local $/ = \32768; # or \"32768", or \$var_containing_32768
+    open my $fh, $myfile or die $!;
+    local $_ = <$fh>;
+
+=begin original
+
+will read a record of no more than 32768 bytes from FILE.  If you're
+not reading from a record-oriented file (or your OS doesn't have
+record-oriented files), then you'll likely get a full chunk of data
+with every read.  If a record is larger than the record size you've
+set, you'll get the record back in pieces.  Trying to set the record
+size to zero or less will cause reading in the (rest of the) whole file.
+
+=end original
+
+“ÀÌ“°Í“Àº FILE “¿¡“¼­ 32768 “¹Ù“ÀÌ“Æ®“¸¦ “³Ñ“Áö “¾Ê“µµ“·Ï “·¹“ÄÚ“µå“¸¦ “ÀĞ“½À“´Ï“´Ù.
+“¸¸“¾à “·¹“ÄÚ“µå“Áö“Çâ“ÀÇ “ÆÄ“ÀÏ“À» “ÀĞ“Áö“¾Ê“´Â “°æ“¿ì(“¶Ç“´Â OS “°¡ “·¹“ÄÚ“µå“Áö“Çâ“ÆÄ“ÀÏ“À» “°¡“Áö“Áö 
+“¾Ê“´Â “°æ“¿ì), “ÀĞ“À» “¶§“¸¶“´Ù “µ¥“ÀÌ“ÅÍ“ÀÇ “Ã»“Å© “Àü“ºÎ“¸¦ “Áı“¾î“³Ö“½À“´Ï“´Ù.
+“¸¸“¾à “·¹“ÄÚ“µå“°¡ “¼³“Á¤“ÇÑ “·¹“ÄÚ“µå “»ç“ÀÌ“Áî“º¸“´Ù “Å« “°æ“¿ì, “·¹“ÄÚ“µå“ÀÇ “ºÎ“ºĞ“À» “Áı“¾î“³Ö“½À“´Ï“´Ù.
+“·¹“ÄÚ“µå “»ç“ÀÌ“Áî“¸¦ 0 “ÀÌ“ÇÏ“·Î “¼³“Á¤“ÇÏ“·Á“°í “ÇÏ“¸é, (“³²“Àº) “ÆÄ“ÀÏ “Àü“Ã¼“¸¦ 
+“ÀĞ“¾î“µé“ÀÌ“´Â “°Í“ÀÌ “µË“´Ï“´Ù.
+
+=begin original
+
+On VMS, record reads are done with the equivalent of C<sysread>,
+so it's best not to mix record and non-record reads on the same
+file.  (This is unlikely to be a problem, because any file you'd
+want to read in record mode is probably unusable in line mode.)
+Non-VMS systems do normal I/O, so it's safe to mix record and
+non-record reads of a file.
+
+=end original
+
+VMS “¿¡“¼­“´Â “·¹“ÄÚ“µå “ÀĞ“±â“´Â C<sysread> “¿Í “¸¶“Âù“°¡“Áö“·Î “¼ö“Çà“µÇ“±â“¿¡, 
+“·¹“ÄÚ“µå “ÀĞ“±â “¿Í “ºñ“·¹“ÄÚ“µå “ÀĞ“±â“¸¦ “°°“Àº “ÆÄ“ÀÏ“¿¡“¼­ “¼¯“Áö “¾Ê“´Â “°Í“ÀÌ “ÃÖ“¼±“ÀÔ“´Ï“´Ù.
+(“ÀÌ“°Í“Àº “±×“¸® “¹®“Á¦“°¡ “µÇ“Áö “¾Ê“½À“´Ï“´Ù. “¿Ö“³Ä“¸é “·¹“ÄÚ“µå“¸¦ “ÀĞ“°í“½Í“Àº “ÆÄ“ÀÏ“Àº 
+“¾Æ“¸¶ “Çà “¸ğ“µå“¿¡“¼­“´Â “»ç“¿ë“ÇÒ “¼ö “¾ø“´Â “°Í“ÀÌ“±â“¶§“¹®“ÀÔ“´Ï“´Ù.)
+VMS “ÀÌ“¿Ü“ÀÇ “½Ã“½º“ÅÛ“¿¡“¼­“´Â “º¸“Åë“ÀÇ I/O “¸¦ “»ç“¿ë“ÇÏ“±â“¿¡ 
+“°°“Àº “ÆÄ“ÀÏ“ÀÇ “·¹“ÄÚ“µå “ÀĞ“±â“¿Í “ºñ“·¹“ÄÚ“µå “ÀĞ“±â“¸¦ “¼¯“¾î“µµ “¾È“Àü“ÇÕ“´Ï“´Ù.
+
+=begin original
+
+See also L<perlport/"Newlines">.  Also see C<$.>.
+
+=end original
+
+Lperlport"/Newlines"> “¿Í C<$.> “µµ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item HANDLE->autoflush(EXPR)
+
+=item $OUTPUT_AUTOFLUSH
+
+=item $|
+X<$|> X<autoflush> X<flush> X<$OUTPUT_AUTOFLUSH>
+
+=begin original
+
+If set to nonzero, forces a flush right away and after every write
+or print on the currently selected output channel.  Default is 0
+(regardless of whether the channel is really buffered by the
+system or not; C<$|> tells you only whether you've asked Perl
+explicitly to flush after each write).  STDOUT will
+typically be line buffered if output is to the terminal and block
+buffered otherwise.  Setting this variable is useful primarily when
+you are outputting to a pipe or socket, such as when you are running
+a Perl program under B<rsh> and want to see the output as it's
+happening.  This has no effect on input buffering.  See L<perlfunc/getc>
+for that.  (Mnemonic: when you want your pipes to be piping hot.)
+
+=end original
+
+0 “ÀÌ“¿Ü“·Î “¼³“Á¤“µÇ“¸é, “±× “½Ã“Á¡“¿¡ “¼±“ÅÃ“µÈ “Ãâ“·Â “Ã¤“³Î“À» “¹Ù“·Î “±× “°÷“¿¡“¼­ “ÇÃ“·¯“½¬“ÇÏ“°í 
+“°Å“±â“¿¡ write “³ª print “¸¦ “¼ö“Çà“ÇÑ “°Í“¿¡ “°­“Á¦“Àû“À¸“·Î “ÇÃ“·¯“½¬“ÇÕ“´Ï“´Ù.
+“±â“º»“°ª“¿¡“¼­“´Â 0 “ÀÌ “µË“´Ï“´Ù.
+(“Ã¤“³Î“ÀÌ “½Ç“Á¦“·Î “½Ã“½º“ÅÛ“¿¡ “ÀÇ“ÇØ “¹ö“ÆÛ“¸µ“µÇ“´Â“Áö “¾î“¶²“Áö“´Â “¸ğ“¸¨“´Ï“´Ù. 
+C<$|> “´Â Perl “ÀÌ “¸í“½Ã“Àû“À¸“·Î “¸Å“¹ø “¾´ “µÚ“¿¡ “ÇÃ“·¯“½¬“ÇÏ“´Â“Áö “¾î“¶²“Áö“¸¸“À» 
+“³ª“Å¸“³À“´Ï“´Ù).
+STDOUT “Àº “ÀÏ“¹İ“Àû“À¸“·Î“´Â “´Ü“¸»“·Î“ÀÇ “Ãâ“·Â“½Ã“¿¡“´Â “Çà “¹ö“ÆÛ“¸µ, “±× “ÀÌ“¿Ü“¿¡“¼­“´Â 
+“ºí“·Ï “¹ö“ÆÛ“¸µ“ÀÎ “°Í“¿¡ “ÁÖ“ÀÇ“ÇÏ“¼¼“¿ä.
+“ÀÌ“°Í“Àº Perl “ÀÇ “½º“Å©“¸³“Æ®“¸¦ rsh “¾Æ“·¡“¿¡“¼­ “½Ç“Çà“ÇÏ“°í, 
+“½Ç“Çà“»ó“È²“À» “È®“ÀÎ“ÇÏ“°í “½Í“Àº “°æ“¿ì“Ã³“·³, “ÆÄ“ÀÌ“ÇÁ“³ª “¼Ò“ÄÏ“¿¡ “Ãâ“·Â“ÇÒ “¶§“¿¡ 
+“Æ¯“È÷ “Æí“¸®“ÇÏ“°Ú“ÁÒ.
+“ÀÌ“°Í“Àº “ÀÔ“·Â “¹ö“ÆÛ“¸µ“¿¡“´Â “¾Æ“¹«“·± “¿µ“Çâ“À» “³¢“Ä¡“Áö “¾Ê“½À“´Ï“´Ù.
+(“±â“¾ï“¹ı: “ÆÄ“ÀÌ“ÇÁ“¸¦ “¶ß“¿î “»ó“ÅÂ“·Î “ÇØ“µÎ“±â “À§“ÇØ “»ç“¿ë“ÇÕ“´Ï“´Ù)
+
+=item IO::Handle->output_field_separator EXPR
+
+=item $OUTPUT_FIELD_SEPARATOR
+
+=item $OFS
+
+=item $,
+X<$,> X<$OFS> X<$OUTPUT_FIELD_SEPARATOR>
+
+=begin original
+
+The output field separator for the print operator.  If defined, this
+value is printed between each of print's arguments.  Default is C<undef>.
+(Mnemonic: what is printed when there is a "," in your print statement.)
+
+=end original
+
+print “¿¬“»ê“ÀÚ“¸¦ “À§“ÇÑ “Ãâ“·Â“ÇÊ“µå “±¸“ºĞ“ÀÚ.
+“Á¤“ÀÇ“µÇ“¸é “ÀÌ “°ª“ÀÌ “°¢“°¢“ÀÇ print “ÀÎ“¼ö “»ç“ÀÌ“¿¡ “Ç¥“½Ã“µË“´Ï“´Ù.
+“±â“º»“°ª“Àº C<undef> “ÀÔ“´Ï“´Ù.
+(“±â“¾ï“¹ı: print “¹®“¿¡“¼­ "," “¸¦ “¾´ “Àå“¼Ò“¿¡ “»õ“°Ü“Áø “°Í)
+
+=item IO::Handle->output_record_separator EXPR
+
+=item $OUTPUT_RECORD_SEPARATOR
+
+=item $ORS
+
+=item $\
+X<$\> X<$ORS> X<$OUTPUT_RECORD_SEPARATOR>
+
+=begin original
+
+The output record separator for the print operator.  If defined, this
+value is printed after the last of print's arguments.  Default is C<undef>.
+(Mnemonic: you set C<$\> instead of adding "\n" at the end of the print.
+Also, it's just like C<$/>, but it's what you get "back" from Perl.)
+
+=end original
+
+print “¿¬“»ê“ÀÚ“¸¦ “À§“ÇÑ “Ãâ“·Â “·¹“ÄÚ“µå “±¸“ºĞ“ÀÚ.
+If defined, this
+value is printed after the last of print's arguments.  Default is C<undef>.
+(“±â“¾ï“¹ı: print “ÀÇ “³¡“¿¡ "\n" “¸¦ “ºÙ“ÀÌ“´Â “´ë“½Å“¿¡ C<$\> “¸¦ “¼³“Á¤“ÇÕ“´Ï“´Ù.
+“¶Ç C<$/> “¿Í “ºñ“½Á“ÇÏ“Áö“¸¸ Perl “¿¡“¼­“´Â pack “µÇ“´Â “°Í“ÀÔ“´Ï“´Ù.)
+
+=item $LIST_SEPARATOR
+
+=item $"
+X<$"> X<$LIST_SEPARATOR>
+
+=begin original
+
+This is like C<$,> except that it applies to array and slice values
+interpolated into a double-quoted string (or similar interpreted
+string).  Default is a space.  (Mnemonic: obvious, I think.)
+
+=end original
+
+C<$,> “¿Í “°°“Áö“¸¸, “ÀÌ“°Í“Àº 2“Áß “ÀÎ“¿ë“ºÎ“È£“¿¡“·Î “°ı“È£“ÃÄ“Áø “¹®“ÀÚ“¿­ 
+(“¶Ç“´Â “±×“Ã³“·³ “Ãë“±Ş“µÇ“´Â “¹®“ÀÚ“¿­) “¾È“¿¡“¼­ “¹è“¿­“°ú “½½“¶ó“ÀÌ“½º “°ª“ÀÌ “Àü“°³“µÉ “¶§“¿¡ 
+“Àû“¿ë“µË“´Ï“´Ù.
+“±â“º»“°ª“¿¡“¼­“´Â “½º“Æä“ÀÌ“½º“°¡ “µË“´Ï“´Ù. (“±â“¾ï“¹ı: “ºĞ“¸í“ÇÏ“ÁÒ)
+
+=item $SUBSCRIPT_SEPARATOR
+
+=item $SUBSEP
+
+=item $;
+X<$;> X<$SUBSEP> X<SUBSCRIPT_SEPARATOR>
+
+=begin original
+
+The subscript separator for multidimensional array emulation.  If you
+refer to a hash element as
+
+=end original
+
+“´Ù“Â÷“¿ø “¹è“¿­“ÀÇ “¿¡“¹Ä“·¹“ÀÌ“Æ®“¸¦ “À§“ÇÑ “Ã·“ÀÚ“ÀÇ “±¸“ºĞ“¹®“ÀÚ.
+“ÇØ“½¬“ÀÇ “¿ä“¼Ò“¸¦
+
+    $foo{$a,$b,$c}
+
+=begin original
+
+it really means
+
+=end original
+
+“Ã³“·³“ÇØ“¼­ “Âü“Á¶“ÇÏ“¸é “½Ç“Á¦“·Î“´Â 
+
+    $foo{join($;, $a, $b, $c)}
+
+=begin original
+
+But don't put
+
+=end original
+
+“ÀÌ“¶ó“´Â “ÀÇ“¹Ì“°¡ “µË“´Ï“´Ù.
+“±×“·¯“³ª,
+
+    @foo{$a,$b,$c}	# a slice--note the @
+
+=begin original
+
+which means
+
+=end original
+
+“ÀÌ“·¸“°Ô “ÇØ“¼­“´Â “¾È“µË“´Ï“´Ù.
+“ÀÌ“°Í“Àº “¾Æ“·¡“¿Í “°°“Àº “ÀÇ“¹Ì“°¡ “µË“´Ï“´Ù.
+
+    ($foo{$a},$foo{$b},$foo{$c})
+
+=begin original
+
+Default is "\034", the same as SUBSEP in B<awk>.  If your
+keys contain binary data there might not be any safe value for C<$;>.
+(Mnemonic: comma (the syntactic subscript separator) is a
+semi-semicolon.  Yeah, I know, it's pretty lame, but C<$,> is already
+taken for something more important.)
+
+=end original
+
+“±â“º»“°ª“Àº "\034" “¿¡“¼­ C<awk> “ÀÇ SUBSEP “°ú “°°“½À“´Ï“´Ù.
+“»ç“¿ë“ÇÏ“·Á“°í “ÇÑ ket “ÀÇ “°ª“ÀÌ “¹Ù“ÀÌ“³Ê“¸® “µ¥“ÀÌ“ÅÍ“¸¦ “Æ÷“ÇÔ“ÇÏ“¸é 
+C<$;> “¿¡ “¼³“Á¤“ÇÑ “¾È“Àü“ÇÑ “°ª “°°“Àº “°Ç “¾ø“¾î“Áı“´Ï.
+(“±â“¾ï“¹ı : “ÄŞ“¸¶ (“±¸“¹®“»ó“ÀÇ “Ã·“ÀÚ “±¸“ºĞ“¹®“ÀÚ) “´Â “¼¼“¹Ì“Äİ“·Ğ“ÀÔ“´Ï“´Ù.
+“³×, “ÀÌ“»ó“ÇÑ “°Ç “¾Ë“Áö“¸¸, C<$,> “´Â “ÀÌ“¹Ì “´õ“¿í “Áß“¿ä“ÇÑ “ÀÓ“¹«“¸¦ “°¡“Áö“°í “ÀÖ“½À“´Ï“´Ù)
+
+=begin original
+
+Consider using "real" multidimensional arrays as described
+in L<perllol>.
+
+=end original
+
+L<perllol> “¿¡“¼­ “±â“¼ú“ÇÑ "“Áø“Á¤“ÇÑ" “´Ù“Â÷“¿ø“¹è“¿­“À» “»ç“¿ë“ÇÏ“µµ“·Ï “ÇØ“ÁÖ“¼¼“¿ä.
+
+=item HANDLE->format_page_number(EXPR)
+
+=item $FORMAT_PAGE_NUMBER
+
+=item $%
+X<$%> X<$FORMAT_PAGE_NUMBER>
+
+=begin original
+
+The current page number of the currently selected output channel.
+Used with formats.
+(Mnemonic: % is page number in B<nroff>.)
+
+=end original
+
+“±× “½Ã“Á¡“¿¡“¼­ “¼±“ÅÃ“µÈ “Ãâ“·Â “Ã¤“³Î“ÀÇ “±× “½Ã“Á¡“¿¡“¼­“ÀÇ “Æä“ÀÌ“Áö “¹ø“È£.
+“Æ÷“¸Ë“¿¡“¼­ “»ç“¿ë“µË“´Ï“´Ù.
+(“±â“¾ï“¹ı: %“´Â B<nroff> “¿¡“¼­“ÀÇ “Æä“ÀÌ“Áö “¹ø“È£“ÀÔ“´Ï“´Ù.)
+
+=item HANDLE->format_lines_per_page(EXPR)
+
+=item $FORMAT_LINES_PER_PAGE
+
+=item $=
+X<$=> X<$FORMAT_LINES_PER_PAGE>
+
+=begin original
+
+The current page length (printable lines) of the currently selected
+output channel.  Default is 60.  
+Used with formats.
+(Mnemonic: = has horizontal lines.)
+
+=end original
+
+“±× “½Ã“Á¡“¿¡“¼­ “¼±“ÅÃ“µÈ “Ãâ“·Â“Ã¤“³Î“ÀÇ “±× “½Ã“Á¡“¿¡“¼­“ÀÇ “Æä“ÀÌ“Áö “±æ“ÀÌ(“ÀÎ“ÀÚ“°¡“´É“Çà“¼ö).
+“±â“º»“°ª“Àº 60“ÀÔ“´Ï“´Ù. “Æ÷“¸Ë“¿¡“¼­ “»ç“¿ë“µË“´Ï“´Ù.
+(“±â“¾ï“¹ı: = “¿¡“´Â “º¹“¼ö“ÀÇ “¼ö“Æò“¼± (“ÁÙ)“ÀÌ “Æ÷“ÇÔ“µË“´Ï“´Ù)
+
+=item HANDLE->format_lines_left(EXPR)
+
+=item $FORMAT_LINES_LEFT
+
+=item $-
+X<$-> X<$FORMAT_LINES_LEFT>
+
+=begin original
+
+The number of lines left on the page of the currently selected output
+channel.  
+Used with formats.
+(Mnemonic: lines_on_page - lines_printed.)
+
+=end original
+
+“±× “½Ã“Á¡“¿¡“¼­ “¼±“ÅÃ“µÈ “Ãâ“·Â “Ã¤“³Î, “Æä“ÀÌ“Áö“¿¡ “³²“¾Æ “ÀÖ“´Â “Çà“¼ö.
+“Æ÷“¸Ë“¿¡“¼­ “»ç“¿ë“µË“´Ï“´Ù.
+(“±â“¾ï“¹ı: "“Æä“ÀÌ“Áö “ÁÙ“¼ö" - "“ÀÎ“ÀÚ“Á¾“·á “Çà“¼ö")
+
+=item @LAST_MATCH_START
+
+=item @-
+X<@-> X<@LAST_MATCH_START>
+
+=begin original
+
+$-[0] is the offset of the start of the last successful match.
+C<$-[>I<n>C<]> is the offset of the start of the substring matched by
+I<n>-th subpattern, or undef if the subpattern did not match.
+
+=end original
+
+$-[0] “Àº “¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ “¸Å“Ä¡“ÀÇ “¸Ç“¾Õ“ÀÇ Offset “ÀÔ“´Ï“´Ù.
+C<$-[>I<n>C<]> “´Â I<n> “¹ø“Â°“ÀÇ “¼­“ºê“ÆĞ“ÅÏ“¿¡ “¸Å“Ä¡“ÇÑ “ºÎ“ºĞ“¹®“ÀÚ“¿­“ÀÇ 
+“¸Ç“¾Õ“ÀÇ “¿À“ÇÁ“¼Â“ÀÔ“´Ï“´Ù. “¼­“ºê“ÆĞ“ÅÏ“ÀÌ “¸Å“Ä¡“ÇÏ“Áö “¾Ê“Àº “°æ“¿ì“´Â undef “ÀÔ“´Ï“´Ù.
+
+=begin original
+
+Thus after a match against $_, $& coincides with C<substr $_, $-[0],
+$+[0] - $-[0]>.  Similarly, $I<n> coincides with C<substr $_, $-[n],
+$+[n] - $-[n]> if C<$-[n]> is defined, and $+ coincides with
+C<substr $_, $-[$#-], $+[$#-] - $-[$#-]>.  One can use C<$#-> to find the last
+matched subgroup in the last successful match.  Contrast with
+C<$#+>, the number of subgroups in the regular expression.  Compare
+with C<@+>.
+
+=end original
+
+“µû“¶ó“¼­ $_ “ÀÇ “¸Å“Ä¡ “ÈÄ, $& “´Â C<substr $_, $-[0], $+[0] - $-[0]> “°ú 
+“ÀÏ“Ä¡“ÇÕ“´Ï“´Ù. “¸¶“Âù“°¡“Áö“·Î $I<n> “Àº C<$-[n]> “ÀÌ “Á¤“ÀÇ“µÇ“¾î “ÀÖ“À¸“¸é 
+C<substr $_, $-[n], $+[n] - $-[n]> “°ú “ÀÏ“Ä¡“ÇÏ“°í, 
+$+ “´Â C<substr $_, $-[$#-], $+[$#-] - $-[$#-]> “°ú “ÀÏ“Ä¡“ÇÕ“´Ï“´Ù.
+C<$#-> “´Â “Á÷“Àü“¿¡ “¼º“°ø“ÇÑ “¸Å“Ä¡“¿¡“¼­ “¸¶“Áö“¸·“ÀÇ “¸Å“Ä¡“ÇÑ “¼­“ºê“·ç“ÇÁ“¸¦ “Ã£“´Â “°Í“¿¡ 
+“»ç“¿ë“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù.
+“Á¤“±Ô“Ç¥“Çö“¿¡“¼­ “¼­“ºê“±×“·ì“ÀÇ “¼ö“ÀÎ c<$#+> “¿Í “´ë“Á¶“Àû“ÀÔ“´Ï“´Ù.
+C<@+> “¿Í “ºñ“±³“ÇØ“ÁÖ“¼¼“¿ä.
+
+=begin original
+
+This array holds the offsets of the beginnings of the last
+successful submatches in the currently active dynamic scope.
+C<$-[0]> is the offset into the string of the beginning of the
+entire match.  The I<n>th element of this array holds the offset
+of the I<n>th submatch, so C<$-[1]> is the offset where $1
+begins, C<$-[2]> the offset where $2 begins, and so on.
+
+=end original
+
+“ÀÌ “¹è“¿­“Àº “Çö“Àç “¾×“Æ¼“ºê“ÇÑ “µ¿“Àû “¿µ“¿ª “¾È“¿¡“¼­ “¸¶“Áö“¸·“À¸“·Î “¼º“°ø“ÇÑ 
+“¼­“ºê“¸Å“Ä¡“ÀÇ “¸Ç“Ã³“À½ “À§“Ä¡“ÀÇ “¿À“ÇÁ“¼Â“À» “°¡“Áı“´Ï“´Ù.
+C<$-[0]> “´Â “¸Å“Ä¡ “Àü“Ã¼“ÀÇ “¼±“µÎ“ÀÇ “¹®“ÀÚ“¿­“·Î“ÀÇ “¿À“ÇÁ“¼Â“ÀÔ“´Ï“´Ù.
+“ÀÌ “¹è“¿­“ÀÇ I<n> “¹ø“Â°“ÀÇ “¿ä“¼Ò“´Â I<n> “¹ø“Â°“ÀÇ “¼­“ºê“¸Å“Ä¡“·Î“ÀÇ 
+“¿À“ÇÁ“¼Â“À» “°¡“Áö“°í “ÀÖ“±â “¶§“¹®“¿¡, C<$-[1]> “´Â $1 “ÀÇ “¼±“µÎ“¿¡“¼­“ÀÇ 
+“¿À“ÇÁ“¼Â, C<$-[2]> “´Â $2 “ÀÇ “¼±“µÎ“¿¡“¼­“ÀÇ “¿À“ÇÁ“¼Â “µî“ÀÌ “µË“´Ï“´Ù.
+
+=begin original
+
+After a match against some variable $var:
+
+=end original
+
+“¾î“¶² “º¯“¼ö $var “¿¡“¼­ “¸Å“Ä¡“ÇÑ “µÚ “¾Æ“·¡“Ã³“·³ “µË“´Ï“´Ù.
+
+=over 5
+
+=begin original
+
+=item C<$`> is the same as C<substr($var, 0, $-[0])>
+
+=item C<$&> is the same as C<substr($var, $-[0], $+[0] - $-[0])>
+
+=item C<$'> is the same as C<substr($var, $+[0])>
+
+=item C<$1> is the same as C<substr($var, $-[1], $+[1] - $-[1])>  
+
+=item C<$2> is the same as C<substr($var, $-[2], $+[2] - $-[2])>
+
+=item C<$3> is the same as C<substr($var, $-[3], $+[3] - $-[3])>
+
+=end original
+
+=item C<$`> “Àº C<substr($var, 0, $-[0])> “¿Í “°°“½À“´Ï“´Ù.
+
+=item C<$&> “Àº C<substr($var, $-[0], $+[0] - $-[0])> “¿À “°°“½À“´Ï“´Ù.
+
+=item C<$'> “Àº C<substr($var, $+[0])> “¿Í “°°“½À“´Ï“´Ù.
+
+=item C<$1> “Àº C<substr($var, $-[1], $+[1] - $-[1])> “¿Í “°°“½À“´Ï“´Ù.
+
+=item C<$2> “Àº C<substr($var, $-[2], $+[2] - $-[2])> “¿Í “°°“½À“´Ï“´Ù.
+
+=item C<$3> “Àº C<substr $var, $-[3], $+[3] - $-[3])> “¿Í “°°“½À“´Ï“´Ù.
+
+=back
+
+=item %-
+X<%->
+
+=begin original
+
+Similar to C<%+>, this variable allows access to the named capture buffers
+in the last successful match in the currently active dynamic scope. To
+each capture buffer name found in the regular expression, it associates a
+reference to an array containing the list of values captured by all
+buffers with that name (should there be several of them), in the order
+where they appear.
+
+=end original
+
+Similar to C<%+>, this variable allows access to the named capture buffers
+in the last successful match in the currently active dynamic scope. To
+each capture buffer name found in the regular expression, it associates a
+reference to an array containing the list of values captured by all
+buffers with that name (should there be several of them), in the order
+where they appear.
+(TBT)
+
+=begin original
+
+Here's an example:
+
+=end original
+
+“¾Æ“·¡“ÀÇ “¿¹“¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+    if ('1234' =~ /(?<A>1)(?<B>2)(?<A>3)(?<B>4)/) {
+        foreach my $bufname (sort keys %-) {
+            my $ary = $-{$bufname};
+            foreach my $idx (0..$#$ary) {
+                print "\$-{$bufname}[$idx] : ",
+                      (defined($ary->[$idx]) ? "'$ary->[$idx]'" : "undef"),
+                      "\n";
+            }
+        }
+    }
+
+=begin original
+
+would print out:
+
+=end original
+
+“ÀÌ“¶ó“°í “ÇÏ“¸é, “¾Æ“·¡“Ã³“·³ “Ç¥“½Ã“µË“´Ï“´Ù.
+
+
+    $-{A}[0] : '1'
+    $-{A}[1] : '3'
+    $-{B}[0] : '2'
+    $-{B}[1] : '4'
+
+=begin original
+
+The keys of the C<%-> hash correspond to all buffer names found in
+the regular expression.
+
+=end original
+
+The keys of the C<%-> hash correspond to all buffer names found in
+the regular expression.
+(TBT)
+
+=begin original
+
+The behaviour of C<%-> is implemented via the
+L<Tie::Hash::NamedCapture> module.
+
+=end original
+
+The behaviour of C<%-> is implemented via the
+L<Tie::Hash::NamedCapture> module.
+(TBT)
+
+=begin original
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes, then the results may be
+surprising.
+
+=end original
+
+B<Note:> C<%-> and C<%+> are tied views into a common internal hash
+associated with the last successful regular expression. Therefore mixing
+iterative access to them via C<each> may have unpredictable results.
+Likewise, if the last successful match changes, then the results may be
+surprising.
+(TBT)
+
+=item HANDLE->format_name(EXPR)
+
+=item $FORMAT_NAME
+
+=item $~
+X<$~> X<$FORMAT_NAME>
+
+=begin original
+
+The name of the current report format for the currently selected output
+channel.  Default is the name of the filehandle.  (Mnemonic: brother to
+C<$^>.)
+
+=end original
+
+“±× “½Ã“Á¡“¿¡“¼­ “¼±“ÅÃ“µÇ“¾î “ÀÖ“´Â “Ãâ“·Â “Ã¤“³Î“ÀÇ, “±× “½Ã“Á¡“¿¡“¼­“ÀÇ “Æ÷“¸Ë“ÀÌ“¸§.
+“±â“º»“°ª“¿¡“¼­“´Â “ÆÄ“ÀÏ“ÇÚ“µé“°ú “°°“Àº “ÀÌ“¸§“ÀÔ“´Ï“´Ù.
+(“±â“¾ï“¹ı: C<$^> “ÀÇ “Çü“Á¦ )
+
+=item HANDLE->format_top_name(EXPR)
+
+=item $FORMAT_TOP_NAME
+
+=item $^
+X<$^> X<$FORMAT_TOP_NAME>
+
+=begin original
+
+The name of the current top-of-page format for the currently selected
+output channel.  Default is the name of the filehandle with _TOP
+appended.  (Mnemonic: points to top of page.)
+
+=end original
+
+“±× “½Ã“Á¡“¿¡“¼­ “¼±“ÅÃ“µÈ “Ãâ“·Â“Ã¤“³Î“ÀÇ “±× “½Ã“Á¡“ÀÇ “Æä“ÀÌ“Áö “¼±“µÎ “Æ÷“¸Ë“ÀÌ“¸§.
+“±â“º»“°ª“¿¡“¼­“´Â “ÆÄ“ÀÏ“ÇÚ“µé“ÀÌ“¸§“¿¡ _TOP “¸¦ “ºÙ“ÀÎ “°Í.
+(“±â“¾ï“¹ı: “Æä“ÀÌ“Áö“ÀÇ “¸Ç“¾Õ“À¸“·Î“ÀÇ “Æ÷“ÀÎ“ÅÍ)
+
+=item IO::Handle->format_line_break_characters EXPR
+
+=item $FORMAT_LINE_BREAK_CHARACTERS
+
+=item $:
+X<$:> X<FORMAT_LINE_BREAK_CHARACTERS>
+
+=begin original
+
+The current set of characters after which a string may be broken to
+fill continuation fields (starting with ^) in a format.  Default is
+S<" \n-">, to break on whitespace or hyphens.  (Mnemonic: a "colon" in
+poetry is a part of a line.)
+
+=end original
+
+“Æ÷“¸Ë“ÀÇ “°è“¼Ó“µÇ“´Â “ÇÊ“µå (^ “·Î “½Ã“ÀÛ“ÇÏ“´Â “°Í)“À¸“·Î“ÀÇ “¹®“ÀÚ“¿­“¿¡“¼­ “Çà“ºĞ“ÇÒ“À» 
+“Çã“¶ô“ÇÏ“´Â “¹®“ÀÚ“Áı“ÇÕ.
+“±â“º»“°ª“Àº S<" \n- "> “·Î “°ø“¹é“ÀÌ “°³“Çà“ÀÇ “µÚ“¿¡“¼­ “Çà“ºĞ“ÇÒ“ÀÌ “°¡“´É“ÇÏ“°Ô “µÇ“¾î “ÀÖ“½À“´Ï“´Ù.
+(“±â“¾ï“¹ı: “½Ã“¿¡“¼­“´Â "“Äİ“·Ğ"“Àº “Çà“ÀÇ “ÀÏ“ºÎ)
+
+=item IO::Handle->format_formfeed EXPR
+
+=item $FORMAT_FORMFEED
+
+=item $^L
+X<$^L> X<$FORMAT_FORMFEED>
+
+=begin original
+
+What formats output as a form feed.  Default is \f.
+
+=end original
+
+“Æ÷“¸Ë “Ãâ“·Â“¿¡“¼­ “Æä“ÀÌ“Áö“³Ñ“±è“À» “À§“ÇØ “Ãâ“·Â“µÈ “°Í.
+“±â“º»“°ª“Àº \f.
+
+=item $ACCUMULATOR
+
+=item $^A
+X<$^A> X<$ACCUMULATOR>
+
+=begin original
+
+The current value of the write() accumulator for format() lines.  A format
+contains formline() calls that put their result into C<$^A>.  After
+calling its format, write() prints out the contents of C<$^A> and empties.
+So you never really see the contents of C<$^A> unless you call
+formline() yourself and then look at it.  See L<perlform> and
+L<perlfunc/formline()>.
+
+=end original
+
+format() “Çà“À» “À§“ÇÑ “±× “½Ã“Á¡“¿¡“¼­“ÀÇ write() “¾î“Å¨“·¹“ÀÌ“ÅÍ“ÀÇ “°ª.
+format “¿¡“´Â C<$^A> “¿¡ “°á“°ú“¸¦ “³ª“¹Í“°í, formline() “È£“Ãâ“ÀÌ “Æ÷“ÇÔ“µË“´Ï“´Ù.
+“ÀÚ“½Å“ÀÇ “Æ÷“¸Ë“À» “È£“Ãâ“ÇÑ “µÚ“¿¡ write() “´Â C<$^A> “³»“¿ë“À» “Ãâ“·Â“ÇÏ“°í “¼Ò“°Å“ÇÕ“´Ï“´Ù.
+“µû“¶ó“¼­ “ÀÚ“½Å“ÀÌ formline() “À» “È£“Ãâ“ÇÏ“´Â “°Í“ÀÌ “¾Æ“´Ï“¸é, 
+C<$^A> “ÀÇ “°ª“ÀÌ “º¸“ÀÌ“´Â “°Í“Àº “¾Æ“´Õ“´Ï“´Ù.
+L<perlform> “°ú L<perlfunc/formline()> “¸¦ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item $CHILD_ERROR
+
+=item $?
+X<$?> X<$CHILD_ERROR>
+
+=begin original
+
+The status returned by the last pipe close, backtick (C<``>) command,
+successful call to wait() or waitpid(), or from the system()
+operator.  This is just the 16-bit status word returned by the
+traditional Unix wait() system call (or else is made up to look like it).  Thus, the
+exit value of the subprocess is really (C<<< $? >> 8 >>>), and
+C<$? & 127> gives which signal, if any, the process died from, and
+C<$? & 128> reports whether there was a core dump.  (Mnemonic:
+similar to B<sh> and B<ksh>.)
+
+=end original
+
+“¸¶“Áö“¸·“À¸“·Î close “ÇÑ “ÆÄ“ÀÌ“ÇÁ, “¿ª“µû“¿È“Ç¥ (C<``>) “Ä¿“¸Ç“µå,
+“¼º“°ø“ÇÑ wait() “¶Ç“´Â waitpid() “È£“Ãâ, system() “¿¬“»ê“ÀÚ“°¡ “¹İ“È¯“ÇÑ “»ó“ÅÂ.
+“ÀÌ “»ó“ÅÂ“´Ü“¾î“´Â “Àü“Åë“Àû“ÀÎ Unix “ÀÇ wait() “½Ã“½º“ÅÛ “È£“Ãâ“ÀÌ “¹İ“È¯“ÇÑ 
+16“ºñ“Æ®“ÀÇ “»ó“ÅÂ(“¶Ç“´Â “±×“·¸“°Ô “º¸“ÀÌ“´Â “°Í) “ÀÔ“´Ï“´Ù.
+“µû“¶ó“¼­ “¼­“ºê“ÇÁ“·Î“¼¼“½º“ÀÇ exit “°ª“Àº “½Ç“Á¦“·Î“´Â (C<<< $? >> 8 >>>) 
+“¿¡“¼­ C<$? & 127> “Àº “¸¸“¾à “ÀÖ“¤¿“¸é, “±× “ÇÁ“·Î“¼¼“½º“¸¦ “¸Ø“Ãß“´Â “½Ã“±×“³Î“¿¡“¼­ 
+C<$? & 128> “´Â “ÄÚ“¾î“´ı“ÇÁ“°¡ “ÀÖ“´Â“Áö “¾î“¶²“Áö“¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+(“±â“¾ï“¹ı: B<sh> “³ª B<ksh> “¿Í “°°“½À“´Ï“´Ù)
+
+=begin original
+
+Additionally, if the C<h_errno> variable is supported in C, its value
+is returned via $? if any C<gethost*()> function fails.
+
+=end original
+
+“°Å“±â“¿¡ C “¿¡“¼­ C<h_errno> “º¯“¼ö“¿¡ “´ë“ÀÀ“ÇÏ“°í “ÀÖ“´Â “°æ“¿ì“´Â 
+C<gethost*()> “°¡ “½Ç“ÆĞ“ÇÑ “¶§“¿¡ $? “¸¦ “Åë“ÇØ“¼­ “¹İ“È¯“µË“´Ï“´Ù.
+
+=begin original
+
+If you have installed a signal handler for C<SIGCHLD>, the
+value of C<$?> will usually be wrong outside that handler.
+
+=end original
+
+C<SIGCHLD> “ÀÇ “½Ã“±×“³Î “ÇÚ“µé“·¯“¸¦ “¼³“Á¤“ÇÑ “°æ“¿ì, 
+C<$?> “ÀÇ “°ª“Àº “º¸“Åë “ÇÚ“µé“·¯“ÀÇ “¹Ù“±ù“ÂÊ“¿¡“¼­“´Â “¹Ù“¸£“Áö “¾Ê“Àº “°ª“ÀÌ “µË“´Ï“´Ù.
+
+=begin original
+
+Inside an C<END> subroutine C<$?> contains the value that is going to be
+given to C<exit()>.  You can modify C<$?> in an C<END> subroutine to
+change the exit status of your program.  For example:
+
+=end original
+
+C<END> “¼­“ºê“·ç“Æ¾“ÀÇ “¾È“ÂÊ“¿¡“¼­“´Â C<$?> “¿¡“´Â C<exit()> “¿¡ “³Ñ“±â“·Á“°í “ÇÏ“´Â 
+“°ª“À» “Æ÷“ÇÔ“ÇÕ“´Ï“´Ù.
+“ÇÁ“·Î“±×“·¥“ÀÇ “Á¾“·á “»ó“ÅÂ“¸¦ “º¯“°æ“ÇÏ“±â “À§“ÇØ C<END> “¼­“ºê“·ç“Æ¾ “¾È“¿¡“¼­ 
+C<$?> “¸¦ “º¯“°æ“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù.
+“¿¹“¸¦“µé“¸é:
+
+    END {
+	$? = 1 if $? == 255;  # die would make it 255
+    } 
+
+=begin original
+
+Under VMS, the pragma C<use vmsish 'status'> makes C<$?> reflect the
+actual VMS exit status, instead of the default emulation of POSIX
+status; see L<perlvms/$?> for details.
+
+=end original
+
+VMS “¿¡“¼­“´Â C<use vmsish 'status'> “¸¦ “Áö“Á¤“ÇÏ“¸é, 
+C<$?> “´Â POSIX “»ó“ÅÂ“¸¦ “¿¡“¹Ä“·¹“ÀÌ“Æ®“ÇÑ “°Í“ÀÌ “¾Æ“´Ï“¶ó,
+“½Ç“Á¦ VMS “Á¾“·á“»ó“ÅÂ“¸¦ “¹İ“¿µ“ÇÕ“´Ï“´Ù; “ÀÚ“¼¼“ÇÑ “³»“¿ë“Àº L<perlvms/$?> “¸¦ 
+“Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=begin original
+
+Also see L<Error Indicators>.
+
+=end original
+
+L<Error Indicators> “µµ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item ${^CHILD_ERROR_NATIVE}
+X<$^CHILD_ERROR_NATIVE>
+
+=begin original
+
+The native status returned by the last pipe close, backtick (C<``>)
+command, successful call to wait() or waitpid(), or from the system()
+operator.  On POSIX-like systems this value can be decoded with the
+WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, WSTOPSIG
+and WIFCONTINUED functions provided by the L<POSIX> module.
+
+=end original
+
+The native status returned by the last pipe close, backtick (C<``>)
+command, successful call to wait() or waitpid(), or from the system()
+operator.  On POSIX-like systems this value can be decoded with the
+WIFEXITED, WEXITSTATUS, WIFSIGNALED, WTERMSIG, WIFSTOPPED, WSTOPSIG
+and WIFCONTINUED functions provided by the L<POSIX> module.
+(TBT)
+
+=begin original
+
+Under VMS this reflects the actual VMS exit status; i.e. it is the same
+as $? when the pragma C<use vmsish 'status'> is in effect.
+
+=end original
+
+VMS “¿¡“¼­“´Â “ÀÌ“°Í“Àº “½Ç“Á¦ VMS “ÀÇ “Á¾“·á “»ó“ÅÂ“¸¦ “¹İ“¿µ“ÇÕ“´Ï“´Ù;
+“¹Ù“²ã “¸»“ÇÏ“¸é “ÀÌ“°Í“Àº C<use vmsish 'status'> “ÇÁ“¶ó“±×“¸¶“°¡ “À¯“È¿“ÇÑ “¶§“ÀÇ $? “°ú 
+ë“½À“´Ï“´Ù.
+
+=item ${^ENCODING}
+X<$^ENCODING>
+
+=begin original
+
+The I<object reference> to the Encode object that is used to convert
+the source code to Unicode.  Thanks to this variable your perl script
+does not have to be written in UTF-8.  Default is I<undef>.  The direct
+manipulation of this variable is highly discouraged.
+
+=end original
+
+The I<object reference> to the Encode object that is used to convert
+the source code to Unicode.  Thanks to this variable your perl script
+does not have to be written in UTF-8.  Default is I<undef>.  The direct
+manipulation of this variable is highly discouraged.
+(TBT)
+
+=item $OS_ERROR
+
+=item $ERRNO
+
+=item $!
+X<$!> X<$ERRNO> X<$OS_ERROR>
+
+=begin original
+
+If used numerically, yields the current value of the C C<errno>
+variable, or in other words, if a system or library call fails, it
+sets this variable.  This means that the value of C<$!> is meaningful
+only I<immediately> after a B<failure>:
+
+=end original
+
+“¼ö“Ä¡“·Î “»ç“¿ë“µÇ“¸é “±× “½Ã“Á¡“ÀÇ C dml C<errno> “º¯“¼ö“ÀÇ “°ª“À» “¾ò“À» “¼ö “ÀÖ“½À“´Ï“´Ù;
+“¹Ù“²ã“¸»“ÇØ “¸¸“¾à “½Ã“½º“ÅÛ “È£“Ãâ“ÀÌ“³ª “¶ó“ÀÌ“ºê“·¯“¸® “È£“Ãâ“ÀÌ “½Ç“ÆĞ“ÇÏ“¸é, “ÀÌ “º¯“¼ö“°¡ 
+“¼³“Á¤“µË“´Ï“´Ù.
+This means that the value of C<$!> is meaningful
+only I<immediately> after a B<failure>:
+(TBT)
+
+    if (open(FH, $filename)) {
+	# Here $! is meaningless.
+	...
+    } else {
+	# ONLY here is $! meaningful.
+	...
+	# Already here $! might be meaningless.
+    }
+    # Since here we might have either success or failure,
+    # here $! is meaningless.
+
+=begin original
+
+In the above I<meaningless> stands for anything: zero, non-zero,
+C<undef>.  A successful system or library call does B<not> set
+the variable to zero.
+
+=end original
+
+“À§“ÀÇ I<meaningless> “´Â “¾Æ“¹«“°Í“µµ “¾Æ“´Õ“´Ï“´Ù: 0, 0“ÀÌ “¾Æ“´Ô, C<undef>.
+“½Ã“½º“ÅÛ “È£“Ãâ“ÀÌ“³ª “¶ó“ÀÌ“ºê“·¯“¸® “È£“Ãâ“ÀÌ “¼º“°ø“ÇÑ “°æ“¿ì“´Â “ÀÌ“º¯“¼ö“´Â 0 “¿¡ 
+“Á¤“ÀÇ“µÇ“Áö B<“¾Ê“½À“´Ï“´Ù>.
+
+=begin original
+
+If used as a string, yields the corresponding system error string.
+You can assign a number to C<$!> to set I<errno> if, for instance,
+you want C<"$!"> to return the string for error I<n>, or you want
+to set the exit value for the die() operator.  (Mnemonic: What just
+went bang?)
+
+=end original
+
+“¹®“ÀÚ“¿­“·Î “»ç“¿ë“µÇ“¸é, “´ë“ÀÀ“ÇÏ“´Â “½Ã“½º“ÅÛ “¿¡“·¯“ÀÇ “¸Ş“½Ã“Áö “¹®“ÀÚ“¿­“À» “¾ò“À» “¼ö “ÀÖ“½À“´Ï“´Ù.
+“¿¹“¸¦“µé“¸é, C<$!> “¿¡ “¿¡“·¯ “¹®“ÀÚ“¿­“À» “¹İ“È¯“ÇØ “ÁÖ“±æ “¿ø“ÇÏ“¸é, “¶Ç“´Â 
+die() “¿¬“»ê“ÀÚ“ÀÇ exit “°ª“À» “¼³“Á¤“ÇÏ“±â “À§“ÇØ I<errno> “¸¦ “¼³“Á¤“ÇÏ“±â “À§“ÇØ 
+C<$!> “¿¡ “´ë“ÀÔ“À» “¼ö“Çà“¤¿“´Â “°Í“ÀÌ “°¡“´É“ÇÕ“´Ï“´Ù.
+(“±â“¾ï“¹ı: “¹º“°¡ bang(!) “Çß“´Â“Áö )
+
+=begin original
+
+Also see L<Error Indicators>.
+
+=end original
+
+L<Error Indicators> “µµ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item %OS_ERROR
+
+=item %ERRNO
+
+=item %!
+X<%!>
+
+=begin original
+
+Each element of C<%!> has a true value only if C<$!> is set to that
+value.  For example, C<$!{ENOENT}> is true if and only if the current
+value of C<$!> is C<ENOENT>; that is, if the most recent error was
+"No such file or directory" (or its moral equivalent: not all operating
+systems give that exact error, and certainly not all languages).
+To check if a particular key is meaningful on your system, use
+C<exists $!{the_key}>; for a list of legal keys, use C<keys %!>.
+See L<Errno> for more information, and also see above for the
+validity of C<$!>.
+
+=end original
+
+Each element of C<%!> has a true value only if C<$!> is set to that
+value.  For example, C<$!{ENOENT}> is true if and only if the current
+value of C<$!> is C<ENOENT>; that is, if the most recent error was
+"No such file or directory" (or its moral equivalent: not all operating
+systems give that exact error, and certainly not all languages).
+To check if a particular key is meaningful on your system, use
+C<exists $!{the_key}>; for a list of legal keys, use C<keys %!>.
+See L<Errno> for more information, and also see above for the
+validity of C<$!>.
+(TBT)
+
+=item $EXTENDED_OS_ERROR
+
+=item $^E
+X<$^E> X<$EXTENDED_OS_ERROR>
+
+=begin original
+
+Error information specific to the current operating system.  At
+the moment, this differs from C<$!> under only VMS, OS/2, and Win32
+(and for MacPerl).  On all other platforms, C<$^E> is always just
+the same as C<$!>.
+
+=end original
+
+“Çö“Àç“ÀÇ OS “¿¡ “Æ¯“È­“µÈ “¿¡“·¯ “Á¤“º¸“ÀÔ“´Ï“´Ù.
+“Çö“Àç VMS, OS/", Win32(“¿Í MacPerl) “¿¡“¼­“¸¸ 
+C<$!> “°ú “´Ù“¸¥ “°ª“À» “°¡“Áı“´Ï“´Ù.
+“±× “¿Ü“ÀÇ “ÇÃ“·§“Æû“¿¡“¼­“´Â C<$E> “´Â “Ç×“»ó C<$!> “°ú “°°“½À“´Ï“´Ù.
+
+=begin original
+
+Under VMS, C<$^E> provides the VMS status value from the last
+system error.  This is more specific information about the last
+system error than that provided by C<$!>.  This is particularly
+important when C<$!> is set to B<EVMSERR>.
+
+=end original
+
+VMS “¿¡“¼­“´Â C<$^E> “´Â “¸¶“Áö“¸·“ÀÇ “½Ã“½º“ÅÛ “¿¡“·¯“ÀÇ VMS “»ó“ÅÂ“°ª“ÀÔ“´Ï“´Ù.
+“ÀÌ“°Í“Àº “¸¶“Áö“¸· “½Ã“½º“ÅÛ “¿¡“·¯“¿¡ “´ë“ÇØ“¼­ C<$!> “¿¡“¼­ “Á¦“°ø“µÈ “°Í“º¸“´Ù “±¸“Ã¼“Àû“ÀÎ 
+“Á¤“º¸“¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+“ÀÌ“°Í“Àº “Æ¯“È÷ C<$!> “ÀÌ B<EVMSERR> “·Î “¼³“Á¤“µÈ “°æ“¿ì“¿¡ “Áß“¿ä“ÇÕ“´Ï“´Ù.
+
+=begin original
+
+Under OS/2, C<$^E> is set to the error code of the last call to
+OS/2 API either via CRT, or directly from perl.
+
+=end original
+
+OS/2 “¿¡“¼­“´Â C<$^E> “´Â CRT “°æ“À¯, “¶Ç“´Â Perl “¿¡“¼­ “Á÷“Á¢“È£“Ãâ“µÈ 
+“¸¶“Áö“¸·“ÀÇ OS/2 API “ÀÇ “¿¡“·¯ “ÄÚ“µå“°¡ “¼³“Á¤“µË“´Ï“´Ù.
+
+=begin original
+
+Under Win32, C<$^E> always returns the last error information
+reported by the Win32 call C<GetLastError()> which describes
+the last error from within the Win32 API.  Most Win32-specific
+code will report errors via C<$^E>.  ANSI C and Unix-like calls
+set C<errno> and so most portable Perl code will report errors
+via C<$!>. 
+
+=end original
+
+Win32 “¿¡“¼­“´Â C<$^E> “´Â Win32 API “¿¡“¼­“ÀÇ “¸¶“Áö“¸·“ÀÇ “¿¡“·¯ “³»“¿ë“À» “¹İ“È¯“ÇÏ“´Â 
+C<GetLastError()> Win32 “È£“Ãâ“·Î “º¸“°í“µÇ“´Â “ÃÖ“½Å“ÀÇ “¿¡“·¯ “Á¤“º¸“¸¦ “¹İ“È¯“ÇÕ“´Ï“´Ù.
+“´ë“ºÎ“ºĞ“ÀÇ Win32 “°í“À¯“ÀÇ “ÄÚ“µå“´Â “¿¡“·¯“¸¦ C<$^E> “°æ“À¯“·Î “¹İ“È¯“ÇÕ“´Ï“´Ù.
+ANSI C “¿Í Unix “Ç³“ÀÇ “È£“Ãâ“Àº C<errno> “¸¦ “¼³“Á¤“ÇÏ“±â“¿¡ 
+“´ë“ºÎ“ºĞ“ÀÇ “ÀÌ“½Ä“¼º“ÀÌ “ÀÖ“´Â Perl “ÄÚ“µå“´Â C<$!> “°æ“À¯“·Î “¿¡“·¯“¸¦ “º¸“°í“ÇÕ“´Ï“´Ù.
+
+=begin original
+
+Caveats mentioned in the description of C<$!> generally apply to
+C<$^E>, also.  (Mnemonic: Extra error explanation.)
+
+=end original
+
+C<$!> “ÀÇ “¼³“¸í“¿¡“¼­ “Á¢“ÇÑ “¹®“Á¦“Á¡“Àº “ÀÏ“¹İ“Àû“À¸“·Î“´Â C<$^E> “¿¡“µµ “Àû“¿ë“µË“´Ï“´Ù.
+(“±â“¾ï“¹ı: “Ãß“°¡“ÀÇ (Extra) “¿¡“·¯“ÀÇ “¼³“¸í.)
+
+=begin original
+
+Also see L<Error Indicators>.
+
+=end original
+
+L<Error Indicators> “µµ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item $EVAL_ERROR
+
+=item $@
+X<$@> X<$EVAL_ERROR>
+
+=begin original
+
+The Perl syntax error message from the last eval() operator.
+If $@ is the null string, the last eval() parsed and executed
+correctly (although the operations you invoked may have failed in the
+normal fashion).  (Mnemonic: Where was the syntax error "at"?)
+
+=end original
+
+“¸¶“Áö“¸·“ÀÇ eval() “Á¶“ÀÛ“ÀÚ“¿¡ “ÀÇ“ÇÑ Perl “ÀÇ “±¸“¹®“¿¡“·¯ “¸Ş“½Ã“Áö“ÀÔ“´Ï“´Ù.
+$@ “°¡ “ºó“¹®“ÀÚ“¿­“ÀÌ“¸é “¸¶“Áö“¸·“ÀÇ eval() “ÀÌ “Á¤“»ó“Àû“À¸“·Î “ÇØ“¼®“µÇ“¾î, “½Ç“Çà“µÇ“°Ô 
+“µË“´Ï“´Ù.(“ÇÏ“Áö“¸¸, “½Ç“Çà“ÇÑ “¿¬“»ê“ÀÚ“°¡ “Åë“»ó“ÀÇ “ÀÇ“¹Ì“¿¡“¼­ “½Ç“ÆĞ“ÇÒ“Áö“µµ “¸ğ“¸¨“´Ï“´Ù).
+(“±â“¾ï“¹ı: “¾î“µğ“¿¡“¼­ ("at" where) “±¸“¹®“¿¡“·¯“°¡ “¹ß“»ı“Çß“´Â“°¡?)
+
+=begin original
+
+Warning messages are not collected in this variable.  You can,
+however, set up a routine to process warnings by setting C<$SIG{__WARN__}>
+as described below.
+
+=end original
+
+“°æ“°í“¸Ş“½Ã“Áö“´Â “ÀÌ “º¯“¼ö“¿¡ “µé“¾î“°¡“Áö “¾Ê“½À“´Ï“´Ù.
+“±×“·¯“³ª “±â“¼ú“ÇÑ C<$SIG{__WARN__}> “¿¡ “¼³“Á¤“ÇÏ“´Â “°Í“À¸“·Î 
+“°æ“°í“¸¦ “Ã³“¸®“ÇÏ“´Â “·ç“Æ¾“À» “¼³“Á¤“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù.
+
+=begin original
+
+Also see L<Error Indicators>.
+
+=end original
+
+L<Error Indicators> “µµ “Âü“Á¶“ÇØ“ÁÖ“¼¼“¿ä.
+
+=item $PROCESS_ID
+
+=item $PID
+
+=item $$
+X<$$> X<$PID> X<$PROCESS_ID>
+
+=begin original
+
+The process number of the Perl running this script.  You should
+consider this variable read-only, although it will be altered
+across fork() calls.  (Mnemonic: same as shells.)
+
+=end original
+
+“½º“Å©“¸³“Æ®“¸¦ “½Ç“Çà“ÇÏ“´Â Perl “ÀÇ “ÇÁ“·Î“¼¼“½º“¹ø“È£“ÀÔ“´Ï“´Ù.
+“ÀÌ “º¯“¼ö“´Â read-only “·Î “»ı“°¢“ÇØ“¾ß “ÇÏ“Áö“¸¸, 
+fork() “È£“Ãâ“¿¡ “ÀÇ“ÇØ “°ª“Àº “¹Ù“²ò“´Ï“´Ù.
+(“±â“¾ï“¹ı: “¼Ğ“°ú “°°“½À“´Ï“´Ù)
+
+=begin original
+
+Note for Linux users: on Linux, the C functions C<getpid()> and
+C<getppid()> return different values from different threads. In order to
+be portable, this behavior is not reflected by C<$$>, whose value remains
+consistent across threads. If you want to call the underlying C<getpid()>,
+you may use the CPAN module C<Linux::Pid>.
+
+=end original
+
+Note for Linux users: on Linux, the C functions C<getpid()> and
+C<getppid()> return different values from different threads. In order to
+be portable, this behavior is not reflected by C<$$>, whose value remains
+consistent across threads. If you want to call the underlying C<getpid()>,
+you may use the CPAN module C<Linux::Pid>.
+(TBT)
+
+=item $REAL_USER_ID
+
+=item $UID
+
+=item $<
+X<< $< >> X<$UID> X<$REAL_USER_ID>
+
+=begin original
+
+The real uid of this process.  (Mnemonic: it's the uid you came I<from>,
+if you're running setuid.)  You can change both the real uid and
+the effective uid at the same time by using POSIX::setuid().  Since
+changes to $< require a system call, check $! after a change attempt to 
+detect any possible errors.
+
+=end original
+
+“ÀÌ “ÇÁ“·Î“¼¼“½º“ÀÇ “½Ç“Á¦ uid “¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+(“±â“¾ï“¹ı: setuid “¿¡“¼­ “½Ç“Çà“Áß“ÀÌ“¶ó“¸é “°Å“±â"“¿¡“¼­" “¿Â uid“ÀÔ“´Ï“´Ù.)
+You can change both the real uid and
+the effective uid at the same time by using POSIX::setuid().  Since
+changes to $< require a system call, check $! after a change attempt to 
+detect any possible errors.
+(TBT)
+
+=item $EFFECTIVE_USER_ID
+
+=item $EUID
+
+=item $>
+X<< $> >> X<$EUID> X<$EFFECTIVE_USER_ID>
+
+=begin original
+
+The effective uid of this process.  Example:
+
+=end original
+
+“ÀÌ “ÇÁ“·Î“¼¼“½º“ÀÇ “½Ç“Á¦ uid “¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+“¿¹“Á¦:
+
+    $< = $>;		# set real to effective uid
+    ($<,$>) = ($>,$<);	# swap real and effective uid
+
+=begin original
+
+You can change both the effective uid and the real uid at the same
+time by using POSIX::setuid().  Changes to $> require a check to $!
+to detect any possible errors after an attempted change. 
+
+=end original
+
+You can change both the effective uid and the real uid at the same
+time by using POSIX::setuid().  Changes to $> require a check to $!
+to detect any possible errors after an attempted change. 
+(TBT)
+
+=begin original
+
+(Mnemonic: it's the uid you went I<to>, if you're running setuid.)
+C<< $< >> and C<< $> >> can be swapped only on machines
+supporting setreuid().
+
+=end original
+
+(“±â“¾ï“¹ı: setuid “¿¡ “½Ç“Çà“Áß“ÀÌ“¶ó“¸é “±×“°÷"“À¸“·Î" “°¡“´Â uid “ÀÔ“´Ï“´Ù)
+C<< $< >> “¿Í C<< $> >> “ÀÇ “º¯“È¯“Àº setreuid() “¸¦ “Áö“¿ø“ÇÏ“´Â 
+“¸Ó“½Å“¿¡“¼­“¸¸ “°¡“´É“ÇÕ“´Ï“´Ù.
+
+=item $REAL_GROUP_ID
+
+=item $GID
+
+=item $(
+X<$(> X<$GID> X<$REAL_GROUP_ID>
+
+=begin original
+
+The real gid of this process.  If you are on a machine that supports
+membership in multiple groups simultaneously, gives a space separated
+list of groups you are in.  The first number is the one returned by
+getgid(), and the subsequent ones by getgroups(), one of which may be
+the same as the first number.
+
+=end original
+
+“ÀÌ “ÇÁ“·Î“¼¼“½º“ÀÇ “½Ç“Á¦ gid “¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+“µ¿“½Ã“¿¡ “º¹“¼ö“ÀÇ “±×“·ì“¿¡ “¼Ò“¼Ó“ÇÒ “¼ö “ÀÖ“´Â “¸Ó“½Å“¿¡“¼­“´Â “¼Ò“¼Ó“ÇÏ“´Â “±×“·ì“À» “½º“Æä“ÀÌ“½º“·Î 
+“±¸“ºĞ“ÇÑ “¸®“½º“Æ®“¸¦ “¾ò“À» “¼ö “ÀÖ“½À“´Ï“´Ù.
+“ÃÖ“ÃÊ“ÀÇ “¼ö“Ä¡“´Â getgid() “¿¡“¼­ “¹İ“È¯“µÈ “°Í“ÀÔ“´Ï“´Ù.
+“±× “µÚ“¿¡ getgroups() “°¡ “¹İ“È¯“ÇÏ“´Â “°ª“ÀÌ “°è“¼Ó“µÇ“°í “±× “Áß “ÇÏ“³ª“´Â 
+“¸Ç“Ã³“À½“ÀÇ “°ª“°ú “°°“À» “Áö“µµ “¸ğ“¸¨“´Ï“´Ù.
+
+=begin original
+
+However, a value assigned to C<$(> must be a single number used to
+set the real gid.  So the value given by C<$(> should I<not> be assigned
+back to C<$(> without being forced numeric, such as by adding zero. Note
+that this is different to the effective gid (C<$)>) which does take a
+list.
+
+=end original
+
+“±×“·¯“³ª C<$(> “¿¡ “´ë“ÀÔ“µÈ “°ª“Àº “½Ç“Á¦ gid “¿¡ “¼³“Á¤“µÈ “°ª“ÀÇ “ÇÏ“³ª“°¡ “¾Æ“´Ï“¸é “¾È“µË“´Ï“´Ù.
+“µû“¶ó“¼­ C<$(> “¿¡ “ÁÖ“¾î“Áø “°ª“Àº “Á¦“·Î“¸¦ “¸¸“Á·“ÇÏ“´Â “°Í“¿¡ “ÀÇ“ÇØ “¼ö“Ä¡“È­“ÇÏ“´Â “ÀÏ “¾ø“ÀÌ 
+C<$(> “¿¡ “½á“¼­ “µÇ“µ¹“·Á“¾ß“ÇÏ“´Â “°Í“Àº “¾Æ“´Õ“´Ï“´Ù.
+
+Note
+that this is different to the effective gid (C<$)>) which does take a
+list.
+(TBT)
+
+=begin original
+
+You can change both the real gid and the effective gid at the same
+time by using POSIX::setgid().  Changes to $( require a check to $!
+to detect any possible errors after an attempted change.
+
+=end original
+
+POSI“¤¼::setgid() “¸¦ “»ç“¿ë“ÇØ“¼­, “½Ç“Á¦ GID “¿Í “½Ç“È¿ GID “ÀÇ “¾ç“ÂÊ“À» “µ¿“½Ã“¿¡ 
+“º¯“°æ“ÇÒ “¼ö “ÀÖ“½À“´Ï“´Ù.
+Changes to $( require a check to $!
+to detect any possible errors after an attempted change.
+(TBT)
+
+=begin original
+
+(Mnemonic: parentheses are used to I<group> things.  The real gid is the
+group you I<left>, if you're running setgid.)
+
+=end original
+
+(“±â“¾ï“¹ı: “°ı“È£“´Â I<“±×“·ì“È­> “¿¡ “»ç“¿ë“µË“´Ï“´Ù.
+setgid “¿¡“¼­ “½Ç“Çà“Áß“ÀÌ“¶ó“¸é “½Ç“Á¦ gid “´Â I<left> “ÇÑ 
+“Áï “¶³“¾î“Áø “±×“·ì“ÀÔ“´Ï“´Ù)
+
+=item $EFFECTIVE_GROUP_ID
+
+=item $EGID
+
+=item $)
+X<$)> X<$EGID> X<$EFFECTIVE_GROUP_ID>
+
+=begin original
+
+The effective gid of this process.  If you are on a machine that
+supports membership in multiple groups simultaneously, gives a space
+separated list of groups you are in.  The first number is the one
+returned by getegid(), and the subsequent ones by getgroups(), one of
+which may be the same as the first number.
+
+=end original
+
+“ÀÌ “ÇÁ“·Î“¼¼“½º“ÀÇ “½Ç“È¿ gid “¸¦ “³ª“Å¸“³À“´Ï“´Ù.
+“µ¿“½Ã“¿¡ “º¹“¼ö“ÀÇ “±×“·ì“¿¡ “¼Ò“¼Ó“ÇÒ “¼ö “ÀÖ“´Â “¸Ó“½Å“¿¡“¼­“´Â 
+“¼Ò“¼Ó“ÇÏ“´Â “±×“·ì“À» “½º“Æä“ÀÌ“½º“·Î “±¸“ºĞ“ÇÑ “¸®“½º“Æ®“¸¦ “¾ò“À» “¼ö “ÀÖ“½À“´Ï“´Ù.
+“ÃÖ“ÃÊ“ÀÇ “¼ö“Ä¡“´Â getgid() “¿¡“¼­ “¹İ“È¯“µÈ “°Í“ÀÔ“´Ï“´Ù.
+“±× “µÚ“¿¡ getgroups() “°¡ “¹İ“È¯“ÇÏ“´Â “°ª“ÀÌ “°è“¼Ó“µÇ“°í, “±× “Áß“ÀÇ “ÇÏ“³ª“´Â 
+“ÃÖ“ÃÊ“ÀÇ “°ª“°ú “°°“À»“Áö“µµ “¸ğ“¸¨“´Ï“´Ù.
+
+=begin original
+
+Similarly, a value assigned to C<$)> must also be a space-separated
+list of numbers.  The first number sets the effective gid, and
+the rest (if any) are passed to setgroups().  To get the effect of an
+empty list for setgroups(), just repeat the new effective gid; that is,
+to force an effective gid of 5 and an effectively empty setgroups()
+list, say C< $) = "5 5" >.
+
+=end original
+
+“¸¶“Âù“¤¿“Áö“·Î, C<$)> “·Î “´ë“ÀÔ“ÇÏ“´Â “°ª“Àº “½º“Æä“ÀÌ“½º“·Î “±¸“ºĞ“µÈ “¼ö“Ä¡“ÀÇ “¸®“½º“Æ®“°¡ 
+“¾Æ“´Ï“¸é “¾È“µË“´Ï“´Ù.
+“ÃÖ“ÃÊ“ÀÇ “¼ö“Ä¡“´Â “½Ç“È¿ gid “¸¦ “¼³“Á¤“ÇÏ“°í, “³²“Àº “¼ö“Ä¡“´Â (“¸¸“¾à “ÀÖ“´Ù“¸é) setgroups() “¿¡
+“³Ñ“°Ü“Áı“´Ï“´Ù.
+setgroups() “¿¡ “ºó“¸®“½º“Æ®“¸¦ “³Ñ“±â“°í “½Í“Àº “°æ“¿ì“´Â “´Ü“¼ø“È÷ “»õ“·Î“¿î “½Ç“È¿ gid “¸¦ 
+“¹İ“º¹“ÇØ“ÁÖ“¼¼“¿ä.
+“Áï, “½Ç“È¿ gid “¸¦ 5 “·Î “ÇØ“¼­ setgroups() “¿¡ “ºó“¸®“½º“Æ®“¸¦ “³Ñ“±â“°í “½Í“Àº “°æ“¿ì“´Â 
+C< $) = "5 5" > “·Î “ÇØ“ÁÖ“¼¼“¿ä.
+
+=begin original
+
+You can change both the effective gid and the real gid at the same
+time by using POSIX::setgid() (use only a single numeric argument).
+Changes to $) require a check to $! to detect any possible errors
+after an attempted change.
+
+=end original
+
+You can change both the effective gid and the real gid at the same
+time by using POSIX::setgid() (use only a single numeric argument).
+Changes to $) require a check to $! to detect any possible errors
+after an attempted change.
+(TBT)
+
+=begin original
+
+(Mnemonic: parentheses are used to I<group> things.  The effective gid
+is the group that's I<right> for you, if you're running setgid.)
+
+=end original
+
+(“±â“¾ï“¹ı: “°ı“È£“´Â I<“±×“·ì“È­> “¿¡ “»ç“¿ë“µË“´Ï“´Ù. 
+setgid “¿¡“¼­ “½Ç“Çà“Áß“ÀÌ“¶ó“¸é “½Ç“È¿ gid “´Â right “¸¦ “Áï “¹Ù“¸¥ “±×“·ì“ÀÔ“´Ï“´Ù.)
+
+=begin original
+
+C<< $< >>, C<< $> >>, C<$(> and C<$)> can be set only on
+machines that support the corresponding I<set[re][ug]id()> routine.  C<$(>
+and C<$)> can be swapped only on machines supporting setregid().
+
+=end original
+
+C<< $< >>, C<< $> >>, C<$(>, C<$)> “Àº “½Ç“Çà“ÇÏ“´Â “¸Ó“½Å“¿¡“¼­ 
+“Áö“¿ø“ÇÏ“´Â I<set[re][ug]>id()> “·ç“Æ¾“ÀÌ “Áö“¿ø“µÉ “¶§“¿¡“¸¸ “¼³“Á¤“°¡“´É“ÇÕ“´Ï“´Ù.
+C<$(> “¿Í C<$)> “ÀÇ “±³“È¯“Àº 
+setregid() “°¡ “Áö“¿ø“µÇ“´Â “¸Ó“½Å“¿¡“¼­“¸¸ “°¡“´É“ÇÕ“´Ï“´Ù.
+
+=item $PROGRAM_NAME
+
+=item $0
+X<$0> X<$PROGRAM_NAME>
+
+=begin original
+
+Contains the name of the program being executed.
+
+=end original
+
+“½Ç“Çà“µÇ“´Â “ÇÁ“·Î“±×“·¥“ÀÇ “ÀÌ“¸§“À» “³ª“Å¸“³À“´Ï“´Ù.
+
+=begin original
+
+On some (read: not all) operating systems assigning to C<$0> modifies
+the argument area that the C<ps> program sees.  On some platforms you
+may have to use special C<ps> options or a different C<ps> to see the
+changes.  Modifying the $0 is more useful as a way of indicating the
+current program state than it is for hiding the program you're
+running.  (Mnemonic: same as B<sh> and B<ksh>.)
+
+=end original
+
+C<$0> “¿¡ “´ë“ÀÔ“À» “¼ö“Çà“ÇÏ“´Â “°Í“À¸“·Î B<ps> “ÇÁ“·Î“±×“·¥“ÀÌ
+C<$0> “ªË“ÓÛ“ìı“ªò“ú¼“ªÊ“ª¦“ª³“ªÈ“ªÇ B<ps>) “«×“«í“«°“«é“«à“ª¬™À¹“ª¯“¡¢
+“ìÚ‘Êı“«¨“«ê“«¢“ªò“áó“ïá“ªÇ“ª­“ªë“«·“«¹“«Æ“«à“ªâ“ª¢“ªê“ªŞ“ª¹(“îï“ªÆ“ªÇ“ªÏ“ª¢“ªê“ªŞ“ª»“ªó)“¡£
+$0 “ªÎ“áó“ïá“ªÏ“¡¢’¼Â“ú¼“ª·“ªÆ“ª¤“ªë“«×“«í“«°“«é“«à“ªò’±£“ª¹“ªè“ªê“ªÏ“¡¢
+’¼Â“ú¼“ñé“ªÎ“«×“«í“«°“«é“«à“ªÎ‘×´“÷¾“ªò“øú“ãÆ“ª¹“ªë“ªÈ“ª­“ªË“¡¢“ŞÅ“ª¦“ªÈ“ªè“ª¤“ªÇ“ª·“ªç“ª¦“¡£
+(“ÑÀ“åã“Ûö: B<sh> “ªä B<ksh> “ªÈ“ÔÒ“ª¸“¡£)
+
+=begin original
+
+Note that there are platform specific limitations on the maximum
+length of C<$0>.  In the most extreme case it may be limited to the
+space occupied by the original C<$0>.
+
+=end original
+
+Note that there are platform specific limitations on the maximum
+length of C<$0>.  In the most extreme case it may be limited to the
+space occupied by the original C<$0>.
+(TBT)
+
+=begin original
+
+In some platforms there may be arbitrary amount of padding, for
+example space characters, after the modified name as shown by C<ps>.
+In some platforms this padding may extend all the way to the original
+length of the argument area, no matter what you do (this is the case
+for example with Linux 2.2).
+
+=end original
+
+In some platforms there may be arbitrary amount of padding, for
+example space characters, after the modified name as shown by C<ps>.
+In some platforms this padding may extend all the way to the original
+length of the argument area, no matter what you do (this is the case
+for example with Linux 2.2).
+(TBT)
+
+=begin original
+
+Note for BSD users: setting C<$0> does not completely remove "perl"
+from the ps(1) output.  For example, setting C<$0> to C<"foobar"> may
+result in C<"perl: foobar (perl)"> (whether both the C<"perl: "> prefix
+and the " (perl)" suffix are shown depends on your exact BSD variant
+and version).  This is an operating system feature, Perl cannot help it.
+
+=end original
+
+BSD “«æ’¡¼“«¶’¡¼“ªØ“ªÎ“ñ¼“ëò: C<$0> “ªË“ö·“ªò“«»“«Ã“«È“ª·“ªÆ“ªâ“¡¢ps(1) “ªÎ“õó“Õô“ª«“ªé
+“èÇ“îï“ªË "perl" “ªÎ“Ùş“í®“Öª“ªÏ“ö¢“ªê“ğ¶“ª«“ªì“ªŞ“ª»“ªó“¡£
+“ÖÇ“ª¨“ªĞ“¡¢C<$0> “ªË C<"foobar"> “ªÈ“àâ“ïÒ“ª¹“ªë“ªÈ“¡¢C<"perl: foobar (perl)"> “ªÈ“ª¤“ª¦
+“Ì¿“Íı“ªË“ªÊ“ªê“ªŞ“ª¹
+(C<"perl: "> “ïÈ“Ôé‘´Ç“ªÈ" (perl)" “ïÈ“Ú­‘´Ç“ª¬“øú“ãÆ“ªµ“ªì“ªë“ª«“ªÉ“ª¦“ª«“ªÏ “¡¢“ïá“ü¬“ªÊ
+BSD “ªÎ“ğú“×¾“ªÈ“«Ğ’¡¼“«¸“«ç“«ó“ªË“ëî“ğí“ª·“ªŞ“ª¹)“¡£
+“ª³“ªì“ªÏ“«ª“«Ú“«ì’¡¼“«Æ“«£“«ó“«°“«·“«¹“«Æ“«à“ªÎ“Ñ¦“Òö“ªÇ“¡¢Perl “ªÏ“ù¼“ªâ“ªÇ“ª­“ªŞ“ª»“ªó“¡£
+
+=begin original
+
+In multithreaded scripts Perl coordinates the threads so that any
+thread may modify its copy of the C<$0> and the change becomes visible
+to ps(1) (assuming the operating system plays along).  Note that
+the view of C<$0> the other threads have will not change since they
+have their own copies of it.
+
+=end original
+
+In multithreaded scripts Perl coordinates the threads so that any
+thread may modify its copy of the C<$0> and the change becomes visible
+to ps(1) (assuming the operating system plays along).  Note that
+the view of C<$0> the other threads have will not change since they
+have their own copies of it.
+(TBT)
+
+=item $[
+X<$[>
+
+=begin original
+
+The index of the first element in an array, and of the first character
+in a substring.  Default is 0, but you could theoretically set it
+to 1 to make Perl behave more like B<awk> (or Fortran) when
+subscripting and when evaluating the index() and substr() functions.
+(Mnemonic: [ begins subscripts.)
+
+=end original
+
+“ÛÕ“Öª“ªÎ“õÌ“ôø“ªÎ“é©“áÈ“ªä“¡¢“Ùş“í®“Öª“ªÎ“õÌ“ôø“ªÎ“Ùş“í®“ªÎ“«¤“«ó“«Ç“«Ã“«¯“«¹“ªò
+“ãÆ“ª·“ªŞ“ª¹“¡£
+“«Ç“«Õ“«©“«ë“«È“ªÏ 0 “ªÇ“ª¹“ª¬“¡¢“×â“Öå“îÜ“ªË“ªÏ“¡¢index() ’´Ø‘Êı“ªä
+substr() ’´Ø‘Êı“ªò“øÄ’²Á“ª¹“ªë“ªÈ“ª­“ªË“¡¢Perl “ªÎ“ÔÑ“íÂ“ªò“ªè“ªê B<awk>
+(“ªä Fortran) “ªË“ĞÎ“ªÅ“ª±“ªë“ª¿“ªá“¡¢1 “ªË“àâ“ïÒ“ª¹“ªë“ª³“ªÈ“ªâ“ªÇ“ª­“ªŞ“ª¹“¡£
+(“ÑÀ“åã“Ûö: [ “ªÏ“ôÕ“ª¨“í®“Üõ“ª±“ªÎ“ã·“ªá“¡£)
+
+=begin original
+
+As of release 5 of Perl, assignment to C<$[> is treated as a compiler
+directive, and cannot influence the behavior of any other file.
+(That's why you can only assign compile-time constants to it.)
+Its use is highly discouraged.
+
+=end original
+
+Perl 5 “ª«“ªé“ªÏ C<$[> “ªØ“ªÎ“ÓÛ“ìı“ªÏ“¡¢“«³“«ó“«Ñ“«¤“«é“ªØ“ªÎ“«Ç“«£“«ì“«¯“«Æ“«£“«Ö“ªÈ“ª·“ªÆ“Ğâ“ªï“ªì“¡¢
+“öâ“ªÎ“«Õ“«¡“«¤“«ë“ªÎ“ÔÑ“íÂ“ªË“ç¯“úÂ“ªò‘Óë“ª¨“ªë“ª³“ªÈ“ª¬“ªÊ“ª¯“ªÊ“ªê“ªŞ“ª·“ª¿“¡£
+(That's why you can only assign compile-time constants to it.)
+“ª³“ªÎ’ÊÑ‘Êı“ªÏ“ªÇ“ª­“ªë“ªÀ“ª±“ŞÅ“ªï“ªÊ“ª¤“ªè“ª¦“ªË“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+(TBT)
+
+=begin original
+
+Note that, unlike other compile-time directives (such as L<strict>),
+assignment to C<$[> can be seen from outer lexical scopes in the same file.
+However, you can use local() on it to strictly bind its value to a
+lexical block.
+
+=end original
+
+Note that, unlike other compile-time directives (such as L<strict>),
+assignment to C<$[> can be seen from outer lexical scopes in the same file.
+However, you can use local() on it to strictly bind its value to a
+lexical block.
+(TBT)
+
+=item $]
+X<$]>
+
+=begin original
+
+The version + patchlevel / 1000 of the Perl interpreter.  This variable
+can be used to determine whether the Perl interpreter executing a
+script is in the right range of versions.  (Mnemonic: Is this version
+of perl in the right bracket?)  Example:
+
+=end original
+
+Perl “«¤“«ó“«¿“«×“«ê“«¿“ªÎ version + patchlevel / 1000 “ª¬“Ú÷“ªµ“ªì“ªŞ“ª¹“¡£
+“«¹“«¯“«ê“«×“«È“ªÎ“õÌ“ôø“ªÇ“¡¢“ª½“ªÎ“«¹“«¯“«ê“«×“«È“ªò’¼Â“ú¼“ª·“ªÆ“ª¤“ªë“«¤“«ó“«¿“«×“«ê“«¿“ªÎ“«Ğ’¡¼“«¸“«ç“«ó“ª¬
+“îê“ï·“ªÊ“Ûô’°Ï‘ÄÚ“ªË“ª¢“ªë“ª«“ªò“ğà“ªÙ“ªë“¡¢“ªÈ“ª¤“ªÃ“ª¿“ª³“ªÈ“ª¬“ªÇ“ª­“ªŞ“ª¹“¡£
+(“ÑÀ“åã“Ûö: Perl “ªÎ“«Ğ’¡¼“«¸“«ç“«ó“ªÏ“¡¢“ïá“ª·“ª¤“Ûô’°Ï (right
+bracket) “ªË“ª¢“ªë“ª«“¡£)“¡¡“ÖÇ:
+
+    warn "No checksumming!\n" if $] < 3.019;
+
+=begin original
+
+See also the documentation of C<use VERSION> and C<require VERSION>
+for a convenient way to fail if the running Perl interpreter is too old.
+
+=end original
+
+’¼Â“ú¼“ª¹“ªë Perl “«¤“«ó“«¿“«×“«ê“«¿“ª¬“Í¯“ª¹“ª®“ªë“íŞ“ùê“ªË“ğû“Öõ“ª¹“ªë“øµ“××“ªÊ“Û°“Ûö“ªË
+“ªÄ“ª¤“ªÆ“ªÏ C<use VERSION> “ªÈ C<require VERSION> “ªÎ“«É“«­“«å“«á“«ó“«È“ªâ
+‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+The floating point representation can sometimes lead to inaccurate
+numeric comparisons.  See C<$^V> for a more modern representation of
+the Perl version that allows accurate string comparisons.
+
+=end original
+
+“İ©“ÔÑ“á³‘Êı“ïÃ“øú“úŞ“ªÏ‘Êı“ö·“İï“Îò“ª¬“Üô“ïá“ü¬“ªË“à÷“ªë“ª³“ªÈ“ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+“Ùş“í®“Öª“İï“Îò“ª¬“ŞÅ“ª¨“ªë“ãæ“ª·“ª¤ Perl “«Ğ’¡¼“«¸“«ç“«ó“ªÎ“øú“úŞ“Û°“Ûö“ªÇ“ª¢“ªë C<$^V> “ªò
+‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=item $COMPILING
+
+=item $^C
+X<$^C> X<$COMPILING>
+
+=begin original
+
+The current value of the flag associated with the B<-c> switch.
+Mainly of use with B<-MO=...> to allow code to alter its behavior
+when being compiled, such as for example to AUTOLOAD at compile
+time rather than normal, deferred loading.  Setting
+C<$^C = 1> is similar to calling C<B::minus_c>.
+
+=end original
+
+B<-c> “«¹“«¤“«Ã“«Á“ªË’´Ø“Ö§“Üõ“ª±“ªé“ªì“ª¿“úŞ“î¤“ªÎ“ö·“ªÇ“ª¹“¡£
+“ñ«“ªË B<-MO=...> “ªÈ“Íì“ªË“éÄ“ª¤“ªé“ªì“¡¢“ÖÇ“ª¨“ªĞ AUTOLOAD “ªò“÷×“ßÈ“ªÎ’ÃÙ“æÅ“«í’¡¼“«É“ªÇ“ªÏ
+“ªÊ“ª¯“«³“«ó“«Ñ“«¤“«ë“ãÁ“ªË’¼Â“ú¼“ª¹“ªë“ªÈ“ª¤“ªÃ“ª¿“¡¢“«³“«ó“«Ñ“«¤“«ë“ãÁ“ªÎ“òÉ“ªë“Ùñ“ª¤“ªò
+’ÊÑ“ª¨“ªë“ª¿“ªá“ªË“éÄ“ª¤“ªŞ“ª¹“¡£
+C<$^C = 1> “ªË“àâ“ïÒ“ª¹“ªë“ª³“ªÈ“ªÏ C<B::minus_c> “ªò“û¼“ªÓ“õó“ª¹“ªÎ“ªÈ“ŞÄ“ªÆ“ª¤“ªŞ“ª¹“¡£
+
+=item $DEBUGGING
+
+=item $^D
+X<$^D> X<$DEBUGGING>
+
+=begin original
+
+The current value of the debugging flags.  (Mnemonic: value of B<-D>
+switch.) May be read or set. Like its command-line equivalent, you can use
+numeric or symbolic values, eg C<$^D = 10> or C<$^D = "st">.
+
+=end original
+
+“«Ç“«Ğ“«Ã“«°“«Õ“«é“«°“ªÎ“úŞ“î¤“ªÎ“ö·“ªò“ãÆ“ª·“ªŞ“ª¹“¡£
+(“ÑÀ“åã“Ûö: B<-D> “«¹“«¤“«Ã“«Á“ªÎ“ö·“¡£)
+’ÆÉ“ªß“ßö“ª­“Ê¦“Òö“ªÇ“ª¹“¡£
+“«³“«Ş“«ó“«É“«é“«¤“«ó“ªË“ªè“ªë“Ôõ’²Á“ªÊ“Ñ¦“Òö“ªÈ“ÔÒ’ÍÍ“ªË“¡¢‘Êı“ö·“ªÈ“«·“«ó“«Ü“«ë“ö·“ª¬“ŞÅ“ª¨“ªŞ“ª¹
+(“ÖÇ: C<$^D = 10> “ªŞ“ª¿“ªÏ C<$^D = "st">)“¡£
+
+=item ${^RE_DEBUG_FLAGS}
+
+=begin original
+
+The current value of the regex debugging flags. Set to 0 for no debug output
+even when the re 'debug' module is loaded. See L<re> for details.
+
+=end original
+
+“ïá“Ğ®“øú“úŞ“«Ç“«Ğ“«Ã“«°“«Õ“«é“«°“ªÎ“úŞ“î¤“ªÎ“ö·“ªÇ“ª¹“¡£
+0 “ªò“«»“«Ã“«È“ª¹“ªë“ªÈ“¡¢re 'debug' “«â“«¸“«å’¡¼“«ë“ª¬’ÆÉ“ªß’¹ş“ªŞ“ªì“ªÆ“ª¤“ªÆ“ªâ
+“«Ç“«Ğ“«Ã“«°“õó“Õô“ªò“ú¼“ª¤“ªŞ“ª»“ªó“¡£
+“ßÙ“á¬“ªË“ªÄ“ª¤“ªÆ“ªÏ L<re> “ªò‘²Î“ğÎ“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+
+=item ${^RE_TRIE_MAXBUF}
+
+=begin original
+
+Controls how certain regex optimisations are applied and how much memory they
+utilize. This value by default is 65536 which corresponds to a 512kB temporary
+cache. Set this to a higher value to trade memory for speed when matching
+large alternations. Set it to a lower value if you want the optimisations to
+be as conservative of memory as possible but still occur, and set it to a
+negative value to prevent the optimisation and conserve the most memory.
+Under normal situations this variable should be of no interest to you.
+
+=end original
+
+Controls how certain regex optimisations are applied and how much memory they
+utilize. This value by default is 65536 which corresponds to a 512kB temporary
+cache. Set this to a higher value to trade memory for speed when matching
+large alternations. Set it to a lower value if you want the optimisations to
+be as conservative of memory as possible but still occur, and set it to a
+negative value to prevent the optimisation and conserve the most memory.
+Under normal situations this variable should be of no interest to you.
+(TBT)
+
+=item $SYSTEM_FD_MAX
+
+=item $^F
+X<$^F> X<$SYSTEM_FD_MAX>
+
+=begin original
+
+The maximum system file descriptor, ordinarily 2.  System file
+descriptors are passed to exec()ed processes, while higher file
+descriptors are not.  Also, during an open(), system file descriptors are
+preserved even if the open() fails.  (Ordinary file descriptors are
+closed before the open() is attempted.)  The close-on-exec
+status of a file descriptor will be decided according to the value of
+C<$^F> when the corresponding file, pipe, or socket was opened, not the
+time of the exec().
+
+=end original
+
+“«·“«¹“«Æ“«à“ª¬“ŞÅ“éÄ“ª¹“ªë“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÎ“õÌ“ÓŞ“ö·“ªò“ãÆ“ª·“¡¢
+“÷×“ßÈ“ªÏ 2 “ªÇ“ª¹“¡£
+“«·“«¹“«Æ“«à“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÏ“¡¢exec() “ªµ“ªì“ª¿“«×“«í“«»“«¹“ªË“Ô¤“ªµ“ªì“ªŞ“ª¹“ª¬“¡¢
+“ª½“ªì“ì¤“Ë½“ªÎ“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÏ“Ô¤“ªµ“ªì“ªŞ“ª»“ªó“¡£
+“ªŞ“ª¿“¡¢open() “ªÎ’¼Â“ú¼“ñé“ªÏ“¡¢“«·“«¹“«Æ“«à“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÏ“¡¢
+“ª¿“ªÈ“ª¨ open() “ª¬“ã÷“ø¨“ª·“ªÆ“ªâ“¡¢“ÜÁ“ğí“ªµ“ªì“ªŞ“ª¹“¡£
+(“÷×“ßÈ“ªÎ“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÏ“¡¢open() “ª¬’¼Â“ú¼“ªµ“ªì“ªë“îñ“ªË“«¯“«í’¡¼“«º“ªµ“ªì“ªŞ“ª¹“¡£)
+“«Õ“«¡“«¤“«ë“ÑÀ“âû“í­“ªÎ close-on-exec “ªÎ“«¹“«Æ’¡¼“«¿“«¹“ªÏ“¡¢exec() “ãÁ“ªÇ“ªÏ“ªÊ“ª¯“¡¢
+’ÂĞ’±ş“ª¹“ªë“«Õ“«¡“«¤“«ë“¡¢“«Ñ“«¤“«×“«½“«±“«Ã“«È“ªÎ open “ãÁ“ªÎ C<$^F> “ªÎ“ö·“ªË“ªè“ªÃ“ªÆ
+“Ì½“ªá“ªé“ªì“ªŞ“ª¹“¡£
+
+=item $^H
+
+=begin original
+
+WARNING: This variable is strictly for internal use only.  Its availability,
+behavior, and contents are subject to change without notice.
+
+=end original
+
+“Ìí“Í±: “ª³“ªÎ’ÊÑ‘Êı“ªÏ’¸·“ÚË“ªË‘ÄÚ“İ»“ŞÅ“éÄ“ªË“ùÚ“ïÒ“ªµ“ªì“ªŞ“ª¹“¡£
+“ª½“ªÎ“Ê¦“éÄ“àõ“¡¢’µó“ÔÑ“¡¢‘ÄÚ“é»“ªÏ“Í±“ò±“ªÊ“ª¯’ÊÑ“ÌÚ“ªµ“ªì“ªë“Ê¦“Òö“àõ“ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+
+=begin original
+
+This variable contains compile-time hints for the Perl interpreter.  At the
+end of compilation of a BLOCK the value of this variable is restored to the
+value when the interpreter started to compile the BLOCK.
+
+=end original
+
+“ª³“ªÎ’ÊÑ‘Êı“ªË“ªÏ Perl “«¤“«ó“«¿“«×“«ê“«¿“ªÎ“«³“«ó“«Ñ“«¤“«ë“ãÁ“ªÎ“«Ò“«ó“«È“ª¬“ìı“ªê“ªŞ“ª¹“¡£
+BLOCK “ªÎ“«³“«ó“«Ñ“«¤“«ë“ğû“Öõ“ãÁ“ªË“¡¢“ª³“ªÎ’ÊÑ‘Êı“ªÎ“ö·“ªÏ
+“«¤“«ó“«¿“«×“«ê“«¿“ª¬ BLOCK “ªÎ“«³“«ó“«Ñ“«¤“«ë“ªò“ËÒ“ã·“ª·“ª¿“ãÁ“ªÎ“ö·“ªË’Ìá“ªµ“ªì“ªŞ“ª¹“¡£
+
+=begin original
+
+When perl begins to parse any block construct that provides a lexical scope
+(e.g., eval body, required file, subroutine body, loop body, or conditional
+block), the existing value of $^H is saved, but its value is left unchanged.
+When the compilation of the block is completed, it regains the saved value.
+Between the points where its value is saved and restored, code that
+executes within BEGIN blocks is free to change the value of $^H.
+
+=end original
+
+Perl “ª¬“«ì“«­“«·“««“«ë“«¹“«³’¡¼“«×“ªò“ò¥“ªÄ“«Ö“«í“«Ã“«¯“Ï°“ğã(eval “ªÎ“ñé“ãó“¡¢required “ªµ“ªì“ª¿
+“«Õ“«¡“«¤“«ë“¡¢“«µ“«Ö“«ë’¡¼“«Á“«ó“ªÎ“ñé“ãó“¡¢loop “ªÎ“ñé“ãó“¡¢‘Ìõ“Ëì“Üõ“ª­“«Ö“«í“«Ã“«¯)“ªÎ
+“«Ñ’¡¼“«º“ªò“ËÒ“ã·“ª¹“ªë“ªÈ“ª­“¡¢“úŞ“î¤“ªÎ $^H “ªÎ“ö·“ªÏ“ÜÁ“ğí“ªµ“ªì“ªŞ“ª¹“ª¬“¡¢
+“ö·“ªÏ’ÊÑ“ÌÚ“ªµ“ªì“ªŞ“ª»“ªó“¡£
+“«Ö“«í“«Ã“«¯“ªÎ“«³“«ó“«Ñ“«¤“«ë“ª¬“ğû“ªï“ªë“ªÈ“¡¢“ÜÁ“ğí“ªµ“ªì“ª¿“ö·“ª¬’Ìá“ªµ“ªì“ªŞ“ª¹“¡£
+“ö·“ªÎ“ÜÁ“ğí“ªÈ“üŞ“ÜÖ“ªÎ“Êà“ªÎ“ò¢“ïÃ“ªÇ“¡¢
+BEGIN “«Ö“«í“«Ã“«¯“ªÎ“ñé“ªÇ’¼Â“ú¼“ªµ“ªì“ªë“«³’¡¼“«É“ªÏ“í»“ë¦“ªË
+$^H “ªÎ“ö·“ªò’ÊÑ“ÌÚ“ªÇ“ª­“ªŞ“ª¹“¡£
+
+=begin original
+
+This behavior provides the semantic of lexical scoping, and is used in,
+for instance, the C<use strict> pragma.
+
+=end original
+
+“ª³“ªÎ“òÉ“ªë“Ùñ“ª¤“ªÏ“«ì“«­“«·“««“«ë“«¹“«³’¡¼“«×“ªò“ò¥“ªÁ“¡¢“ª½“ªÎ“ñé“ªÇ“ŞÅ“ª¨“ªŞ“ª¹“¡£
+“ÖÇ“ªÈ“ª·“ªÆ“ªÏ C<use strict> “ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+
+=begin original
+
+The contents should be an integer; different bits of it are used for
+different pragmatic flags.  Here's an example:
+
+=end original
+
+‘ÄÚ“é»“ªÏ“ïÚ‘Êı“ªÇ“ª¢“ªë“ªÙ“ª­“ªÇ“ª¹“¡£
+“«Ó“«Ã“«È’Ëè“ªË“ì¶“ªÊ“ªë“«×“«é“«°“«Ş“«Õ“«é“«°“ªÈ“ª·“ªÆ“ŞÅ“ªï“ªì“ªŞ“ª¹“¡£“ì¤“ù»“ªÏ“ÖÇ“ªÇ“ª¹:
+
+    sub add_100 { $^H |= 0x100 }
+
+    sub foo {
+	BEGIN { add_100() }
+	bar->baz($boon);
+    }
+
+=begin original
+
+Consider what happens during execution of the BEGIN block.  At this point
+the BEGIN block has already been compiled, but the body of foo() is still
+being compiled.  The new value of $^H will therefore be visible only while
+the body of foo() is being compiled.
+
+=end original
+
+BEGIN “«Ö“«í“«Ã“«¯“ªÎ’¼Â“ú¼“ñé“ªË“ÑÃ“ª³“ªë“ª³“ªÈ“ªò“ÍÅ“ª¨“ªÆ“ªß“ªŞ“ª¹“¡£
+“ª³“ªÎ“ãÁ“ïÃ“ªÇ BEGIN “«Ö“«í“«Ã“«¯“ªÏ‘¼È“ªË“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“ªÆ“ª¤“ªŞ“ª¹“ª¬“¡¢
+foo() “ªÎ“ñé“ãó“ªÏ“ªŞ“ªÀ“«³“«ó“«Ñ“«¤“«ë“ñé“ªÇ“ª¹“¡£
+’½¾“ªÃ“ªÆ $^H “ªÎ“ãæ“ª·“ª¤“ö·“ªÏ foo() “ªÎ“ñé“ãó“ª¬“«³“«ó“«Ñ“«¤“«ë“ñé“ªË“ªÎ“ªß
+“Ì¸“ªë“ª³“ªÈ“ª¬“õó‘À´“ªŞ“ª¹“¡£
+
+=begin original
+
+Substitution of the above BEGIN block with:
+
+=end original
+
+“ß¾“ÑÀ“ªÎ BEGIN “«Ö“«í“«Ã“«¯“ªò“ì¤“ù»“ªÎ“ªè“ª¦“ªË’ÊÑ“ÌÚ“ª¹“ªë“ªÈ:
+
+    BEGIN { require strict; strict->import('vars') }
+
+=begin original
+
+demonstrates how C<use strict 'vars'> is implemented.  Here's a conditional
+version of the same lexical pragma:
+
+=end original
+
+“ªÉ“ªÎ“ªè“ª¦“ªË C<use strict 'vars'> “ª¬’¼Â‘×°“ªµ“ªì“ªÆ“ª¤“ªë“ª«“ª¬“ªï“ª«“ªê“ªŞ“ª¹“¡£
+“ì¤“ù»“ªÏ“ÔÒ“ª¸“«ì“«­“«·“««“«ë“«×“«é“«°“«Ş“ªÎ‘Ìõ“Ëì“Üõ“ª­“÷ú“ªÇ“ª¹:
+
+    BEGIN { require strict; strict->import('vars') if $condition }
+
+=item %^H
+
+=begin original
+
+The %^H hash provides the same scoping semantic as $^H.  This makes it
+useful for implementation of lexically scoped pragmas. See L<perlpragma>.
+
+=end original
+
+%^H “«Ï“«Ã“«·“«å“ªÏ $^H “ªÈ“ÔÒ“ª¸“«¹“«³’¡¼“«×“ªò“ò¥“ªÁ“ªŞ“ª¹“¡£
+“ª³“ªì“ªÏ“«ì“«­“«·“««“«ë“«¹“«³’¡¼“«×“ªò“ò¥“ªÄ“«×“«é“«°“«Ş“ªò’¼Â‘×°“ª¹“ªë“ªÎ“ªË“øµ“××“ªÇ“ª¹“¡£
+L<perlpragma> “ªò‘²Î“ğÎ“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+
+=item $INPLACE_EDIT
+
+=item $^I
+X<$^I> X<$INPLACE_EDIT>
+
+=begin original
+
+The current value of the inplace-edit extension.  Use C<undef> to disable
+inplace editing.  (Mnemonic: value of B<-i> switch.)
+
+=end original
+
+“öÇ“ª­“üµ“ª¨“øº“ó¢“ªÎ’³È“íå“í­“ªÎ“ö·“ªò“ãÆ“ª·“ªŞ“ª¹“¡£
+“öÇ“ª­“üµ“ª¨“øº“ó¢“ªò“Ğ×“ò­“ª¹“ªë“ª¿“ªá“ªË“ªÏ“¡¢C<undef> “ªò“àâ“ïÒ“ª·“ªŞ“ª¹“¡£
+(“ÑÀ“åã“Ûö: B<-i> “«¹“«¤“«Ã“«Á“ªÎ“ö·“¡£)
+
+=item $^M
+X<$^M>
+
+=begin original
+
+By default, running out of memory is an untrappable, fatal error.
+However, if suitably built, Perl can use the contents of C<$^M>
+as an emergency memory pool after die()ing.  Suppose that your Perl
+were compiled with C<-DPERL_EMERGENCY_SBRK> and used Perl's malloc.
+Then
+
+=end original
+
+“«Ç“«Õ“«©“«ë“«È“ªÇ“ªÏ“¡¢“«á“«â“«ê“Üô“ğë“ªÏ“«È“«é“«Ã“«×“ªÇ“ª­“ªÊ“ª¤“öÈ“Ù¤“îÜ“«¨“«é’¡¼“ªÈ“ªÊ“ªê“ªŞ“ª¹“¡£
+“ª·“ª«“ª·“¡¢“ªâ“ª·“îê“ï·“ªË“Ï°“õé“ªµ“ªì“ªÆ“ª¤“ªì“ªĞ“¡¢Perl “ªÏ C<$^M> “ªÎ“ñé“ãó“ªò
+die() “ª·“ª¿“ı­“ªÎ“ÑÌ“Ğá“éÄ“«á“«â“«ê“ªÈ“ª·“ªÆ“ŞÅ“ª¨“ªŞ“ª¹“¡£
+Perl “ª¬ C<-DPERL_EMERGENCY_SBRK> “Üõ“ª­“ªÇ“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“¡¢
+Perl “ªÎ malloc “ªò“ŞÅ“ª¦“ªÈ’²¾“ïÒ“ª·“ªŞ“ª¹“¡£“ª½“ª·“ªÆ“¡¢
+
+    $^M = 'a' x (1 << 16);
+
+=begin original
+
+would allocate a 64K buffer for use in an emergency.  See the
+F<INSTALL> file in the Perl distribution for information on how to
+add custom C compilation flags when compiling perl.  To discourage casual
+use of this advanced feature, there is no L<English|English> long name for
+this variable.
+
+=end original
+
+“ªÈ“ª¹“ªë“ªÈ“ÑÌ“Ğá“éÄ“ªÎ 64K “ªÎ“«Ğ“«Ã“«Õ“«¡“ªò“ùÜ“ªê‘µ±“ªÆ“ªŞ“ª¹“¡£
+perl “ªò“«³“«ó“«Ñ“«¤“«ë“ª¹“ªë“ªÈ“ª­“ªË‘¶À“í»“ªÎ C “«³“«ó“«Ñ“«¤“«ë“«Õ“«é“«°“ªò“õÚ“Ê¥“ª¹“ªë
+“Û°“Ûö“ªË“ªÄ“ª¤“ªÆ“ªÎ“ï×“ÜÃ“ªÏ“¡¢Perl “ÛÕ“øÖ“«Ñ“«Ã“«±’¡¼“«¸“ªË“ùß“ªŞ“ªì“ªÆ“ª¤“ªë
+F<INSTALL> “«Õ“«¡“«¤“«ë“ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+“ª³“ªÎ’³È“íå“Ñ¦“Òö“ªò’µ¤’·Ú“ªË“ŞÅ“ª¨“ªÊ“ª¤“ªè“ª¦“ªË“ª¹“ªë“ª¿“ªá“ªË“¡¢
+“ª³“ªÎ’ÊÑ‘Êı“ªË“ªÏ L<English|English> “ªÎ“íş“ª¤“Ù£“îñ“ªÏ“ª¢“ªê“ªŞ“ª»“ªó“¡£
+
+=item $OSNAME
+
+=item $^O
+X<$^O> X<$OSNAME>
+
+=begin original
+
+The name of the operating system under which this copy of Perl was
+built, as determined during the configuration process.  The value
+is identical to C<$Config{'osname'}>.  See also L<Config> and the 
+B<-V> command-line switch documented in L<perlrun>.
+
+=end original
+
+“ª³“ªÎ Perl “ª¬“Ï°“õé“ªµ“ªì“ª¿“«ª“«Ú“«ì’¡¼“«Æ“«£“«ó“«°“«·“«¹“«Æ“«à“ªÎ“Ù£“îñ“ªÇ“ª¹“¡£
+“ª³“ªì“ªÏ“àâ“ïÒ“«×“«í“«»“«¹“ñé“ªË“Ì½“ïÒ“ªµ“ªì“ªŞ“ª¹“¡£
+“ª³“ªÎ“ö·“ªÏ C<$Config{'osname'}> “ªÈ“ÔÒ“ª¸“ªÇ“ª¹“¡£
+L<Config> “ªÈ“¡¢L<perlrun> “ªÇ“«É“«­“«å“«á“«ó“«È“ûù“ªµ“ªì“ªÆ“ª¤“ªë
+B<-V> “«³“«Ş“«ó“«É“«é“«¤“«ó“«¹“«¤“«Ã“«Á“ªâ‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+In Windows platforms, $^O is not very helpful: since it is always
+C<MSWin32>, it doesn't tell the difference between
+95/98/ME/NT/2000/XP/CE/.NET.  Use Win32::GetOSName() or
+Win32::GetOSVersion() (see L<Win32> and L<perlport>) to distinguish
+between the variants.
+
+=end original
+
+In Windows platforms, $^O is not very helpful: since it is always
+C<MSWin32>, it doesn't tell the difference between
+95/98/ME/NT/2000/XP/CE/.NET.  Use Win32::GetOSName() or
+Win32::GetOSVersion() (see L<Win32> and L<perlport>) to distinguish
+between the variants.
+(TBT)
+
+=item ${^OPEN}
+
+=begin original
+
+An internal variable used by PerlIO.  A string in two parts, separated
+by a C<\0> byte, the first part describes the input layers, the second
+part describes the output layers.
+
+=end original
+
+PerlIO “ªÇ“ŞÅ“ªï“ªì“ªë‘ÄÚ“İ»’ÊÑ‘Êı“ªÇ“ª¹“¡£
+A string in two parts, separated
+by a C<\0> byte, the first part describes the input layers, the second
+part describes the output layers.
+(TBT)
+
+=item $PERLDB
+
+=item $^P
+X<$^P> X<$PERLDB>
+
+=begin original
+
+The internal variable for debugging support.  The meanings of the
+various bits are subject to change, but currently indicate:
+
+=end original
+
+“«Ç“«Ğ“«Ã“«°“Ñ¦“Òö“ªÎ“ª¿“ªá“ªÎ‘ÄÚ“İ»’ÊÑ‘Êı“ªÇ“ª¹“¡£
+“ª½“ªì“ª¾“ªì“ªÎ“«Ó“«Ã“«È“ªÎ“ëò“Ú«“ªÏ’ÊÑ“ªï“ªë“ª«“ªâ“ª·“ªì“ªŞ“ª»“ªó“ª¬“¡¢
+“úŞ“î¤“ªÎ“ªÈ“ª³“ªí“ªÏ“ì¤“ù»“ªÎ“÷×“ªê“ªÇ“ª¹:
+
+=over 6
+
+=item 0x01
+
+=begin original
+
+Debug subroutine enter/exit.
+
+=end original
+
+“«µ“«Ö“«ë’¡¼“«Á“«ó“ªÎ“õó“ìı“ªê“ªò“«Ç“«Ğ“«Ã“«°“ª·“ªŞ“ª¹“¡£
+
+=item 0x02
+
+=begin original
+
+Line-by-line debugging.
+
+=end original
+
+“ú¼’Ëè“ªË“«Ç“«Ğ“«Ã“«°“ª·“ªŞ“ª¹“¡£
+
+=item 0x04
+
+=begin original
+
+Switch off optimizations.
+
+=end original
+
+“õÌ“îê“ûù“ªò“ú¼“ª¤“ªŞ“ª»“ªó“¡£
+
+=item 0x08
+
+=begin original
+
+Preserve more data for future interactive inspections.
+
+=end original
+
+‘½«‘À´“ªÎ’ÂĞ“ü¥“îÜ“ªÊ’¸¡“ŞÛ“ªÎ“ª¿“ªá“ªË“ªè“ªê“Òı“ª¯“ªÎ“«Ç’¡¼“«¿“ªò“ÜÁ“ğí“ª·“ªŞ“ª¹“¡£
+
+=item 0x10
+
+=begin original
+
+Keep info about source lines on which a subroutine is defined.
+
+=end original
+
+“«µ“«Ö“«ë’¡¼“«Á“«ó“ª¬“ïÒ“ëù“ªµ“ªì“ª¿“«½’¡¼“«¹“ú¼“ªË’´Ø“ª¹“ªë“ï×“ÜÃ“ªò“ÜÁ“ò¥“ª·“ªŞ“ª¹“¡£
+
+=item 0x20
+
+=begin original
+
+Start with single-step on.
+
+=end original
+
+“«·“«ó“«°“«ë“«¹“«Æ“«Ã“«×’¼Â“ú¼“ªÇ“ËÒ“ã·“ª·“ªŞ“ª¹“¡£
+
+=item 0x40
+
+=begin original
+
+Use subroutine address instead of name when reporting.
+
+=end original
+
+“ÜÃ“Í±“ãÁ“ªË“«µ“«Ö“«ë’¡¼“«Á“«ó“Ù£“ªÇ“ªÊ“ª¯“«µ“«Ö“«ë’¡¼“«Á“«ó“ªÎ“«¢“«É“«ì“«¹“ªò“ŞÅ“ª¤“ªŞ“ª¹“¡£
+
+=item 0x80
+
+=begin original
+
+Report C<goto &subroutine> as well.
+
+=end original
+
+C<goto &subroutine> “ªâ“ÔÒ’ÍÍ“ªË“ÜÃ“Í±“ª·“ªŞ“ª¹“¡£
+
+=item 0x100
+
+=begin original
+
+Provide informative "file" names for evals based on the place they were compiled.
+
+=end original
+
+eval “ªË’ÂĞ“ª·“ªÆ“¡¢“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“ª¿“êÈ“öÇ“ªò“êª“ªË“ª·“ª¿“¡¸“«Õ“«¡“«¤“«ë“¡¹“Ù£“ªò“ğ«“Íê“ª·“ªŞ“ª¹“¡£
+
+=item 0x200
+
+=begin original
+
+Provide informative names to anonymous subroutines based on the place they
+were compiled.
+
+=end original
+
+“Ùí“Ù£“«µ“«Ö“«ë’¡¼“«Á“«ó“ªË’ÂĞ“ª·“ªÆ“¡¢
+“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“ª¿“êÈ“öÇ“ªò“Ğñ“ªË“ª·“ª¿‘²Î“ÍÅ“Ù£“ªò“ğ«“Íê“ª·“ªŞ“ª¹“¡£
+
+=item 0x400
+
+=begin original
+
+Debug assertion subroutines enter/exit.
+
+=end original
+
+“«µ“«Ö“«ë’¡¼“«Á“«ó“ªÎ“òä“ìı/‘ÍÑ“õó“ªò“«¢“«µ’¡¼“«È“ª·“ªŞ“ª¹“¡£
+
+=back
+
+=begin original
+
+Some bits may be relevant at compile-time only, some at
+run-time only.  This is a new mechanism and the details may change.
+
+=end original
+
+“Ùí“Ù£“«µ“«Ö“«ë’¡¼“«Á“«ó“ªË’ÂĞ“ª·“ªÆ“¡¢
+“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“ª¿“êÈ“öÇ“ªò“Ğñ“ªË“ª·“ª¿‘²Î“ÍÅ“Ù£“ªò“ğ«“Íê“ª·“ªŞ“ª¹“¡£
+
+=item $LAST_REGEXP_CODE_RESULT
+
+=item $^R
+X<$^R> X<$LAST_REGEXP_CODE_RESULT>
+
+=begin original
+
+The result of evaluation of the last successful C<(?{ code })>
+regular expression assertion (see L<perlre>).  May be written to.
+
+=end original
+
+“õÌ“ı­“ªË“à÷“Íí“ª·“ª¿ C<(?{ code })> “ïá“Ğ®“øú“úŞ“«¢“«µ’¡¼“«È“ªÎ“øÄ’²Á“ªÎ“Ì¿“Íı“ªÇ“ª¹
+(L<perlre> “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤)“¡£“ªª“ª½“ªé“ª¯“ªâ“ªÃ“ªÈ“ßö“ª­“ğë“ª·“ªŞ“ª¹“¡£
+
+=item $EXCEPTIONS_BEING_CAUGHT
+
+=item $^S
+X<$^S> X<$EXCEPTIONS_BEING_CAUGHT>
+
+=begin original
+
+Current state of the interpreter.
+
+=end original
+
+“úŞ“î¤“ªÎ“«¤“«ó“«¿“«×“«ê“«¿“ªÎ‘×´“÷¾“ªò“ãÆ“ª·“ªŞ“ª¹“¡£
+
+=begin original
+
+    $^S         State
+    ---------   -------------------
+    undef       Parsing module/eval
+    true (1)    Executing an eval
+    false (0)   Otherwise
+
+=end original
+
+    $^S         State
+    ---------   -------------------
+    undef       “«â“«¸“«å’¡¼“«ë/eval “ªÎ“«Ñ’¡¼“«¹“ñé
+    ‘Õæ (1)      eval “ªÎ’¼Â“ú¼“ñé
+    ˜ºô (0)      “ª½“ªÎ“öâ
+
+=begin original
+
+The first state may happen in $SIG{__DIE__} and $SIG{__WARN__} handlers.
+
+=end original
+
+“õÌ“ôø“ªÎ‘×´“÷¾“ªÏ $SIG{__DIE__} “ªÈ $SIG{__WARN__} “ªÎ“«Ï“«ó“«É“«é“ªÇ“ÑÃ“ª­“ªë“Ê¦“Òö“àõ“ª¬
+“ª¢“ªê“ªŞ“ª¹“¡£
+
+=item $BASETIME
+
+=item $^T
+X<$^T> X<$BASETIME>
+
+=begin original
+
+The time at which the program began running, in seconds since the
+epoch (beginning of 1970).  The values returned by the B<-M>, B<-A>,
+and B<-C> filetests are based on this value.
+
+=end original
+
+“«×“«í“«°“«é“«à“ªò’¼Â“ú¼“ËÒ“ã·“ª·“ª¿“ãÁ“Ê¾“ªò“¡¢“Ñº“êª (1970“Ò´“ªÎ“ã·“ªá) “ª«“ªé“ªÎ“õ©‘Êı“ªÇ“ãÆ“ª·“ª¿“ªâ“ªÎ“ªÇ“ª¹“¡£
+“«Õ“«¡“«¤“«ë“«Æ“«¹“«È B<-M>“¡¢B<-A>“¡¢B<-C> “ªÇ“Ú÷“ªµ“ªì“ªë“ö·“ªÏ“¡¢“ª³“ªÎ“ö·“ªË“Ğñ“ªÅ“ª¤“ªÆ“ª¤“ªŞ“ª¹“¡£
+
+=item ${^TAINT}
+
+=begin original
+
+Reflects if taint mode is on or off.  1 for on (the program was run with
+B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
+B<-t> or B<-TU>).  This variable is read-only.
+
+=end original
+
+“çı“æø’¸¡“ŞÛ“«â’¡¼“«É“ªÎ“«ª“«ó‘¡¤“«ª“«Õ“ªò“Úã“ç±“ª·“ªŞ“ª¹“¡£
+1 for on (the program was run with
+B<-T>), 0 for off, -1 when only taint warnings are enabled (i.e. with
+B<-t> or B<-TU>).  This variable is read-only.
+(TBT)
+
+=item ${^UNICODE}
+
+=begin original
+
+Reflects certain Unicode settings of Perl.  See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values. This variable is set during Perl startup
+and is thereafter read-only.
+
+=end original
+
+Reflects certain Unicode settings of Perl.  See L<perlrun>
+documentation for the C<-C> switch for more information about
+the possible values. This variable is set during Perl startup
+and is thereafter read-only.
+(TBT)
+
+=item ${^UTF8CACHE}
+
+=begin original
+
+This variable controls the state of the internal UTF-8 offset caching code.
+1 for on (the default), 0 for off, -1 to debug the caching code by checking
+all its results against linear scans, and panicking on any discrepancy.
+
+=end original
+
+This variable controls the state of the internal UTF-8 offset caching code.
+1 for on (the default), 0 for off, -1 to debug the caching code by checking
+all its results against linear scans, and panicking on any discrepancy.
+(TBT)
+
+=item ${^UTF8LOCALE}
+
+=begin original
+
+This variable indicates whether an UTF-8 locale was detected by perl at
+startup. This information is used by perl when it's in
+adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
+switch); see L<perlrun> for more info on this.
+
+=end original
+
+This variable indicates whether an UTF-8 locale was detected by perl at
+startup. This information is used by perl when it's in
+adjust-utf8ness-to-locale mode (as when run with the C<-CL> command-line
+switch); see L<perlrun> for more info on this.
+(TBT)
+
+=item $PERL_VERSION
+
+=item $^V
+X<$^V> X<$PERL_VERSION>
+
+=begin original
+
+The revision, version, and subversion of the Perl interpreter, represented
+as a C<version> object.
+
+=end original
+
+C<version> “«ª“«Ö“«¸“«§“«¯“«È“ªÈ“ª·“ªÆ“øú“úŞ“ªµ“ªì“ªë revision, version, subversion“¡£
+
+=begin original
+
+This variable first appeared in perl 5.6.0; earlier versions of perl will
+see an undefined value. Before perl 5.10.0 $^V was represented as a v-string.
+
+=end original
+
+“ª³“ªÎ’ÊÑ‘Êı“ªÏ perl 5.6.0 “ªÇ“õÌ“ôø“ªË“úŞ“ªì“ªŞ“ª·“ª¿; “ª½“ªì“ªè“ªê“îñ“ªÎ“«Ğ’¡¼“«¸“«ç“«ó“ªÇ“ªÏ
+“Ú±“ïÒ“ëù“ö·“ªÈ“ªÊ“ªê“ªŞ“ª¹“¡£
+perl 5.10.0 “ì¤“îñ“ªÇ“ªÏ $^V “ªÏ v-string “û¡“ãÒ“ªÇ“øú“úŞ“ªµ“ªì“ªŞ“ª¹“¡£
+
+=begin original
+
+$^V can be used to determine whether the Perl interpreter executing a
+script is in the right range of versions.  (Mnemonic: use ^V for Version
+Control.)  Example:
+
+=end original
+
+$^V “ªÏ“«¹“«¯“«ê“«×“«È“ªò’¼Â“ú¼“ª·“ªÆ“ª¤“ªë Perl “«¤“«ó“«¿“«×“«ê“«¿“ªÎ“«Ğ’¡¼“«¸“«ç“«ó“ª¬
+“ïá“ª·“ª¤“Ûô’°Ï“ªË“ìı“ªÃ“ªÆ“ª¤“ªë“ª«“ªò“ğà“ªÙ“ªë“ªÎ“ªË“ŞÅ“ª¨“ªŞ“ª¹“¡£(“ÑÀ“åã“Ûö:
+^V “ªò“«Ğ’¡¼“«¸“«ç“«ó“«³“«ó“«È“«í’¡¼“«ë“ªË“ŞÅ“ª¤“ªŞ“ª¹“¡£) “ÖÇ:
+
+    warn "Hashes not randomized!\n" if !$^V or $^V lt v5.8.1
+
+=begin original
+
+To convert C<$^V> into its string representation use sprintf()'s
+C<"%vd"> conversion:
+
+=end original
+
+C<$^V> “ªò“Ùş“í®“Öª“øú“úŞ“ªË’ÊÑ“üµ“ª¹“ªë“ªË“ªÏ sprintf() “ªÎ C<"%vd"> ’ÊÑ“üµ“ªò“ŞÅ“ª¤“ªŞ“ª¹:
+
+    printf "version is v%vd\n", $^V;  # Perl's version
+
+=begin original
+
+See the documentation of C<use VERSION> and C<require VERSION>
+for a convenient way to fail if the running Perl interpreter is too old.
+
+=end original
+
+’¼Â“ú¼“ª¹“ªë Perl “«¤“«ó“«¿“«×“«ê“«¿“ª¬“Í¯“ª¹“ª®“ªë“íŞ“ùê“ªË“ğû“Öõ“ª¹“ªë“øµ“××“ªÊ“Û°“Ûö“ªË
+“ªÄ“ª¤“ªÆ“ªÏ C<use VERSION> “ªÈ C<require VERSION> “ªÎ“«É“«­“«å“«á“«ó“«È“ªò
+‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+See also C<$]> for an older representation of the Perl version.
+
+=end original
+
+Perl “«Ğ’¡¼“«¸“«ç“«ó“ªÎ“Í¯“ª¤“øú“úŞ“ªË“ªÄ“ª¤“ªÆ“ªÏ C<$]> “ªâ‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=item $WARNING
+
+=item $^W
+X<$^W> X<$WARNING>
+
+=begin original
+
+The current value of the warning switch, initially true if B<-w>
+was used, false otherwise, but directly modifiable.  (Mnemonic:
+related to the B<-w> switch.)  See also L<warnings>.
+
+=end original
+
+“Ìí“Í±“«¹“«¤“«Ã“«Á“ªÎ“ö·“ªÇ“¡¢B<-w> “«¹“«¤“«Ã“«Á“ª¬“ŞÅ“ªï“ªì“ªë“ªÈ‘ÄÚ“İ»“îÜ“ªË‘Õæ“ªÈ“ªÊ“ªê“¡¢
+“ª½“ª¦“ªÇ“ªÊ“ª¤“íŞ“ùê“ªÏ“òÁ“ïÈ’ÊÑ“ÌÚ“Ê¦“Òö“ªÇ“ª¹“¡£
+(“ÑÀ“åã“Ûö: B<-w> “«¹“«¤“«Ã“«Á“ªË’´Ø“Ìõ“ª·“ªŞ“ª¹“¡£)
+L<warnings> “ªâ‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=item ${^WARNING_BITS}
+
+=begin original
+
+The current set of warning checks enabled by the C<use warnings> pragma.
+See the documentation of C<warnings> for more details.
+
+=end original
+
+C<use warnings> “«×“«é“«°“«Ş“ªÇ“êó’¸ú“ªË“ªµ“ªì“ª¿“¡¢“úŞ“î¤“ªÎ“Ìí“Í±“«Á“«§“«Ã“«¯“ªÎ“ó¢“ùê“ªÇ“ª¹“¡£
+“ßÙ“á¬“ªË“ªÄ“ª¤“ªÆ“ªÏ C<warnings> “ªÎ“«É“«­“«å“«á“«ó“«È“ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=item ${^WIN32_SLOPPY_STAT}
+
+=begin original
+
+If this variable is set to a true value, then stat() on Windows will
+not try to open the file. This means that the link count cannot be
+determined and file attributes may be out of date if additional
+hardlinks to the file exist. On the other hand, not opening the file
+is considerably faster, especially for files on network drives.
+
+=end original
+
+If this variable is set to a true value, then stat() on Windows will
+not try to open the file. This means that the link count cannot be
+determined and file attributes may be out of date if additional
+hardlinks to the file exist. On the other hand, not opening the file
+is considerably faster, especially for files on network drives.
+(TBT)
+
+=begin original
+
+This variable could be set in the F<sitecustomize.pl> file to
+configure the local Perl installation to use "sloppy" stat() by
+default.  See L<perlrun> for more information about site
+customization.
+
+=end original
+
+This variable could be set in the F<sitecustomize.pl> file to
+configure the local Perl installation to use "sloppy" stat() by
+default.  See L<perlrun> for more information about site
+customization.
+(TBT)
+
+=item $EXECUTABLE_NAME
+
+=item $^X
+X<$^X> X<$EXECUTABLE_NAME>
+
+=begin original
+
+The name used to execute the current copy of Perl, from C's
+C<argv[0]> or (where supported) F</proc/self/exe>.
+
+=end original
+
+Perl “«Ğ“«¤“«Ê“«ê“í»“ãó“ª¬’¼Â“ú¼“ªµ“ªì“ª¿“ãÁ“ªÎ“Ù£“îñ“ªò C “ªÎ argv[0] “ªŞ“ª¿“ªÏ (’ÂĞ’±ş“ª·“ªÆ“ª¤“ªì“ªĞ)
+F</proc/self/exe> “ª«“ªé“ò¥“ªÃ“ªÆ“ª­“ª¿“ªâ“ªÎ“ªÇ“ª¹“¡£
+
+=begin original
+
+Depending on the host operating system, the value of $^X may be
+a relative or absolute pathname of the perl program file, or may
+be the string used to invoke perl but not the pathname of the
+perl program file.  Also, most operating systems permit invoking
+programs that are not in the PATH environment variable, so there
+is no guarantee that the value of $^X is in PATH.  For VMS, the
+value may or may not include a version number.
+
+=end original
+
+Depending on the host operating system, the value of $^X may be
+a relative or absolute pathname of the perl program file, or may
+be the string used to invoke perl but not the pathname of the
+perl program file.  Also, most operating systems permit invoking
+programs that are not in the PATH environment variable, so there
+is no guarantee that the value of $^X is in PATH.  For VMS, the
+value may or may not include a version number.
+(TBT)
+
+=begin original
+
+You usually can use the value of $^X to re-invoke an independent
+copy of the same perl that is currently running, e.g.,
+
+=end original
+
+You usually can use the value of $^X to re-invoke an independent
+copy of the same perl that is currently running, e.g.,
+(TBT)
+
+  @first_run = `$^X -le "print int rand 100 for 1..100"`;
+
+=begin original
+
+But recall that not all operating systems support forking or
+capturing of the output of commands, so this complex statement
+may not be portable.
+
+=end original
+
+But recall that not all operating systems support forking or
+capturing of the output of commands, so this complex statement
+may not be portable.
+(TBT)
+
+=begin original
+
+It is not safe to use the value of $^X as a path name of a file,
+as some operating systems that have a mandatory suffix on
+executable files do not require use of the suffix when invoking
+a command.  To convert the value of $^X to a path name, use the
+following statements:
+
+=end original
+
+It is not safe to use the value of $^X as a path name of a file,
+as some operating systems that have a mandatory suffix on
+executable files do not require use of the suffix when invoking
+a command.  To convert the value of $^X to a path name, use the
+following statements:
+(TBT)
+
+  # Build up a set of file names (not command names).
+  use Config;
+  $this_perl = $^X;
+  if ($^O ne 'VMS')
+     {$this_perl .= $Config{_exe}
+          unless $this_perl =~ m/$Config{_exe}$/i;}
+
+=begin original
+
+Because many operating systems permit anyone with read access to
+the Perl program file to make a copy of it, patch the copy, and
+then execute the copy, the security-conscious Perl programmer
+should take care to invoke the installed copy of perl, not the
+copy referenced by $^X.  The following statements accomplish
+this goal, and produce a pathname that can be invoked as a
+command or referenced as a file.
+
+=end original
+
+Because many operating systems permit anyone with read access to
+the Perl program file to make a copy of it, patch the copy, and
+then execute the copy, the security-conscious Perl programmer
+should take care to invoke the installed copy of perl, not the
+copy referenced by $^X.  The following statements accomplish
+this goal, and produce a pathname that can be invoked as a
+command or referenced as a file.
+(TBT)
+
+  use Config;
+  $secure_perl_path = $Config{perlpath};
+  if ($^O ne 'VMS')
+     {$secure_perl_path .= $Config{_exe}
+          unless $secure_perl_path =~ m/$Config{_exe}$/i;}
+
+=item ARGV
+X<ARGV>
+
+=begin original
+
+The special filehandle that iterates over command-line filenames in
+C<@ARGV>. Usually written as the null filehandle in the angle operator
+C<< <> >>. Note that currently C<ARGV> only has its magical effect
+within the C<< <> >> operator; elsewhere it is just a plain filehandle
+corresponding to the last file opened by C<< <> >>. In particular,
+passing C<\*ARGV> as a parameter to a function that expects a filehandle
+may not cause your function to automatically read the contents of all the
+files in C<@ARGV>.
+
+=end original
+
+The special filehandle that iterates over command-line filenames in
+C<@ARGV>. Usually written as the null filehandle in the angle operator
+C<< <> >>. Note that currently C<ARGV> only has its magical effect
+within the C<< <> >> operator; elsewhere it is just a plain filehandle
+corresponding to the last file opened by C<< <> >>. In particular,
+passing C<\*ARGV> as a parameter to a function that expects a filehandle
+may not cause your function to automatically read the contents of all the
+files in C<@ARGV>.
+(TBT)
+
+=item $ARGV
+X<$ARGV>
+
+=begin original
+
+contains the name of the current file when reading from <>.
+
+=end original
+
+<> “ª«“ªé’ÆÉ’¹ş“ªß“ªò“ú¼“ªÊ“ªÃ“ªÆ“ª¤“ªë“ªÈ“ª­“¡¢“ª½“ªÎ“ãÁ“ïÃ“ªÎ“«Õ“«¡“«¤“«ë“Ù£“ªò“ãÆ“ª·“ªŞ“ª¹“¡£
+
+=item @ARGV
+X<@ARGV>
+
+=begin original
+
+The array @ARGV contains the command-line arguments intended for
+the script.  C<$#ARGV> is generally the number of arguments minus
+one, because C<$ARGV[0]> is the first argument, I<not> the program's
+command name itself.  See C<$0> for the command name.
+
+=end original
+
+“ÛÕ“Öª @ARGV “ªÏ“¡¢“«³“«Ş“«ó“«É“«é“«¤“«ó“ª«“ªé“«¹“«¯“«ê“«×“«È“ªË“Ô¤“ª¹“ìÚ‘Êı“ª¬“ìı“ªì“ªé“ªì“ªŞ“ª¹“¡£
+C<$ARGV[0]> “ª¬I<“«×“«í“«°“«é“«à“ªÎ“«³“«Ş“«ó“«É“Ù£“í»“ãó“ªÇ“ªÏ“ªÊ“ª¯>“¡¢
+“õÌ“ôø“ªÎ“ìÚ‘Êı“ªÇ“ª¹“ª«“ªé“¡¢C<$#ARGV> “ªÏ“ìé“Úõ“ªË“ªÏ“¡¢“ìÚ‘Êı“ªÎ“ËÁ‘Êı - 1 “ªÈ“ªÊ“ªê“ªŞ“ª¹“¡£
+“«³“«Ş“«ó“«É“Ù£“ªË“ªÄ“ª¤“ªÆ“ªÏ“¡¢C<$0> “ªò‘²Î“ğÎ“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+
+=item ARGVOUT
+X<ARGVOUT>
+
+=begin original
+
+The special filehandle that points to the currently open output file
+when doing edit-in-place processing with B<-i>.  Useful when you have
+to do a lot of inserting and don't want to keep modifying $_.  See
+L<perlrun> for the B<-i> switch.
+
+=end original
+
+The special filehandle that points to the currently open output file
+when doing edit-in-place processing with B<-i>.  Useful when you have
+to do a lot of inserting and don't want to keep modifying $_.  See
+L<perlrun> for the B<-i> switch.
+(TBT)
+
+=item @F
+X<@F>
+
+=begin original
+
+The array @F contains the fields of each line read in when autosplit
+mode is turned on.  See L<perlrun> for the B<-a> switch.  This array
+is package-specific, and must be declared or given a full package name
+if not in package main when running under C<strict 'vars'>.
+
+=end original
+
+The array @F contains the fields of each line read in when autosplit
+mode is turned on.  See L<perlrun> for the B<-a> switch.  This array
+is package-specific, and must be declared or given a full package name
+if not in package main when running under C<strict 'vars'>.
+(TBT)
+
+=item @INC
+X<@INC>
+
+=begin original
+
+The array @INC contains the list of places that the C<do EXPR>,
+C<require>, or C<use> constructs look for their library files.  It
+initially consists of the arguments to any B<-I> command-line
+switches, followed by the default Perl library, probably
+F</usr/local/lib/perl>, followed by ".", to represent the current
+directory.  ("." will not be appended if taint checks are enabled, either by
+C<-T> or by C<-t>.)  If you need to modify this at runtime, you should use
+the C<use lib> pragma to get the machine-dependent library properly
+loaded also:
+
+=end original
+
+“ÛÕ“Öª @INC “ªË“ªÏ“¡¢do EXPR“¡¢require“¡¢use “ªË“ªè“ªÃ“ªÆ“«é“«¤“«Ö“«é“«ê“«Õ“«¡“«¤“«ë“ªò
+“÷®“ª¹“ªÈ“ª­“ªË“øÄ’²Á“ª¹“ªë“íŞ“á¶“ªÎ“«ê“«¹“«È“ª¬“Ò¡“ªá“ªé“ªì“ªÆ“ª¤“ªŞ“ª¹“¡£
+“ôø“Ñ¢‘×´“÷¾“ªÇ“ªÏ“¡¢“«³“«Ş“«ó“«É“«é“«¤“«ó“«¹“«¤“«Ã“«Á B<-I> “ªÎ“ìÚ‘Êı“ªÈ
+“«Ç“«Õ“«©“«ë“«È“ªÎ Perl “«é“«¤“«Ö“«é“«ê“«Ç“«£“«ì“«¯“«È“«ê (“ªª“ª½“ªé“ª¯
+F</usr/local/lib/perl5>) “ªÈ“««“«ì“«ó“«È“«Ç“«£“«ì“«¯“«È“«ê“ªò“øú“ªï“ª¹
+"." “ªò“â÷“ªË“ªÄ“ªÊ“ª²“ª¿“ªâ“ªÎ“ªÇ“ª¹“¡£
+("." will not be appended if taint checks are enabled, either by
+C<-T> or by C<-t>.)
+’¼Â“ú¼“ãÁ“ªË“ª³“ªì“ªò’ÊÑ“ÌÚ“ª¹“ªë“ù±“é©“ª¬“ª¢“ªë“íŞ“ùê“ªÏ“¡¢
+“«Ş“«·“«ó“ëî“ğí“ªÎ“«é“«¤“«Ö“«é“«ê“ªò“ïá“ª·“ª¯’ÆÉ“ªß’¹ş“ªà“ª¿“ªá“ªË C<use lib> “ªâ“ŞÅ“ª¦“ªÙ“ª­“ªÇ“ª¹:
+(TBT)
+
+    use lib '/mypath/libdir/';
+    use SomeMod;
+
+=begin original
+
+You can also insert hooks into the file inclusion system by putting Perl
+code directly into @INC.  Those hooks may be subroutine references, array
+references or blessed objects.  See L<perlfunc/require> for details.
+
+=end original
+
+You can also insert hooks into the file inclusion system by putting Perl
+code directly into @INC.  Those hooks may be subroutine references, array
+references or blessed objects.  See L<perlfunc/require> for details.
+(TBT)
+
+=item @ARG
+
+=item @_
+X<@_> X<@ARG>
+
+=begin original
+
+Within a subroutine the array @_ contains the parameters passed to that
+subroutine.  See L<perlsub>.
+
+=end original
+
+“«µ“«Ö“«ë’¡¼“«Á“«ó“ªÎ‘ÄÚ“İ»“ªÇ“ªÏ“¡¢“ÛÕ“Öª @_ “ªÏ“«µ“«Ö“«ë’¡¼“«Á“«ó“ªË“Ô¤“ªµ“ªì“ª¿“«Ñ“«é“«á’¡¼“«¿“ªÇ“ª¹“¡£
+L<perlsub> “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=item %INC
+X<%INC>
+
+=begin original
+
+The hash %INC contains entries for each filename included via the
+C<do>, C<require>, or C<use> operators.  The key is the filename
+you specified (with module names converted to pathnames), and the
+value is the location of the file found.  The C<require>
+operator uses this hash to determine whether a particular file has
+already been included.
+
+=end original
+
+“«Ï“«Ã“«·“«å %INC “ªÏ“¡¢C<do>, C<require>, C<use>“æÑ“ß©“í­“ªË“ªè“ªÃ“ªÆ
+“«¤“«ó“«¯“«ë’¡¼“«É“ªµ“ªì“ª¿“¡¢“ËÁ‘¡©“ªÎ“«Õ“«¡“«¤“«ë“Ù£“ªò“«¨“«ó“«È“«ê“ªÈ“ª·“ªÆ“ò¥“ªÃ“ªÆ“ª¤“ªŞ“ª¹“¡£
+key “ªÏ“ò¦“ïÒ“ª·“ª¿“«Õ“«¡“«¤“«ë“Ù£(“«â“«¸“«å’¡¼“«ë“Ù£“ªÏ“«Ñ“«¹“Ù£“ªË’ÊÑ“üµ“ªµ“ªì“ªŞ“ª¹)“ªÇ“¡¢
+value “ªÏ“Ì¸“ªÄ“ª«“ªÃ“ª¿“íŞ“á¶“ªÈ“ªÊ“ªÃ“ªÆ“ª¤“ªŞ“ª¹“¡£
+C<require> “æÑ“ß©“í­“ªÏ“¡¢“ò¦“ïÒ“ªµ“ªì“ª¿“«Õ“«¡“«¤“«ë“Ù£“ª¬‘¼È“ªË
+“«¤“«ó“«¯“«ë’¡¼“«É“ªµ“ªì“ªÆ“ª¤“ªë“ª«“ªò“¡¢“ª³“ªÎ“«Ï“«Ã“«·“«å“ªò“ŞÅ“ªÃ“ªÆ“ğà“ªÙ“ªŞ“ª¹“¡£
+
+=begin original
+
+If the file was loaded via a hook (e.g. a subroutine reference, see
+L<perlfunc/require> for a description of these hooks), this hook is
+by default inserted into %INC in place of a filename.  Note, however,
+that the hook may have set the %INC entry by itself to provide some more
+specific info.
+
+=end original
+
+If the file was loaded via a hook (e.g. a subroutine reference, see
+L<perlfunc/require> for a description of these hooks), this hook is
+by default inserted into %INC in place of a filename.  Note, however,
+that the hook may have set the %INC entry by itself to provide some more
+specific info.
+(TBT)
+
+=item %ENV
+
+=item $ENV{expr}
+X<%ENV>
+
+=begin original
+
+The hash %ENV contains your current environment.  Setting a
+value in C<ENV> changes the environment for any child processes
+you subsequently fork() off.
+
+=end original
+
+“«Ï“«Ã“«·“«å %ENV “ªË“ªÏ“¡¢“ª½“ªÎ“ãÁ“ïÃ“ªÎ“ü»“ÌÑ’ÊÑ‘Êı“ª¬“àâ“ïÒ“ªµ“ªì“ªÆ“ª¤“ªŞ“ª¹“¡£
+C<ENV> “ªË“ö·“ªò“àâ“ïÒ“ª¹“ªë“ª³“ªÈ“ªÇ“¡¢
+“ì¤“ı­“ªË fork() “ª·“ª¿“í­“«×“«í“«»“«¹“ªÎ“ü»“ÌÑ’ÊÑ‘Êı“ªò’ÊÑ“ÌÚ“ª·“ªŞ“ª¹“¡£
+
+=item %SIG
+
+=item $SIG{expr}
+X<%SIG>
+
+=begin original
+
+The hash C<%SIG> contains signal handlers for signals.  For example:
+
+=end original
+
+“«Ï“«Ã“«·“«å C<%SIG> “ªË“ªÏ“«·“«°“«Ê“«ë“ªÎ“ª¿“ªá“ªÎ“«·“«°“«Ê“«ë“«Ï“«ó“«É“«é“ª¬“ùß“ªŞ“ªì“ªÆ“ª¤“ªŞ“ª¹“¡£
+“ÖÇ“ª¨“ªĞ:
+
+    sub handler {	# 1st argument is signal name
+	my($sig) = @_;
+	print "Caught a SIG$sig--shutting down\n";
+	close(LOG);
+	exit(0);
+    }
+
+    $SIG{'INT'}  = \&handler;
+    $SIG{'QUIT'} = \&handler;
+    ...
+    $SIG{'INT'}  = 'DEFAULT';	# restore default action
+    $SIG{'QUIT'} = 'IGNORE';	# ignore SIGQUIT
+
+=begin original
+
+Using a value of C<'IGNORE'> usually has the effect of ignoring the
+signal, except for the C<CHLD> signal.  See L<perlipc> for more about
+this special case.
+
+=end original
+
+C<'IGNORE'> “ªÈ“ª¤“ª¦“ö·“ªÏ“÷×“ßÈ“ªÏ“«·“«°“«Ê“«ë“ªÎ’¸ú“Íı“ªò“Ùí“ãÊ“ª¹“ªë“ª¿“ªá“ªË“ŞÅ“ª¤“ªŞ“ª¹“ª¬“¡¢
+C<CHLD> “«·“«°“«Ê“«ë“ªÏ“ÖÇ“èâ“ªÇ“ª¹“¡£
+“ª³“ªÎ“÷å“Ü¬“ªÊ“íŞ“ùê“ªË’´Ø“ª¹“ªë“ßÙ“á¬“ªÏ L<perlipc> “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+Here are some other examples:
+
+=end original
+
+“ì¤“ù»“ªË“ª½“ªÎ“öâ“ªÎ“ÖÇ“ªò“ãÆ“ª·“ªŞ“ª¹:
+
+=begin original
+
+    $SIG{"PIPE"} = "Plumber";   # assumes main::Plumber (not recommended)
+    $SIG{"PIPE"} = \&Plumber;   # just fine; assume current Plumber
+    $SIG{"PIPE"} = *Plumber;    # somewhat esoteric
+    $SIG{"PIPE"} = Plumber();   # oops, what did Plumber() return??
+
+=end original
+
+    $SIG{"PIPE"} = "Plumber";   # main::Plumber “ªò’²¾“ïÒ“ª·“ªŞ“ª¹(“Şª“õÏ’¾©)
+    $SIG{"PIPE"} = \&Plumber;   # “Ùı“ğ¹“ªÊ“ª·; “««“«ì“«ó“«È“ªÎ Plumber “ªò’²¾“ïÒ“ª·“ªŞ“ª¹
+    $SIG{"PIPE"} = *Plumber;    # “á´‘¡©“Ññ“ú°
+    $SIG{"PIPE"} = Plumber();   # “ª²“ª²“¡¢Plumber() “ªÏ“ù¼“ªò“Ú÷“ª¹“ªÎ??
+
+=begin original
+
+Be sure not to use a bareword as the name of a signal handler,
+lest you inadvertently call it. 
+
+=end original
+
+“Õ£“ªÎ’Ã±“åŞ“ªò“«·“«°“«Ê“«ë“«Ï“«ó“«É“«é“ªÎ“Ù£“îñ“ªÈ“ª·“ªÆ“ŞÅ“ªï“ªÊ“ª¤“ªè“ª¦“ªË“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+“Üô“ñ¼“ëò“ªÇ“û¼“ªÓ“õó“ª¹“ªÎ“ªò“ù­“ª±“ªë“ª¿“ªá“ªÇ“ª¹“¡£
+
+=begin original
+
+If your system has the sigaction() function then signal handlers are
+installed using it.  This means you get reliable signal handling.
+
+=end original
+
+“«·“«¹“«Æ“«à“ªË sigaction() ’´Ø‘Êı“ª¬“ª¢“ªë“íŞ“ùê“ªÏ“¡¢
+“«·“«°“«Ê“«ë“«Ï“«ó“«É“«é“ªÏ“ª³“ªÎ’´Ø‘Êı“ªò“ŞÅ“ªÃ“ªÆ“àâ“ïÒ“ªµ“ªì“ªŞ“ª¹“¡£
+“ª³“ªì“ªË“ªè“ªê“¡¢“ãá’Íê“àõ“ªÎ“ª¢“ªë“«·“«°“«Ê“«ë“«Ï“«ó“«É“«ê“«ó“«°“ª¬“Ê¦“Òö“ªË“ªÊ“ªê“ªŞ“ª¹“¡£
+
+=begin original
+
+The default delivery policy of signals changed in Perl 5.8.0 from 
+immediate (also known as "unsafe") to deferred, also known as 
+"safe signals".  See L<perlipc> for more information.
+
+=end original
+
+The default delivery policy of signals changed in Perl 5.8.0 from 
+immediate (also known as "unsafe") to deferred, also known as 
+"safe signals".  See L<perlipc> for more information.
+(TBT)
+
+=begin original
+
+Certain internal hooks can be also set using the %SIG hash.  The
+routine indicated by C<$SIG{__WARN__}> is called when a warning message is
+about to be printed.  The warning message is passed as the first
+argument.  The presence of a C<__WARN__> hook causes the ordinary printing
+of warnings to C<STDERR> to be suppressed.  You can use this to save warnings
+in a variable, or turn warnings into fatal errors, like this:
+
+=end original
+
+“ª¢“ªë“ğú“ªÎ‘ÄÚ“İ»“«Õ“«Ã“«¯“ªâ %SIG “«Ï“«Ã“«·“«å“ªò“ŞÅ“ªÃ“ªÆ“«»“«Ã“«È“ªµ“ªì“ªŞ“ª¹“¡£
+“Ìí“Í±“«á“«Ã“«»’¡¼“«¸“ªò“øú“ãÆ“ª·“ªè“ª¦“ªÈ“ª¹“ªë“ªÈ“ª­“ªË C<$SIG{__WARN__}> “ªÇ
+“ãÆ“ªµ“ªì“ª¿“«ë’¡¼“«Á“«ó“ª¬“û¼“ªÓ“õó“ªµ“ªì“ªŞ“ª¹“¡£
+“Ìí“Í±“«á“«Ã“«»’¡¼“«¸“ªÏ“õÌ“ôø“ªÎ“ìÚ‘Êı“ªÈ“ª·“ªÆ“Ô¤“ªµ“ªì“ªŞ“ª¹“¡£
+C<__WARN__> “«Õ“«Ã“«¯“ª¬“ª¢“ªë“ªÈ“¡¢“÷×“ßÈ“ªÎ C<STDERR> “ªØ“ªÎ“Ìí“Í±“ªÎ“õó“Õô“ªÏ“ú¼“ªï“ªì“ªŞ“ª»“ªó“¡£
+“ª³“ªì“ªò“ŞÅ“ªÃ“ªÆ“¡¢“Ìí“Í±“«á“«Ã“«»’¡¼“«¸“ªò’ÊÑ‘Êı“ªË“ª¤“ªì“ª¿“ªê“¡¢
+“ª¢“ªë“ª¤“ªÏ“ì¤“ù»“ªÎ“ªè“ª¦“ªË“ª·“ªÆ“Ìí“Í±“ªò“öÈ“Ù¤“îÜ“«¨“«é’¡¼“ªË’ÊÑ“ª¨“ª¿“ªê“õó‘À´“ªŞ“ª¹:
+
+    local $SIG{__WARN__} = sub { die $_[0] };
+    eval $proggie;
+
+=begin original
+
+As the C<'IGNORE'> hook is not supported by C<__WARN__>, you can
+disable warnings using the empty subroutine:
+
+=end original
+
+As the C<'IGNORE'> hook is not supported by C<__WARN__>, you can
+disable warnings using the empty subroutine:
+(TBT)
+
+    local $SIG{__WARN__} = sub {};
+
+=begin original
+
+The routine indicated by C<$SIG{__DIE__}> is called when a fatal exception
+is about to be thrown.  The error message is passed as the first
+argument.  When a C<__DIE__> hook routine returns, the exception
+processing continues as it would have in the absence of the hook,
+unless the hook routine itself exits via a C<goto>, a loop exit, or a C<die()>.
+The C<__DIE__> handler is explicitly disabled during the call, so that you
+can die from a C<__DIE__> handler.  Similarly for C<__WARN__>.
+
+=end original
+
+C<$SIG{__DIE__}> “ªÇ“ãÆ“ªµ“ªì“ªë“«ë’¡¼“«Á“«ó“ªÏ
+“öÈ“Ù¤“îÜ“ªÊ“ÖÇ“èâ“ª¬“ªŞ“ªµ“ªË“÷á“ª²“ªé“ªì“ªè“ª¦“ªÈ“ª¹“ªë“ªÈ“ª­“ªË“û¼“ªÓ“õó“ªµ“ªì“ªŞ“ª¹“¡£
+“«¨“«é’¡¼“«á“«Ã“«»’¡¼“«¸“ªÏ“õÌ“ôø“ªÎ“ìÚ‘Êı“ªÈ“ª·“ªÆ“Ô¤“ªµ“ªì“ªŞ“ª¹“¡£
+C<__DIE__> “«Õ“«Ã“«¯“ª«“ªé’Ìá“ªë“ªÈ“¡¢
+“ÖÇ“èâ’½è“×â“ªÏ“«Õ“«Ã“«¯“ª¬“ªÊ“ª«“ªÃ“ª¿“ª«“ªÎ“ªè“ª¦“ªË“î¢“ËÒ“ªµ“ªì“ªŞ“ª¹“ª¬“¡¢
+“«Õ“«Ã“«¯“«ë’¡¼“«Á“«ó“í»‘Ìå“ª¬ C<goto>“¡¢“«ë’¡¼“«×“ğû“Öõ“¡¢C<die()> “ªË“ªè“ªÃ“ªÆ
+“ğû“Öõ“ª·“ª¿“íŞ“ùê“ªò“ğ¶“ª­“ªŞ“ª¹“¡£
+C<__DIE__> “«Ï“«ó“«É“«é“ªÏ“û¼“ªÓ“õó“ª·“ñé“ªÏ“Ù¥“ãÆ“îÜ“ªË“Ùí’¸ú“ªË“ªÊ“ªê“ªŞ“ª¹“ªÎ“ªÇ“¡¢
+C<__DIE__> “«Ï“«ó“«É“«é“ª«“ªé die “ªÇ“ª­“ªŞ“ª¹“¡£
+C<__WARN__> “ªâ“ÔÒ’ÍÍ“ªÇ“ª¹“¡£
+
+=begin original
+
+Due to an implementation glitch, the C<$SIG{__DIE__}> hook is called
+even inside an eval().  Do not use this to rewrite a pending exception
+in C<$@>, or as a bizarre substitute for overriding C<CORE::GLOBAL::die()>.
+This strange action at a distance may be fixed in a future release
+so that C<$SIG{__DIE__}> is only called if your program is about
+to exit, as was the original intent.  Any other use is deprecated.
+
+=end original
+
+’¼Â‘×°“ß¾“ªÎ“Üô“Îı“ùê“ªË“ªè“ªê“¡¢C<$SIG{__DIE__}> “ªÏ eval() “ªÎ“ñé“ªÇ“ªâ
+“û¼“ªÓ“õó“ªµ“ªì“ªŞ“ª¹“¡£“ª³“ªì“ªò“¡¢C<$@> “ªÎ“Óâ“ªÃ“ªÆ“ª¤“ªë“ÖÇ“èâ“ªò“ßö“ª­“üµ“ª¨“ª¿“ªê“¡¢
+C<CORE::GLOBAL::die()> “ªò“ß¾“ßö“ª­“ª¹“ªë“ªÎ“ªË“ŞÅ“ªï“ªÊ“ª¤“ªÇ“ª¯“ªÀ“ªµ“ª¤“¡£
+“ª³“ªÎ“Ğô“ÙØ“ªÊ“ú¼“ÔÑ“ªÏ‘½«‘À´“ªÎ“«ê“«ê’¡¼“«¹“ªÇ“áó“ïá“ªµ“ªì“ªë“åø“ïÒ“ªÊ“ªÎ“ªÇ“¡¢
+C<$SIG{__DIE__}> “ªÏ‘µ±“ôø“ªÎ“ÙÍ“îÜ“÷×“ªê“¡¢
+“«×“«í“«°“«é“«à“ª¬“ğû“Öõ“ª¹“ªë“ªÈ“ª­“ªË“ªÎ“ªß“û¼“ªÓ“õó“ªµ“ªì“ªë“ªè“ª¦“ªË“ªÊ“ªê“ªŞ“ª¹“¡£
+“ª½“ªÎ“öâ“ªÎ“éÄ“Ô²“ªÏ“Şª“õÏ’¾©“ªÇ“ª¹“¡£
+
+=begin original
+
+C<__DIE__>/C<__WARN__> handlers are very special in one respect:
+they may be called to report (probable) errors found by the parser.
+In such a case the parser may be in inconsistent state, so any
+attempt to evaluate Perl code from such a handler will probably
+result in a segfault.  This means that warnings or errors that
+result from parsing Perl should be used with extreme caution, like
+this:
+
+=end original
+
+C<__DIE__> “ªÈ C<__WARN__> “ªÎ“«Ï“«ó“«É“«é“ªÏ“ìé“ªÄ“ªÎ“ïÃ“ªÇ“Şª“ßÈ“ªË“÷å“Ü¬“ªÇ“ª¹“¡£
+“«Ñ’¡¼“«¶“ªË“ªè“ªÃ“ªÆ“«¨“«é’¡¼(“ªÇ“ª¢“ªí“ª¦“ªâ“ªÎ)“ªò“ÜÃ“Í±“ª¹“ªë“ª¿“ªá“ªË“û¼“ªÓ“õó“ªµ“ªì“ªë“ª³“ªÈ“ª¬“ª¢“ªë
+“ª³“ªÈ“ªÇ“ª¹“¡£
+“ª³“ªÎ“ªè“ª¦“ªÊ“íŞ“ùê“¡¢“«Ñ’¡¼“«¶“ªÏ“Üô“äÌ“ïÒ“ªÊ‘×´“÷¾“ªË“ªÊ“ªÃ“ªÆ“ª¤“ªë“ª«“ªâ“ª·“ªì“ªÊ“ª¤“ªÎ“ªÇ“¡¢
+“«Ï“«ó“«É“«é“ª«“ªé Perl “«³’¡¼“«É“ªò“øÄ’²Á“ª·“ªè“ª¦“ªÈ“ª¹“ªë“ªÈ“«»“«°“«á“«ó“«Æ’¡¼“«·“«ç“«ó“«Õ“«©’¡¼“«ë“«È“ª¬
+’È¯“ßæ“ª¹“ªë“ª«“ªâ“ª·“ªì“ªŞ“ª»“ªó“¡£
+Perl “ªÎ“«Ñ’¡¼“«º“ñé“ªÎ“Ìí“Í±“ªä“«¨“«é’¡¼“ªÏ“¡¢“ì¤“ù»“ªÎ“ªè“ª¦“ªË“Şª“ßÈ“ªË“ñ¼“ëò“ª·“ªÆ“Ğâ“ª¦“ªÙ“ª­“ªÇ“ª¹“¡£
+
+    require Carp if defined $^S;
+    Carp::confess("Something wrong") if defined &Carp::confess;
+    die "Something wrong, but could not load Carp to give backtrace...
+         To see backtrace try starting Perl with -MCarp switch";
+
+=begin original
+
+Here the first line will load Carp I<unless> it is the parser who
+called the handler.  The second line will print backtrace and die if
+Carp was available.  The third line will be executed only if Carp was
+not available.
+
+=end original
+
+“ìé“ú¼“ÙÍ“ªÏ“¡¢I<“«Ñ’¡¼“«¶“ª¬“«Ï“«ó“«É“«é“ªò“û¼“ªÓ“õó“ª·“ª¿“ªÎ“ªÇ“ªÊ“ª±“ªì“ªĞ>
+Carp “ªò’ÆÉ“ªß’¹ş“ªß“ªŞ“ª¹“¡£
+“ì£“ú¼“ÙÍ“ªÏ“¡¢Carp “ª¬“ŞÅ“ª¨“ªë“ªÊ“ªé“«Ğ“«Ã“«¯“ªÈ“«ì’¡¼“«¹“ªò“øú“ãÆ“ª·“ªÆ die “ª·“ªŞ“ª¹“¡£
+“ß²“ú¼“ÙÍ“ªÏ Carp “ª¬“ŞÅ“ª¨“ªÊ“ª¤“ªÈ“ª­“ªË“ªÎ“ªß’¼Â“ú¼“ªµ“ªì“ªŞ“ª¹“¡£
+
+=begin original
+
+See L<perlfunc/die>, L<perlfunc/warn>, L<perlfunc/eval>, and
+L<warnings> for additional information.
+
+=end original
+
+“õÚ“Ê¥“ªÎ“ï×“ÜÃ“ªË“ªÄ“ª¤“ªÆ“ªÏ L<perlfunc/die>, L<perlfunc/warn>, L<perlfunc/eval>,
+L<warnings> “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=back
+
+=head2 Error Indicators
+X<error> X<exception>
+
+(“«¨“«é’¡¼“ò¦“ãÆ“í­)
+
+=begin original
+
+The variables C<$@>, C<$!>, C<$^E>, and C<$?> contain information
+about different types of error conditions that may appear during
+execution of a Perl program.  The variables are shown ordered by
+the "distance" between the subsystem which reported the error and
+the Perl process.  They correspond to errors detected by the Perl
+interpreter, C library, operating system, or an external program,
+respectively.
+
+=end original
+
+’ÊÑ‘Êı C<$@>, C<$!>, C<$^E>, C<$?> “ªÏ Perl “«×“«í“«°“«é“«à“ªÎ’¼Â“ú¼“ñé“ªË
+’È¯“ßæ“ª·“ª¿“¡¢“ì¶“ªÊ“ªë“ğú“×¾“ªÎ“«¨“«é’¡¼“ï×“ÜÃ“ªò“ÜÁ“ò¥“ª·“ªŞ“ª¹“¡£
+’ÊÑ‘Êı“ªÏ“«¨“«é’¡¼“ªò“ÜÃ“Í±“ª·“ª¿“Üù“«·“«¹“«Æ“«à“ªÈ Perl “«×“«í“«»“«¹“ªÈ“ªÎ“¡¸“Ëå“×î“¡¹
+“ªÎ“â÷“Ûã“ªË˜­å“ªó“ªÇ“ª¤“ªŞ“ª¹“¡£
+“ª³“ªì“ªé“ªÏ“ª½“ªì“ª¾“ªì“¡¢Perl “«¤“«ó“«¿“«×“«ê“«¿“¡¢C “«é“«¤“«Ö“«é“«ê“¡¢
+“«ª“«Ú“«ì’¡¼“«Æ“«£“«ó“«°“«·“«¹“«Æ“«à“¡¢“èâ“İ»“«×“«í“«°“«é“«à“ªË“ªè“ªÃ“ªÆ’¸¡“õó“ªµ“ªì“ª¿
+“«¨“«é’¡¼“ªË’ÂĞ’±ş“ª·“ªÆ“ª¤“ªŞ“ª¹“¡£
+
+=begin original
+
+To illustrate the differences between these variables, consider the 
+following Perl expression, which uses a single-quoted string:
+
+=end original
+
+“ª³“ªì“ªé“ªÎ’ÊÑ‘Êı“ªÎ“êŞ“ª¤“ªò“ãÆ“ª¹“ª¿“ªá“ªË“¡¢
+“ì¤“ù»“ªÎ“ªè“ª¦“ªÊ“«·“«ó“«°“«ë“«¯“«©’¡¼“«È“ªò“éÄ“ª¤“ª¿ Perl “ãÒ“ªò“ÍÅ“ª¨“ªŞ“ª¹:
+
+    eval q{
+	open my $pipe, "/cdrom/install |" or die $!;
+	my @res = <$pipe>;
+	close $pipe or die "bad pipe: $?, $!";
+    };
+
+=begin original
+
+After execution of this statement all 4 variables may have been set.  
+
+=end original
+
+“ª³“ªÎ“Ùş“ªò’¼Â“ú¼“ª·“ª¿“ı­“¡¢4 “ªÄ“ªÎ’ÊÑ‘Êı“îï“ªÆ“ª¬“«»“«Ã“«È“ªµ“ªì“ªë“Ê¦“Òö“àõ“ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+
+=begin original
+
+C<$@> is set if the string to be C<eval>-ed did not compile (this
+may happen if C<open> or C<close> were imported with bad prototypes),
+or if Perl code executed during evaluation die()d .  In these cases
+the value of $@ is the compile error, or the argument to C<die>
+(which will interpolate C<$!> and C<$?>).  (See also L<Fatal>,
+though.)
+
+=end original
+
+C<$@> “ªÏ C<eval> “ªµ“ªì“ª¿“Ùş“í®“Öª“ª¬“«³“«ó“«Ñ“«¤“«ë“ªµ“ªì“ªÊ“ª«“ªÃ“ª¿“ªÈ“ª­
+(“ª³“ªì“ªÏ C<open> “ª« C<close> “ª¬“ïá“ª·“ª¯“ªÊ“ª¤
+“«×“«í“«È“«¿“«¤“«×“ªÇ“«¤“«ó“«İ’¡¼“«È“ªµ“ªì“ª¿“ªÈ“ª­“ªË“ÑÃ“ª³“ªê“Ôğ“ªŞ“ª¹)“¡¢
+“ªŞ“ª¿“ªÏ“øÄ’²Á“ñé“ªË’¼Â“ú¼“ª·“ªÆ“ª¤“ªë Perl “«³’¡¼“«É“ª¬ die() “ª·“ª¿“ªÈ“ª­“ªË“«»“«Ã“«È“ªµ“ªì“ªŞ“ª¹“¡£
+“ª³“ªì“ªé“ªÎ“íŞ“ùê“ªË“ªÏ $@ “ªÎ“ö·“ªÏ“«³“«ó“«Ñ“«¤“«ë“«¨“«é’¡¼“¡¢“ªŞ“ª¿“ªÏ
+C<die> “ªØ“ªÎ“ìÚ‘Êı(“ª³“ªì“ªË“ªÏ C<$!> “ªÈ C<$?> “ª¬“ó¬“ª·‘Ğ®“ªŞ“ªì“ªŞ“ª¹)“ªÇ“ª¹“¡£
+(“ª·“ª«“ª·“¡¢L<Fatal> “ªâ‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£)
+
+=begin original
+
+When the eval() expression above is executed, open(), C<< <PIPE> >>,
+and C<close> are translated to calls in the C run-time library and
+thence to the operating system kernel.  C<$!> is set to the C library's
+C<errno> if one of these calls fails. 
+
+=end original
+
+“ß¾“ÑÀ“ªÎ eval() “ãÒ“ª¬’¼Â“ú¼“ªµ“ªì“ª¿“ı­“¡¢
+open(), C<< <PIPE> >>, C<close> “ªÏ C “«é“«ó“«¿“«¤“«à“«é“«¤“«Ö“«é“«ê“ªÎ“û¼“ªÓ“õó“ª·“ªË
+’ÊÑ“üµ“ªµ“ªì“¡¢“ª½“ªì“ª«“ªé“«ª“«Ú“«ì’¡¼“«Æ“«£“«ó“«°“«·“«¹“«Æ“«à“«³’¡¼“«ë“ªË’ÊÑ“üµ“ªµ“ªì“ªŞ“ª¹“¡£
+C<$!> “ªÏ“ª³“ªì“ªé“ªÎ“û¼“ªÓ“õó“ª·“ªÎ“ªÉ“ªì“ª«“ª¬“ã÷“ø¨“ª·“ª¿“ªÈ“ª­“¡¢
+C “«é“«¤“«Ö“«é“«ê“ªÎ C<errno> “ªÎ“ö·“ª¬“«»“«Ã“«È“ªµ“ªì“ªŞ“ª¹“¡£
+
+=begin original
+
+Under a few operating systems, C<$^E> may contain a more verbose
+error indicator, such as in this case, "CDROM tray not closed."
+Systems that do not support extended error messages leave C<$^E>
+the same as C<$!>.
+
+=end original
+
+“ª¤“ª¯“ªÄ“ª«“ªÎ“«ª“«Ú“«ì’¡¼“«Æ“«£“«ó“«°“«·“«¹“«Æ“«à“ªÇ“ªÏ“¡¢
+C<$^E> “ªË“ªè“ªê“ßÙ“á¬“ªÊ“«¨“«é’¡¼“ò¦“ãÆ“í­“ª¬“ìı“ªÃ“ªÆ“ª¤“ªë“ª«“ªâ“ª·“ªì“ªŞ“ª»“ªó“¡£
+“ĞÑ“üŞ“ªÎ“íŞ“ùê“ªÇ“åë“ª¨“ªĞ“¡¢"CDROM tray not closed." “ªÊ“ªÉ“ªÇ“ª¹“¡£
+“õÚ“Ê¥“ªÎ“«¨“«é’¡¼“«á“«Ã“«»’¡¼“«¸“ªË’ÂĞ’±ş“ª·“ªÆ“ª¤“ªÊ“ª¤“«·“«¹“«Æ“«à“ªÇ“ªÏ“¡¢
+C<$^E> “ªÏ C<$!> “ªÈ“ÔÒ“ª¸“ö·“ªÇ“ª¹“¡£
+
+=begin original
+
+Finally, C<$?> may be set to non-0 value if the external program
+F</cdrom/install> fails.  The upper eight bits reflect specific
+error conditions encountered by the program (the program's exit()
+value).   The lower eight bits reflect mode of failure, like signal
+death and core dump information  See wait(2) for details.  In
+contrast to C<$!> and C<$^E>, which are set only if error condition
+is detected, the variable C<$?> is set on each C<wait> or pipe
+C<close>, overwriting the old value.  This is more like C<$@>, which
+on every eval() is always set on failure and cleared on success.
+
+=end original
+
+“õÌ“ı­“ªË“¡¢C<$?> “ªÏ“èâ“İ»“«×“«í“«°“«é“«à F</cdrom/install> “ª¬“ã÷“ø¨“ª·“ª¿“ªÈ“ª­“ªË
+“Şª 0 “ªË“«»“«Ã“«È“ªµ“ªì“ªë“ª«“ªâ“ª·“ªì“ªŞ“ª»“ªó“¡£
+“ß¾“êÈ“ªÎ 8 “«Ó“«Ã“«È“ªÏ“«×“«í“«°“«é“«à“ª¬“ğä“éç“ª·“ª¿“÷å“ïÒ“ªÎ“«¨“«é’¡¼‘×´“üÏ
+(“«×“«í“«°“«é“«à“ªÎ exit() “ªÎ“ö·)“ªò“Úã“ç±“ª·“ªŞ“ª¹“¡£
+“ù»“êÈ“ªÎ 8 “«Ó“«Ã“«È“ªÏ“¡¢“«·“«°“«Ê“«ë“ªÎ“Şİ“ØÌ“ªä“«³“«¢“«À“«ó“«×“ï×“ÜÃ“ªÈ“åë“ªÃ“ª¿“ã÷“ø¨“ªÎ“«â’¡¼“«É“ªò“Úã“ç±“ª·“ªŞ“ª¹“¡£
+“ßÙ“á¬“ªË“ªÄ“ª¤“ªÆ“ªÏ wait(2) “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+C<$!> “ªÈ C<$^E> “ªÏ“«¨“«é’¡¼‘×´“üÏ“ª¬’¸¡“õó“ªµ“ªì“ª¿“ªÈ“ª­“ªË“ªÎ“ªß“àâ“ïÒ“ªµ“ªì“ªŞ“ª¹“ª¬“¡¢
+’ÊÑ‘Êı C<$?> “ªÏ C<wait> “ªä“«Ñ“«¤“«×“ªÎ C<close> “ªÎ“Óø“ªË“¡¢“îñ“ªÎ“ö·“ªò“ß¾“ßö“ª­“ª·“ªŞ“ª¹“¡£
+“ª³“ªì“ªÏ“¡¢C<$@> “ª¬ eval() “ªÎ’¼Â“ú¼’Ëè“ªË“¡¢“«¨“«é’¡¼“ªÊ“ªé“«»“«Ã“«È“ªµ“ªì“¡¢
+“à÷“Íí“ªÊ“ªé“«¯“«ê“«¢“ªµ“ªì“ªë“ªÈ“ª¤“ª¦“ÔÑ“íÂ“ªÈ“ŞÄ“ªÆ“ª¤“ªŞ“ª¹“¡£
+
+=begin original
+
+For more details, see the individual descriptions at C<$@>, C<$!>, C<$^E>,
+and C<$?>.
+
+=end original
+
+“ªè“ªê“ßÙ“á¬“ªË“ªÄ“ª¤“ªÆ“ªÏ“¡¢C<$@>, C<$!>, C<$^E>, C<$?> “ª½“ªì“ª¾“ªì“ªÎ’Àâ“Ù¥“ªò
+‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=head2 Technical Note on the Syntax of Variable Names
+
+(’ÊÑ‘Êı“Ù£“ªÎ“Ùş“Ûö“ªË’´Ø“ª¹“ªë“«Æ“«¯“«Ë“««“«ë“«Î’¡¼“«È)
+
+=begin original
+
+Variable names in Perl can have several formats.  Usually, they
+must begin with a letter or underscore, in which case they can be
+arbitrarily long (up to an internal limit of 251 characters) and
+may contain letters, digits, underscores, or the special sequence
+C<::> or C<'>.  In this case, the part before the last C<::> or
+C<'> is taken to be a I<package qualifier>; see L<perlmod>.
+
+=end original
+
+Perl “ªÎ’ÊÑ‘Êı“Ù£“ªÏ’ÍÍ‘¡©“ªÊ“û¡“ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+“÷×“ßÈ“¡¢’ÊÑ‘Êı“Ù£“ªÏ“çÈ“Ùş“í®“ª«“ù»“àÊ“ªÇ“ã·“ªŞ“ªé“ªÊ“ª±“ªì“ªĞ“ªÊ“ªé“ªº“¡¢
+“ìò“ëò“ªÎ“íş“ªµ(‘ÄÚ“İ»“ğ¤“ùÚ“ªÎ 251 “Ùş“í®“ªŞ“ªÇ)“ªò“ö¢“ªë“ª³“ªÈ“ª¬“ªÇ“ª­“¡¢
+“çÈ“Ùş“í®“¡¢‘Êı“í®“¡¢“ù»“àÊ“¡¢“÷å“Ü¬“ªÊ“Ùş“í®“Öª“ªÇ“ª¢“ªë C<::> “ªÈ C<'> “ªò“ùß“ªà“ª³“ªÈ“ª¬“ªÇ“ª­“ªŞ“ª¹“¡£
+“ª³“ªÎ“íŞ“ùê“¡¢“õÌ“ı­“ªÎ C<::> “ªŞ“ª¿“ªÏ C<'> “ªÎ“îñ“ªÏ
+I<“«Ñ“«Ã“«±’¡¼“«¸“ùÚ“ïÒ“í­> “ªÈ“ª·“ªÆ“Ğâ“ªï“ªì“ªŞ“ª¹“¡£
+L<perlmod> “ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+Perl variable names may also be a sequence of digits or a single
+punctuation or control character.  These names are all reserved for
+special uses by Perl; for example, the all-digits names are used
+to hold data captured by backreferences after a regular expression
+match.  Perl has a special syntax for the single-control-character
+names: It understands C<^X> (caret C<X>) to mean the control-C<X>
+character.  For example, the notation C<$^W> (dollar-sign caret
+C<W>) is the scalar variable whose name is the single character
+control-C<W>.  This is better than typing a literal control-C<W>
+into your program.
+
+=end original
+
+Perl “ªÎ’ÊÑ‘Êı“ªÏ“¡¢‘Êı“í®“ªÎ“Öª“ªŞ“ª¿“ªÏ“ìé“Ùş“í®“ªÎ“Ï£’ÆÉ“ïÃ“ª«“«³“«ó“«È“«í’¡¼“«ë“Ùş“í®“ªÎ
+“íŞ“ùê“ªâ“ª¢“ªê“ªŞ“ª¹“¡£
+“ª³“ªì“ªé“ªÎ“Ù£“îñ“ªÏ“îï“ªÆ Perl “ªË“ªè“ªÃ“ªÆ“÷å“Ü¬“ªÊ“éÄ“Ô²“ªÎ“ª¿“ªá“ªË“åø“å³“ªµ“ªì“ªÆ“ª¤“ªŞ“ª¹“¡£
+“ÖÇ“ª¨“ªĞ“¡¢“îï“ªÆ‘Êı“í®“ªÎ“Ù£“îñ“ªÏ“ïá“Ğ®“øú“úŞ“«Ş“«Ã“«Á“ªÎ“ı­“ªÎ“ı­“Û°‘²Î“ğÎ“ªÎ“«Ç’¡¼“«¿“ªò
+“ÜÁ“ò¥“ª¹“ªë“ª¿“ªá“ªË“éÄ“ª¤“ªé“ªì“ªŞ“ª¹“¡£
+Perl “ªË“ªÏ“ìé“Ùş“í®“ªÎ“«³“«ó“«È“«í’¡¼“«ë“Ùş“í®“ªÎ“Ù£“îñ“ªÎ“ª¿“ªá“ªÎ“÷å“Ü¬“ªÊ“Ùş“Ûö“ª¬“ª¢“ªê“ªŞ“ª¹“¡£
+C<^X>(“«­“«ã“«ì“«Ã“«È C<X>)“ªÏ control-C<X> “«­“«ã“«é“«¯“«¿“ªò“ëò“Ú«“ª·“ªŞ“ª¹“¡£
+“ÖÇ“ª¨“ªĞ“¡¢C<$^W>(“«É“«ë“ÑÀ‘ºÅ “«­“«ã“«ì“«Ã“«È C<W>)“ªÏ control-C<W> “ìé“Ùş“í®“ªÎ
+“Ù£“îñ“ªò“ªâ“ªÄ“«¹“««“«é’ÊÑ‘Êı“ªÇ“ª¹“¡£
+“ª³“ªì“ªÏ“«×“«í“«°“«é“«à“ñé“ªË“«ê“«Æ“«é“«ë“ªÊ control-C<W> “ªò“«¿“«¤“«×“ª¹“ªë“ªè“ªê
+“ÕŞ“ª¤“ªÇ“ª¹“¡£
+
+=begin original
+
+Finally, new in Perl 5.6, Perl variable names may be alphanumeric
+strings that begin with control characters (or better yet, a caret).
+These variables must be written in the form C<${^Foo}>; the braces
+are not optional.  C<${^Foo}> denotes the scalar variable whose
+name is a control-C<F> followed by two C<o>'s.  These variables are
+reserved for future special uses by Perl, except for the ones that
+begin with C<^_> (control-underscore or caret-underscore).  No
+control-character name that begins with C<^_> will acquire a special
+meaning in any future version of Perl; such names may therefore be
+used safely in programs.  C<$^_> itself, however, I<is> reserved.
+
+=end original
+
+“õÌ“ı­“ªË“¡¢Perl 5.6 “ªÎ“ãæ“Ñ¦“Òö“ªÈ“ª·“ªÆ“¡¢“«³“«ó“«È“«í’¡¼“«ë“Ùş“í®(“ªâ“ªÃ“ªÈ“åë“ª¨“ªĞ“«­“«ã“«ì“«Ã“«È)“ªÇ
+“ã·“ªŞ“ªë“¡¢“çÈ‘Êı“í®“ª«“ªé“ªÊ“ªë“Ùş“í®“Öª“ªÎ’ÊÑ‘Êı“Ù£“ªâ“ŞÅ“ª¨“ªŞ“ª¹“¡£
+“ª³“ªì“ªé“ªÎ’ÊÑ‘Êı“ªÏ C<${^Foo}> “ªÎ“û¡“ªÇ“ßö“ª«“ªì“ªÊ“ª±“ªì“ªĞ“ªÊ“ªê“ªŞ“ª»“ªó“¡£
+“ÎÀ“ûÁ“ªÏ“ù±“âÎ“ªÇ“ª¹“¡£
+C<${^Foo}> “ªÏ“«³“«ó“«È“«í’¡¼“«ë-C<F> “ªÎ“ı­“ªË“ì£“ªÄ C<o> “ª¬’Â³“ª¯“Ù£“îñ“ªò“ò¥“ªÄ
+“«¹“««“«é’ÊÑ‘Êı“ªÇ“ª¹“¡£
+“ª³“ªì“ªé“ªÎ’ÊÑ‘Êı“ªÏ Perl “ªË“ªè“ªÃ“ªÆ“÷å“Ü¬“ªÊ“éÄ“Ô²“ªÎ“ª¿“ªá“ªË“åø“å³“ªµ“ªì“ªÆ“ª¤“ªŞ“ª¹“ª¬“¡¢
+C<^_> (“«³“«ó“«È“«í’¡¼“«ë-“ù»“àÊ“ªŞ“ª¿“ªÏ“«­“«ã“«ì“«Ã“«È-“ù»“àÊ)“ªÇ“ã·“ªŞ“ªë“ªâ“ªÎ“ªÏ“ÖÇ“èâ“ªÇ“ª¹“¡£
+C<^_> “ªÇ“ã·“ªŞ“ªë“«³“«ó“«È“«í’¡¼“«ë“Ùş“í®“Ù£“ªÏ Perl “ªÎ‘½«‘À´“ªÎ“«Ğ’¡¼“«¸“«ç“«ó“ªÇ
+“÷å“Ü¬“ªÊ“ëò“Ú«“ªò“ò¥“ªÄ“ª³“ªÈ“ªÏ“ª¢“ªê“ªŞ“ª»“ªó“¡£
+’½¾“ªÃ“ªÆ“ª³“ªì“ªé“ªÎ“Ù£“îñ“ªÏ“«×“«í“«°“«é“«à“ñé“ªÇ“äÌ“îï“ªË“ŞÅ“éÄ“ªÇ“ª­“ªŞ“ª¹“¡£
+“Ó£“ª·“¡¢C<$^_> “ª½“ªÎ“ªâ“ªÎ“ªÏ I<“åø“å³“ªµ“ªì“ªŞ“ª¹>“¡£
+
+=begin original
+
+Perl identifiers that begin with digits, control characters, or
+punctuation characters are exempt from the effects of the C<package>
+declaration and are always forced to be in package C<main>; they are
+also exempt from C<strict 'vars'> errors.  A few other names are also
+exempt in these ways:
+
+=end original
+
+‘Êı“í®“¡¢“«³“«ó“«È“«í’¡¼“«ë“Ùş“í®“¡¢“Ï£’ÆÉ“ïÃ“ªÇ“ã·“ªŞ“ªë Perl “ªÎ“ãÛ“Ü¬“í­“ªÏ
+C<package> “à¾“åë“ªÎ’¸ú“Íı“ª«“ªé“Ô±“ªì“ªÆ“¡¢“ßÈ“ªË C<main> “«Ñ“«Ã“«±’¡¼“«¸“ªË“ª¢“ªë“ªâ“ªÎ“ªÈ“ª·“ªÆ
+“Ğâ“ªï“ªì“ªŞ“ª¹“¡£“ªµ“ªé“ªË“ì¤“ù»“ªÎ“ªâ“ªÎ“ªâ“Ô±“ªì“ªŞ“ª¹:
+
+	ENV		STDIN
+	INC		STDOUT
+	ARGV		STDERR
+	ARGVOUT		_
+	SIG
+
+=begin original
+
+In particular, the new special C<${^_XYZ}> variables are always taken
+to be in package C<main>, regardless of any C<package> declarations
+presently in scope.  
+
+=end original
+
+“÷å“ªË“¡¢“ãæ“ª·“ª¤“÷å“Ü¬“ªÊ C<${^_XYZ}> ’ÊÑ‘Êı“ªÏ“«¹“«³’¡¼“«×‘ÄÚ“ªÎ C<package> “à¾“åë“ªË’´Ø“ªï“ªé“ªº
+“ßÈ“ªË C<main> “«Ñ“«Ã“«±’¡¼“«¸“ªÈ“ª·“ªÆ“Ğâ“ªï“ªì“ªŞ“ª¹“¡£
+
+=head1 BUGS
+
+(“«Ğ“«°)
+
+=begin original
+
+Due to an unfortunate accident of Perl's implementation, C<use
+English> imposes a considerable performance penalty on all regular
+expression matches in a program, regardless of whether they occur
+in the scope of C<use English>.  For that reason, saying C<use
+English> in libraries is strongly discouraged.  See the
+Devel::SawAmpersand module documentation from CPAN
+( http://www.cpan.org/modules/by-module/Devel/ )
+for more information. Writing C<use English '-no_match_vars';>
+avoids the performance penalty.
+
+=end original
+
+Perl “ªÎ’¼Â‘×°“ªË“ªª“ª±“ªë“Üô“ú¹“ªÊ“ŞÀ“Íº“ªË“ªè“ªê“¡¢
+C<use English> “ªÏ“«×“«í“«°“«é“«à“ñé“ªÎ“îï“ªÆ“ªÎ“ïá“Ğ®“øú“úŞ“«Ş“«Ã“«Á“«ó“«°“ªË“ªª“ª¤“ªÆ
+“ª«“ªÊ“ªê“ªÎ“àõ“Òö“î¸“ù»“ªò“ìÚ“ª­“ÑÃ“ª³“ª·“ªŞ“ª¹“¡£
+“ª³“ªì“ªÏ C<use English> “ªÎ“«¹“«³’¡¼“«×‘ÄÚ“ª«“ªÉ“ª¦“ª«“ªË’´Ø“ªï“ªê“ªŞ“ª»“ªó“¡£
+“ª³“ªÎ“×â“ë¦“ªË“ªè“ªê“¡¢“«é“«¤“«Ö“«é“«ê“ªÇ C<use English> “ªò“ŞÅ“ª¦“ªÎ“ªÏ
+“ªÇ“ª­“ªë“ªÀ“ª±“ù­“ª±“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+“ªµ“ªé“ªÊ“ªë“ï×“ÜÃ“ªË“ªÄ“ª¤“ªÆ“ªÏ CPAN “ªÎ Devel::SawAmpersand “«â“«¸“«å’¡¼“«ë
+(http://www.perl.com/CPAN/modules/by-module/Devel/) “ªÎ
+“«É“«­“«å“«á“«ó“«È“ªò‘²Î“ğÎ“ª·“ªÆ“ù»“ªµ“ª¤“¡£
+
+=begin original
+
+Having to even think about the C<$^S> variable in your exception
+handlers is simply wrong.  C<$SIG{__DIE__}> as currently implemented
+invites grievous and difficult to track down errors.  Avoid it
+and use an C<END{}> or CORE::GLOBAL::die override instead.
+
+=end original
+
+“ÖÇ“èâ“«Ï“«ó“«É“«é“ªÎ“ñé“ªÇ C<$^S> “ªò“ŞÅ“ªª“ª¦“ªÊ“ªÉ“ªÈ“ªÏ“ÍÅ“ª¨“ªÆ“ªâ“ª¤“ª±“ªŞ“ª»“ªó“¡£
+“úŞ“î¤“ªÎ’¼Â‘×°“ªÎ C<$SIG{__DIE__}> “ªÏ“Øü“Óî“ªò“ìÚ“ª­“Ğö“ª»“¡¢“«¨“«é’¡¼“ªÎ“õÚ“îæ“ªò“Íİ“Ññ“ªË“ª·“ªŞ“ª¹“¡£
+“ª³“ªì“ªÎ“ÓÛ“ªï“ªê“ªË C<END{}> “ªò“ŞÅ“ª¦“ª«“¡¢CORE::GLOBAL::die “ªò“«ª’¡¼“«Ğ’¡¼“«é“«¤“«É“ª·“ªÆ“ª¯“ªÀ“ªµ“ª¤“¡£
+
+=begin meta
+
+Translate: “ÑÎ“õ½ ‘ÊÙ“ìÑ <JAE00534@niftyserve.or.jp> (5.000)
+Update: Kentaro Shirakata <argrath@ub32.org> (5.6.1-)
+License: GPL or Artistic
+
+=end meta
+

@@ -1,0 +1,727 @@
+=head1 NAME
+
+perldebtut - Perl 디버깅 튜토리얼
+
+=head1 DESCRIPTION
+
+펄 디버거를 사용하는 방법을 다루는 가벼운 소개서이자,
+펄 프로그램 디버깅의 주제를 담은 기존의 자세한 정보 출처 소개서
+
+펄을 매일 사용함에도 불구하고 펄 디버거를 사용하는 방법을
+전혀 알려고 하지 않는 사람이 놀랄만큼 많다.
+이 문서는 그들을 위한 것이다.
+
+
+=head1 use strict
+
+무엇보다 펄 프로그램을 디버깅해야 할 때 디버거를 전혀 사용하지 않고서도
+훨씬 더 편한 인생을 보낼 수 있는 몇 가지 방법이 있다.
+문제가 있는 간단한 "hello" 스크립트를 이용해서 설명하겠다:
+
+	#!/usr/bin/perl
+
+	$var1 = 'Hello World'; # always wanted to do that :-)
+	$var2 = "$varl\n";
+
+	print $var2; 
+	exit;
+
+이 스크립트는 컴파일과 실행에 성공하지만 아마도 원한것 처럼 동작하지 않을 것이다.
+즉, 이름처럼 "Hello World\n"을 전혀 출력하지 않는다;
+It will on the other hand do exactly what it was told to do,
+computers being a bit that way inclined.
+That is, it will print out a newline character,
+and you'll get what looks like a blank line.
+It looks like there's 2 variables when (because of the typo) there's really 3:
+
+	$var1 = 'Hello World';
+	$varl = undef;
+	$var2 = "\n";
+
+이런 문제를 해결하기 위해, 스크립트의 처음 줄 다음에 'use strict;'를 넣어
+strict 모듈을 사용해서 각각의 변수를 사용하기 전에 선언해야하도록 강제할 수 있다.
+
+이제 스크립트를 실행시키면, 펄은 선언하지 않은 3 개의 변수에대해 불평한다.
+그리고 하나의 변수를 두번 참조했기 때문에 4 개의 에러 메시지가 발생한다:
+
+ Global symbol "$var1" requires explicit package name at ./t1 line 4.
+ Global symbol "$var2" requires explicit package name at ./t1 line 5.
+ Global symbol "$varl" requires explicit package name at ./t1 line 5.
+ Global symbol "$var2" requires explicit package name at ./t1 line 7.
+ Execution of ./hello aborted due to compilation errors.     
+
+멋지다! 그리고 이것을 고치기 위해 모든 변수를 명시적으로 선언하자.
+그러면 이제 스크립트는 다음과 같을 것이다:
+
+	#!/usr/bin/perl
+	use strict;
+
+	my $var1 = 'Hello World';
+	my $varl = undef;
+	my $var2 = "$varl\n";
+
+	print $var2; 
+	exit;
+
+이제 다시 실행하기 전에 문법 점검을 먼저하자(대부분의 경우 훌륭한 생각이다):
+
+	> perl -c hello
+	hello syntax OK 
+
+이제 실행하면, 여전히 "\n" 을 출력하지만, 적어도 이유는 알고 있다.
+컴파일을 하기 위해 수정한 스크립트에는 '$varl' (문자 'l'을 가진) 변수가 있고,
+간단히 $varl 을 $var1 로 바꿈으로써 문제를 해결할 수 있다.
+
+
+=head1 Looking at data and -w and v
+
+좋다. 하지만 데이터를 정말로 보고 싶을 때는 어떨까?
+사용하기 직전에 동적 변수 안에 무엇이 있을까?
+
+	#!/usr/bin/perl 
+	use strict;
+
+	my $key = 'welcome';
+	my %data = (
+		'this' => qw(that), 
+		'tom' => qw(and jerry),
+		'welcome' => q(Hello World),
+		'zip' => q(welcome),
+	);
+	my @data = keys %data;
+
+	print "$data{$key}\n";
+	exit;                               
+
+perl -c scriptname 을 이용한 문법체크도 성공했고, 괜찮아 보인다.
+하지만, 실행한 후 우리가 얻는 것은 또다시 빈 줄이다! 흠.
+
+이런 경우 종종 사용하는 디버깅 방법은, 대충 print 명령문을 좀 삽입해서
+점검하려는 데이터의 직전과, 직후의 값을 출력하는 것이다:
+
+	print "All OK\n" if grep($key, keys %data);
+	print "$data{$key}\n";
+	print "done: '$data{$key}'\n";
+
+그리고 다시 시도해보자:
+
+	> perl data
+	All OK     
+
+	done: ''
+
+어떤 경우는 이런 류의 코드 조각을 한참은 노려본 후에도,
+나무를 보고 숲을 보지 못하겠다면, 커피 한 잔 마시고 다른 방법을 시도해보자.
+커맨드 라인에서 펄에게 'B<-d>' 스위치를 주면, 기병대를 들여올 수 있다:
+
+	> perl -d data 
+	Default die handler restored.
+
+	Loading DB routines from perl5db.pl version 1.07
+	Editor support available.
+
+	Enter h or `h h' for help, or `man perldebug' for more help.
+
+	main::(./data:4):     my $key = 'welcome';   
+
+지금까지 우리의 스크립트를 빌트인 디버거를 이용해서 구동했다.
+이제 실행 가능한 코드의 첫 번째 줄에서 멈추고 입력을 기다릴 것이다.
+
+여기서 더 나가기전에, 디버거를 종료하는 법을 알고 싶을 것이다:
+'quit' 나 'exit' 가 아닌 문자 'B<q>' 를 사용해야 한다:
+
+	DB<1> q
+	>
+
+바로 그것이다. 여러분은 이제 집앞 잔디밭으로 되돌아왔다.
+
+
+=head1 help
+
+스크립트를 디버거를 이용해 실행하고, 도움말 메뉴를 살펴보자.
+도움말을 호출하는 몇 가지 방법은 다음과 같다:
+간단하게 'B<h>' 는 도움말 목록의 요약 정보를 보여준다.
+'B<|h>' (파이프-h) 는 파이프로 여러분 시스템의 페이저
+(대부분 'more' 또는 'less' 인)에 보내서 화면에 보여준다.
+그리고 마지막으로 'B<h h>' (h-공백-h) 는 도움말 화면 전체를 보여준다.
+요약 페이지는 다음과 같다:
+
+ DB<1> h
+
+ List/search source lines:               Control script execution:
+  l [ln|sub]  List source code            T           Stack trace
+  - or .      List previous/current line  s [expr]    Single step [in expr]
+  v [line]    View around line            n [expr]    Next, steps over subs
+  f filename  View source in file         <CR/Enter>  Repeat last n or s
+  /pattern/ ?patt?   Search forw/backw    r           Return from subroutine
+  M           Show module versions        c [ln|sub]  Continue until position
+ Debugger controls:                       L           List break/watch/actions
+  o [...]     Set debugger options        t [expr]    Toggle trace [trace expr]
+  <[<]|{[{]|>[>] [cmd] Do pre/post-prompt b [ln|event|sub] [cnd] Set breakpoint
+  ! [N|pat]   Redo a previous command     B ln|*      Delete a/all breakpoints
+  H [-num]    Display last num commands   a [ln] cmd  Do cmd before line
+  = [a val]   Define/list an alias        A ln|*      Delete a/all actions
+  h [db_cmd]  Get help on command         w expr      Add a watch expression
+  h h         Complete help page          W expr|*    Delete a/all watch exprs
+  |[|]db_cmd  Send output to pager        ![!] syscmd Run cmd in a subprocess
+  q or ^D     Quit                        R           Attempt a restart
+ Data Examination:     expr     Execute perl code, also see: s,n,t expr
+  x|m expr       Evals expr in list context, dumps the result or lists methods.
+  p expr         Print expression (uses script's current package).
+  S [[!]pat]     List subroutine names [not] matching pattern
+  V [Pk [Vars]]  List Variables in Package.  Vars can be ~pattern or !pattern.
+  X [Vars]       Same as "V current_package [Vars]".
+  y [n [Vars]]   List lexicals in higher scope <n>.  Vars same as V.
+ For more help, type h cmd_letter, or run man perldebug for all docs. 
+
+셀 수 없이 매우 많은 혼란스러운 옵션이지만, 그래도 보기보단 그렇게 나쁘진 않다.
+게다가, 그것을 다 아는 것은 매우 유용하고, 매우 재미있기도 하다!
+
+There's a couple of useful ones to know about straight away.
+You wouldn't think we're using any libraries at all at the moment,
+but 'B<M>' will show which modules are currently loaded,
+and their version number, while 'B<m>' will show the methods,
+and 'B<S>' shows all subroutines (by pattern) as shown below.
+'B<V>' 와 'B<X>' 는 패키지 범위에서 프로그램의 변수를 보여주고
+패턴을 이용해서 검색 결과를 추려낼 수 있다.
+
+	DB<2> S str 
+	dumpvar::stringify
+	strict::bits
+	strict::import
+	strict::unimport  
+
+'X' 와 같은 종류의 명령을 사용할 때는
+타입 식별자($@%)를 사용하지 말고 '이름' 만을 사용해야 한다:
+
+	DM<3> X ~err
+	FileHandle(stderr) => fileno(2)    
+
+문제가 있는 우리의 작은 프로그램을 기억하자.
+우리는 우리가 어디에 있는지, 우리의 데이터가 어떻게 보이는지 봐야한다.
+'B<v>' 명령을 통해 먼저 현재 위치(지금의 경우는 코드의 첫 번째 줄)에서
+코드를 살펴보자:
+
+	DB<4> v
+	1       #!/usr/bin/perl
+	2:      use strict;
+	3
+	4==>    my $key = 'welcome';
+	5:      my %data = (
+	6               'this' => qw(that),
+	7               'tom' => qw(and jerry),
+	8               'welcome' => q(Hello World),
+	9               'zip' => q(welcome),
+	10      );                                 
+
+4 번째 줄에는 우리가 현재 어디에 있는지 알려주는 유용한 포인터가 있다.
+코드를 좀 더 보고 싶다면 'v'를 한번 더 입력한다:
+
+	DB<4> v
+	8               'welcome' => q(Hello World),
+	9               'zip' => q(welcome),
+	10      );
+	11:     my @data = keys %data;
+	12:     print "All OK\n" if grep($key, keys %data);
+	13:     print "$data{$key}\n";
+	14:     print "done: '$data{$key}'\n";
+	15:     exit;      
+
+그리고 5 번째 줄을 다시 열람하기를 원한다면,
+'l 5'(공백이 있음을 주의하자)를 입력한다:
+
+	DB<4> l 5
+	5:      my %data = (
+
+이 경우 볼것은 별로 없지만, 보통 헤쳐나가야 할 페이지가 있을 경우
+'l' 은 매우 유용하다.  열람하고 싶은 줄을 실행해야 할 곳으로
+초기화 하고 싶은 경우 마침표 '.' 를 입력한다:
+
+	DB<5> .
+	main::(./data_a:4):     my $key = 'welcome';  
+
+보이는 줄은 아직 실행하지 않은 다음에(B<next>) 실행할 부분이다.
+그렇기 때문에 이 지점에서 'B<p>' 를 이용해서 변수를 출력하면
+빈 값(undefined)을 볼 수 있다.  우리가 해야 할 일은 'B<s>' 명령을
+이용해 다음 실행 가능한 문장으로 한 걸음 나가는(step through) 것이다.
+
+	DB<6> s
+	main::(./data_a:5):     my %data = (
+	main::(./data_a:6):             'this' => qw(that),
+	main::(./data_a:7):             'tom' => qw(and jerry),
+	main::(./data_a:8):             'welcome' => q(Hello World),
+	main::(./data_a:9):             'zip' => q(welcome),
+	main::(./data_a:10):    );   
+
+이제 첫 번째 변수인 $key 값을 보자:
+
+	DB<7> p $key 
+	welcome 
+
+13 번째 줄에서 동작이 있으니 'B<c>' 명령을 이용해서 특정 줄이나 함수까지
+실행하는 '단 한 번의' 정지점(브레이크 포인트)을 삽입하자:
+
+	DB<8> c 13
+	All OK
+	main::(./data_a:13):    print "$data{$key}\n";
+
+코드는 'All OK'를 출력하는 체크 부분을 지나서 우리의 task 바로 앞에서 멈췄다.
+무슨 일이 벌어지고 있는지 확인하기 위해 몇몇의 변수를 출력해보자:
+
+	DB<9> p $data{$key}
+
+별 다른 것이 없으므로 해시를 통째로 보자:
+
+	DB<10> p %data
+	Hello Worldziptomandwelcomejerrywelcomethisthat 
+
+	DB<11> p keys %data
+	Hello Worldtomwelcomejerrythis  
+
+이런, 출력물은 그다지 읽기 편하지 않다.
+도움말(B<h h>)을 보면 'B<x>' 명령이 괜찮아 보인다:
+
+	DB<12> x %data
+	0  'Hello World'
+	1  'zip'
+	2  'tom'
+	3  'and'
+	4  'welcome'
+	5  undef
+	6  'jerry'
+	7  'welcome'
+	8  'this'
+	9  'that'     
+
+이것은 그다지 도움이 되지 않는다. welcome의 쌍이 있지만 키와 값을 구분할
+수 없다. 이것은 그저 배열의 덤프를 나열한 것일 뿐이고, 이 경우 별로
+유용하지 않다. 여기서 비결은 B<reference>를 사용하는 것이다:
+
+	DB<13> x \%data
+	0  HASH(0x8194bc4)
+	   'Hello World' => 'zip'
+	   'jerry' => 'welcome'
+	   'this' => 'that'
+	   'tom' => 'and'
+	   'welcome' => undef  
+
+레퍼런스는 정말로 덤프를 수행하고, 이제야 우리가 다루는 것을 볼 수 있다.
+인용을 하는 부분은 완벽하게 유효했지만 우리의 목적으로 비추었을때 틀렸다.
+'and jerry' 를 하나의 구로 다룬 것이 아니라 두 개의 단어로 다루었기 때문에
+정렬되지 않은 evenly paired 해시 구조를 생성했다.
+
+시작할 때 'B<-w>' 스위치를 이용하면 이 문제에 대해 알려주며,
+골치 아픈 많은 부분을 해결할 수 있다:
+
+	> perl -w data
+	Odd number of elements in hash assignment at ./data line 5.    
+
+인용 부분을 고쳐보자: 'tom' => q(and jerry)
+다시 실행하면, 원했던 결과물을 얻을 수 있다:
+
+	> perl -w data
+	Hello World
+
+
+여기까지 왔지만, 'B<x>' 명령에 대해 좀 더 자세히 알아보자.
+이 명령은 정말 유용하고, 중첩 레퍼런스와 완전한 객체, 부분 객체 등
+원하는 모든 것을 유쾌하게 덤프할 수 있다.
+
+이제 간단한 객체를 만들고 폭발시켜 보자.  먼저 디버거를 실행하자:
+STDIN 의 입력을 원하므로 non-committal인 무언가, 즉 0을 주도록 하자:
+
+	> perl -de 0
+	Default die handler restored.
+
+	Loading DB routines from perl5db.pl version 1.07
+	Editor support available.
+
+	Enter h or `h h' for help, or `man perldebug' for more help.
+
+	main::(-e:1):   0                       
+
+지금부터 몇 줄에 걸쳐(역슬래쉬 기호를 주의한다) 즉석에서 객체를 만들자:
+
+	DB<1> $obj = bless({'unique_id'=>'123', 'attr'=> \
+	cont: 	{'col' => 'black', 'things' => [qw(this that etc)]}}, 'MY_class')
+
+이제 이 객체를 살펴보자:
+
+  	DB<2> x $obj
+	0  MY_class=HASH(0x828ad98)
+   		'attr' => HASH(0x828ad68)
+      	'col' => 'black'
+      	'things' => ARRAY(0x828abb8)
+         	0  'this'
+         	1  'that'
+         	2  'etc'
+   		'unique_id' => 123       
+  	DB<3>
+
+유용한가, 흠?  여러분은 언제든지 그 안에 있는 거의 모든 것을
+eval 할 수 있고 정규 표현식이나 코드의 일부를 실험할 수 도 있다:
+
+	DB<3> @data = qw(this that the other atheism leather theory scythe)
+
+	DB<4> p 'saw -> '.($cnt += map { print "\t:\t$_\n" } grep(/the/, sort @data))
+	atheism
+	leather
+	other
+	scythe
+	the
+	theory  
+	saw -> 6
+
+입력한 명령들의 히스토리를 보고 싶다면 'B<H>' 명령을 이용한다:
+
+	DB<5> H
+	4: p 'saw -> '.($cnt += map { print "\t:\t$_\n" } grep(/the/, sort @data))
+	3: @data = qw(this that the other atheism leather theory scythe)
+	2: x $obj
+	1: $obj = bless({'unique_id'=>'123', 'attr'=>
+	{'col' => 'black', 'things' => [qw(this that etc)]}}, 'MY_class')
+	DB<5>
+
+이전의 명령을 반복하고 싶다면 느낌표 기호 'B<!>'를 이용한다:
+
+	DB<5> !4
+	p 'saw -> '.($cnt += map { print "$_\n" } grep(/the/, sort @data))
+	atheism
+	leather
+	other
+	scythe
+	the
+	theory  
+	saw -> 12
+
+더 많은 정보를 찾기 위해서 L<perlref>와 L<perlreftut> 를 참조하라. 
+
+
+=head1 Stepping through code
+
+섭씨와 화씨를 변환하는 간단한 프로그램이 있다.
+이 프로그램은 문제가 있다:
+
+	#!/usr/bin/perl -w
+	use strict;
+
+	my $arg = $ARGV[0] || '-c20';
+
+	if ($arg =~ /^\-(c|f)((\-|\+)*\d+(\.\d+)*)$/) {
+		my ($deg, $num) = ($1, $2);
+		my ($in, $out) = ($num, $num);
+		if ($deg eq 'c') {
+			$deg = 'f';
+			$out = &c2f($num);
+		} else {
+			$deg = 'c';
+			$out = &f2c($num);
+		}
+		$out = sprintf('%0.2f', $out);
+		$out =~ s/^((\-|\+)*\d+)\.0+$/$1/;
+		print "$out $deg\n";
+	} else {
+		print "Usage: $0 -[c|f] num\n";
+	}
+	exit;
+
+	sub f2c {
+		my $f = shift;
+		my $c = 5 * $f - 32 / 9;
+		return $c;
+	}
+
+	sub c2f {
+		my $c = shift;
+		my $f = 9 * $c / 5 + 32;
+		return $f;
+	}
+
+
+어떤 이유로, 화씨에서 섭씨로의 변환은 기대했던 값을 구하지 못한다.
+이 프로그램은 이렇게 동작한다:
+
+	> temp -c0.72
+	33.30 f
+
+	> temp -f33.3
+	162.94 c
+
+일관적이지 못하다!  우리는 코드에 직접 정지점을 설정하고,
+무슨 일이 일어나는지 확인하기 위해 디버거를 이용해 실행할 것이다.
+정지점은 일종의 플래그로, 디버거는 정지점에 도달하기 전까지는
+방해받지 않고 실행하다가 정지점에 도달하면 실행을 멈추고
+다음 상호작용을 위해 프롬프트를 제공한다.
+보통의 경우 이 디버거 명령은 완전하게 무시하며, 안전하다.
+만약 좀 너저분하다면 최종 코드에서는 제거하도록 한다.
+
+	my ($in, $out) = ($num, $num);
+	$DB::single=2; # insert at line 9!
+	if ($deg eq 'c') 
+		...
+
+	> perl -d temp -f33.3
+	Default die handler restored.
+
+	Loading DB routines from perl5db.pl version 1.07
+	Editor support available.
+
+	Enter h or `h h' for help, or `man perldebug' for more help.
+
+	main::(temp:4): my $arg = $ARGV[0] || '-c100';     
+
+'B<c>' 명령을 이용해 간단하게 미리 정한 정지점으로 이동하자(continue):
+
+  	DB<1> c
+	main::(temp:10):                if ($deg eq 'c') {   
+
+우리가 어디에 있는지 보기위해 view 명령을 이용해 따라가자:
+
+	DB<1> v
+	7:              my ($deg, $num) = ($1, $2);
+	8:              my ($in, $out) = ($num, $num);
+	9:              $DB::single=2;
+	10==>           if ($deg eq 'c') {
+	11:                     $deg = 'f';
+	12:                     $out = &c2f($num);
+	13              } else {
+	14:                     $deg = 'c';
+	15:                     $out = &f2c($num);
+	16              }                             
+
+그리고 현재 사용하고 있는 값을 출력하자:
+
+	DB<1> p $deg, $num
+	f33.3
+
+콜론으로 시작하는 코드상의 줄이 시작하는 부분이면 어느 곳이든
+또 다른 정지점을 설정할 수 있다.  함수가 막 끝나는 지점인 17 번째 줄을
+이용할 것이고, 추후 이곳에서 잠시 멈추기를 원할 것이다:
+
+	DB<2> b 17
+
+정지점을 설정하는 작업은 별 반응 없이 그대로 프롬프트를 출력한다.
+하지만 'L' 명령을 이용해서 현재 설정한 정지점 목록을 확인할 수 있다:
+
+	DB<3> L
+	temp:
+ 		17:            print "$out $deg\n";
+   		break if (1)     
+
+정지점을 지우기 위해서는 'd' 나 'D' 를 이용한다.
+(역주: 더이상 정지점을 지우기 위해서 'd'와 'D'를 사용하지 않는다.
+5.8.8 과 5.10 의 펄 디버거에서 정지점을 지우는 명령은 'B<B>' 다.)
+
+이제 서브루틴까지 계속 진행할 것이다. 이번에는 줄 번호를 사용하는 대신
+함수 이름을 이용할 것이다. 그리고 이제 친숙한 'v' 를 이용해 코드를 따라가자:
+
+	DB<3> c f2c
+	main::f2c(temp:30):             my $f = shift;  
+
+	DB<4> v
+	24:     exit;
+	25
+	26      sub f2c {
+	27==>           my $f = shift;
+	28:             my $c = 5 * $f - 32 / 9; 
+	29:             return $c;
+	30      }
+	31
+	32      sub c2f {
+	33:             my $c = shift;   
+
+
+현재 위치에서 29 번째 줄 사이에 함수가 있다고 가정했을때,
+그 함수로 한 단계 들어가기를 원한다면 'B<s>' 명령을 사용하고,
+정밀 검사를 위해 하부로 내려가지 않고 그냥 띄어 넘기를 원한다면
+'B<n>' 명령을 사용한다.
+이 경우는 단순하게 29 번째 줄까지 계속 진행하도록 한다:
+
+	DB<4> c 29  
+	main::f2c(temp:29):             return $c;
+
+그리고 반환 값을 살펴보자:
+
+	DB<5> p $c
+	162.944444444444
+
+전혀 원했던 답이 아니지만 덧셈은 맞는것 같다.
+혹시 연산자 우선 순위와 관련있는 것이 아닐까?
+우리의 덧셈에서 가능한 다른 경우를 고려해보자:
+
+	DB<6> p (5 * $f - 32 / 9)
+	162.944444444444
+
+	DB<7> p 5 * $f - (32 / 9) 
+	162.944444444444
+
+	DB<8> p (5 * $f) - 32 / 9
+	162.944444444444
+
+	DB<9> p 5 * ($f - 32) / 9
+	0.722222222222221
+
+:-) 찾았다!
+좋다. 이제 반환할 변수를 설정하고 'r' 명령을 이용해 함수에서 되돌아가자:
+
+	DB<10> $c = 5 * ($f - 32) / 9
+
+	DB<11> r
+	scalar context return from main::f2c: 0.722222222222221
+
+괜찮아 보인다. 이제 스크립트의 나머지 부분까지 계속해 실행해보자:
+
+	DB<12> c
+	0.72 c 
+	Debugged program terminated.  Use q to quit or R to restart,
+  	use O inhibit_exit to avoid stopping after program termination,
+  	h q, h R or h O to get additional info.   
+
+실제 프로그램에서 성가시게 굴었던 줄에 간단한 수정
+(빠뜨린 괄호를 추가하는 것)을 하자.  끝났다!
+
+
+=head1 Placeholder for a, w, t, T
+
+Actions, watch variables, stack traces etc.: on the TODO list.
+
+	a 
+
+	w 
+
+	t 
+
+	T
+
+
+=head1 REGULAR EXPRESSIONS
+
+Ever wanted to know what a regex looked like?  You'll need perl compiled with
+the DEBUGGING flag for this one:
+
+	> perl -Dr -e '/^pe(a)*rl$/i'
+	Compiling REx `^pe(a)*rl$'
+	size 17 first at 2
+	rarest char
+	 at 0
+	   1: BOL(2)
+	   2: EXACTF <pe>(4)
+	   4: CURLYN[1] {0,32767}(14)
+	   6:   NOTHING(8)
+	   8:   EXACTF <a>(0)
+	  12:   WHILEM(0)
+	  13: NOTHING(14)
+	  14: EXACTF <rl>(16)
+	  16: EOL(17)
+	  17: END(0)
+	floating `'$ at 4..2147483647 (checking floating) stclass `EXACTF <pe>'
+anchored(BOL) minlen 4
+	Omitting $` $& $' support.
+
+	EXECUTING...
+
+	Freeing REx: `^pe(a)*rl$'  
+
+Did you really want to know? :-)
+For more gory details on getting regular expressions to work, have a look at
+L<perlre>, L<perlretut>, and to decode the mysterious labels (BOL and CURLYN,
+etc. above), see L<perldebguts>.
+
+
+=head1 OUTPUT TIPS
+
+에러 로그의 모든 출력물을 보고 싶고, 유용한 운영체제의 버퍼링으로 인해
+어떠한 메시지도 잃고 싶지 않다면, 스크립트의 시작 부분에 다음 줄을 넣어라:
+
+	$|=1;	
+
+명령줄에서 계속해서 증가하는 로그 파일의 마지막 부분을 보고 싶다면:
+
+	tail -f $error_log
+
+모든 die 호출을 감싸는 것은 이것을 어떻게 호출한 것인지, 어디서 호출한
+것인지 알고 싶을 경우 유용하다. 자세한 내용은 L<perlvar>을 참조하라:
+
+	BEGIN { $SIG{__DIE__} = sub { require Carp; Carp::confess(@_) } }
+
+STDOUT 과 STDERR 파일핸들을 재지향(redirection) 하는 다양하면서 유용한
+기법은 L<perlopentut>과 L<perlfaq8>을 참조하라.
+
+
+=head1 CGI
+
+Just a quick hint here for all those CGI programmers who can't figure out how
+on earth to get past that 'waiting for input' prompt, when running their CGI
+script from the command-line, try something like this:
+CGI 스크립트를 명령줄에서 실행시켰을 때 입력을 기다리는 프롬프트를
+어떻게 해야할지 모르는 CGI 프로그래머를 위한 간단한 힌트를 알려주겠다.
+이 경우 다음과 같이 실행해보라:
+
+	> perl -d my_cgi.pl -nodebug 
+
+물론 L<CGI>와 L<perlfaq9>는 더 많은 정보를 알려줄 것이다.
+
+
+=head1 GUIs
+
+The command line interface is tightly integrated with an B<emacs> extension
+and there's a B<vi> interface too.  
+
+You don't have to do this all on the command line, though, there are a few GUI
+options out there.  The nice thing about these is you can wave a mouse over a
+variable and a dump of its data will appear in an appropriate window, or in a
+popup balloon, no more tiresome typing of 'x $varname' :-)
+
+In particular have a hunt around for the following:
+
+B<ptkdb> perlTK based wrapper for the built-in debugger
+
+B<ddd> data display debugger
+
+B<PerlDevKit> and B<PerlBuilder> are NT specific
+
+NB. (more info on these and others would be appreciated).
+
+
+=head1 SUMMARY
+
+우리는 B<use strict>와 B<-w>를 이용할 경우
+어떻게 좋은 코딩 습관을 장려할 수 있을지 보았다.
+B<perl -d scriptname>으로 펄 디버거를 실행하고, 디버거 안에서
+데이터를 점검하기 위해 B<p> 와 B<x> 명령을 이용했다.
+여러분은 코드를 돌아다닐 수 있었다.  B<b>를 이용해 정지점을 설정하고,
+B<s>나 B<n> 을 이용해서 단계별로 따라갈 수도 있고,
+B<c> 를 이용해서 계속 진행할 수 있고, B<r>을 이용해서 함수에서 리턴할 수도 있다.
+여러분이 본격적으로 사용할 때, 매우 직관적인 기능이다.
+
+물론 이것은 단지 표면을 훑어본 것일 뿐이고, 더 많은 것들이 남아 있다.
+더 배우기 위한 가장 좋은 방법은 언어에 대해 더 발견하고,
+온라인 도움말을 (L<perldebug> 는 아마도 다음으로 봐야할 문서일 것이다.)
+읽기위해 perldoc 을 사용하는 것이다.
+그리고 물론 실습도 필요할 것이다.
+
+
+=head1 SEE ALSO
+
+L<perldebug>, 
+L<perldebguts>, 
+L<perldiag>,
+L<dprofpp>,
+L<perlrun>
+
+
+=head1 AUTHOR
+
+Richard Foley <richard@rfi.net> Copyright (c) 2000
+
+
+=head1 CONTRIBUTORS
+
+Various people have made helpful suggestions and contributions, in particular:
+
+Ronald J Kimball <rjk@linguist.dartmouth.edu>
+
+Hugo van der Sanden <hv@crypt0.demon.co.uk>
+
+Peter Scott <Peter@PSDT.com>
+

@@ -1,0 +1,1338 @@
+=head1 NAME
+X<object> X<OOP>
+
+=begin original
+
+perlobj - Perl objects
+
+=end original
+
+perlobj - Perl 의 오브젝트
+
+=head1 DESCRIPTION
+
+=begin original
+
+First you need to understand what references are in Perl.
+See L<perlref> for that.  Second, if you still find the following
+reference work too complicated, a tutorial on object-oriented programming
+in Perl can be found in L<perltoot> and L<perltooc>.
+
+=end original
+
+우선 처음으로 Perl에서의 리퍼런스가 무엇인지를 이해하고 있어야합니다.
+이에 대해서는 L<perlref> 를 참조해 주세요.
+두번째로는, 이제부터 설명하는 리퍼런스의 동작이 너무 복잡하다고 생각하신다면,
+Perl 에서의 오브젝트지향 프로그래밍의 튜토리얼이 
+L<perltoot> 와 L<perltooc> 에 있으니 참고하세요.
+
+=begin original
+
+If you're still with us, then
+here are three very simple definitions that you should find reassuring.
+
+=end original
+
+여기까지로 아직 읽어나갈 기운이 있다면, 당신을 안심시키기 위한 것입니다.
+세개의 꽤 단순한 정의가 있습니다.
+
+=over 4
+
+=item 1.
+
+=begin original
+
+An object is simply a reference that happens to know which class it
+belongs to.
+
+=end original
+
+오브젝트란, 단순히 자신이 어느 클래스에 속해있는 가를 알고 있는 리퍼런스입니다.
+
+=item 2.
+
+=begin original
+
+A class is simply a package that happens to provide methods to deal
+with object references.
+
+=end original
+
+클래스란, 단순히 오브젝트의 리퍼런스를 취급하는 메소드를 제공하는 패키지입니다.
+
+=item 3.
+
+=begin original
+
+A method is simply a subroutine that expects an object reference (or
+a package name, for class methods) as the first argument.
+
+=end original
+
+메소드란, 단순히 첫번째 인수에 오브젝트의 리퍼런스(혹은 클래스의 메소드에 대한
+패키지명)을 얻을 수 있는 서브루틴입니다.
+
+=back
+
+=begin original
+
+We'll cover these points now in more depth.
+
+=end original
+
+이런 것들에 대해서 더 깊게 파고 들어 가겠습니다.
+
+=head2 An Object is Simply a Reference
+X<object> X<bless> X<constructor> X<new>
+
+(오브젝트는 단순한 레퍼런스)
+
+=begin original
+
+Unlike say C++, Perl doesn't provide any special syntax for
+constructors.  A constructor is merely a subroutine that returns a
+reference to something "blessed" into a class, generally the
+class that the subroutine is defined in.  Here is a typical
+constructor:
+
+=end original
+
+C++ 과는 달리 Perl은 생성자에 대해 특별한 구문을 준비하지 않습니다.
+생성자는 단순히, 클래스에 "bless" 한 무엇인가의 리퍼런스를
+반환하는 서브루틴으로, 일반적으로는 서브틴이 정의되어 있는 클래스입니다.
+아래는 전형적인 생성자를 나타냅니다.
+
+    package Critter;
+    sub new { bless {} }
+
+=begin original
+
+That word C<new> isn't special.  You could have written
+a construct this way, too:
+
+=end original
+
+C<new> 라고 하는 단어는 특별한 것이 아닙니다.
+생성자를 아래와 같이 쓰는 것도 가능합니다.
+
+    package Critter;
+    sub spawn { bless {} }
+
+=begin original
+
+This might even be preferable, because the C++ programmers won't
+be tricked into thinking that C<new> works in Perl as it does in C++.
+It doesn't.  We recommend that you name your constructors whatever
+makes sense in the context of the problem you're solving.  For example,
+constructors in the Tk extension to Perl are named after the widgets
+they create.
+
+=end original
+
+실제로는, 이건 C++ 프로그래머가 C++ 처럼 Perl 의 C<new> 가 동작한다고
+생각해서 함정에 빠질 일이 없다 는 점에서 선택할 만한 것입니다.
+해결하고 픈 문제에 관한 컨텍스트에서 알기쉬운 생성자로 하는 것을
+추천합니다. 예를 들면, Perl 의 Tk 익스텐션의 생성자에서는
+작성하는 위젯에서 이름을 얻고 있습니다.
+
+=begin original
+
+One thing that's different about Perl constructors compared with those in
+C++ is that in Perl, they have to allocate their own memory.  (The other
+things is that they don't automatically call overridden base-class
+constructors.)  The C<{}> allocates an anonymous hash containing no
+key/value pairs, and returns it  The bless() takes that reference and
+tells the object it references that it's now a Critter, and returns
+the reference.  This is for convenience, because the referenced object
+itself knows that it has been blessed, and the reference to it could
+have been returned directly, like this:
+
+=end original
+
+Perl 의 생성자에 관해서 C++ 과 다른 것은,
+C++ 에서는 자신이 메모리를 할당할 필요가 있다는 것입니다.
+C<{}> 는 빈 이름없는 해쉬를 할당합니.
+bless() 는 인수에 리퍼런스를 얻고, 그 오브젝트에 오브젝트가
+Critter 의 리퍼런스인 것을 알리고, 리퍼런스를 반환합니다.
+참조된 오브젝트는 그 자신이 bless 되어 있는 것을 아고 있고,
+리퍼런스는 아래의 예처럼 직접 반환할 수 있습니다.
+
+    sub new {
+	my $self = {};
+	bless $self;
+	return $self;
+    }
+
+=begin original
+
+You often see such a thing in more complicated constructors
+that wish to call methods in the class as part of the construction:
+
+=end original
+
+실제로는, 구축의 일부로써 클래스의 메소드를 호출하는 것처럼 더욱
+복잡한 생성자를 잘 보이도록 하는 것이겠죠.
+
+    sub new {
+	my $self = {};
+	bless $self;
+	$self->initialize();
+	return $self;
+    }
+
+=begin original
+
+If you care about inheritance (and you should; see
+L<perlmodlib/"Modules: Creation, Use, and Abuse">),
+then you want to use the two-arg form of bless
+so that your constructors may be inherited:
+
+=end original
+
+상속에 대해서 신경쓰고 있으면(혹 그러고 계시다면,
+L<perlmodlib/"Modules: Creation, Use, and Abuse">를 참조해주세요)
+계승될지도 모르는 생성자에서 인수 두개를 얻는 형식의 bless 를
+사용하고 싶다면 :
+
+    sub new {
+	my $class = shift;
+	my $self = {};
+	bless $self, $class;
+	$self->initialize();
+	return $self;
+    }
+
+=begin original
+
+Or if you expect people to call not just C<< CLASS->new() >> but also
+C<< $obj->new() >>, then use something like the following.  (Note that using
+this to call new() on an instance does not automatically perform any
+copying.  If you want a shallow or deep copy of an object, you'll have to
+specifically allow for that.)  The initialize() method used will be of
+whatever $class we blessed the object into:
+
+=end original
+
+혹은, 유저가 C<< CLASS->new() >> 가 아닌 C<< $obj->new() >> 를 사용하는 것을
+기대하고 있다면, 아래와 같은 형식을 사용합니다.
+initialize() 라 하는 메소드는 $class를 자신들이 오브젝트에 bless 하고 있는 
+지 어떤 지에 상관없이 사용됩니다.
+
+    sub new {
+	my $this = shift;
+	my $class = ref($this) || $this;
+	my $self = {};
+	bless $self, $class;
+	$self->initialize();
+	return $self;
+    }
+
+=begin original
+
+Within the class package, the methods will typically deal with the
+reference as an ordinary reference.  Outside the class package,
+the reference is generally treated as an opaque value that may
+be accessed only through the class's methods.
+
+=end original
+
+클래스 패키지 안에서는, 메소드는 리퍼런스를 보통의 리퍼런스로써 취급됩니다.
+클래스 패키지의 바깥쪽에서는 리퍼런스는 일반적으로 클래스 메소드를
+통해서만 접근하는 것이 가능한 불투명한 값(opaque value)인 것처럼
+취급됩니다.
+
+=begin original
+
+Although a constructor can in theory re-bless a referenced object
+currently belonging to another class, this is almost certainly going
+to get you into trouble.  The new class is responsible for all
+cleanup later.  The previous blessing is forgotten, as an object
+may belong to only one class at a time.  (Although of course it's
+free to inherit methods from many classes.)  If you find yourself
+having to do this, the parent class is probably misbehaving, though.
+
+=end original
+
+생성자는 현재 참조된 오브젝트를 별도의 클래스에 소속시키기 위해
+다시 bless 할지도 모릅니다.
+하지만, 새로운 클래스는 나중에 없어지는 원인이 됩니다.
+오브젝트는 한번에 하나의 클래스에만 속할 수 없는 것처럼 
+이전의 bless는 잊혀져버립니다(많은 클래스에서 메소드를 상속하는 것이
+자유롭게 된다고 해도, 마찬가지입니다)
+만약 다시 bless 하지않으면 안되는 것이라면, 부모 클래스는 잘못된
+행동을 하고 있는 것입니다.
+
+=begin original
+
+A clarification:  Perl objects are blessed.  References are not.  Objects
+know which package they belong to.  References do not.  The bless()
+function uses the reference to find the object.  Consider
+the following example:
+
+=end original
+
+해설 : Perl 의 오브젝트는 bless 되어 있습니다.
+리퍼런스는 그렇지 않습니다.
+오브젝트는 자신이 속해 있는 패키지가 무엇인지를 알고 있지만,
+리퍼런스는 모릅니다.
+함수 bless() 는 리퍼런스를 오브젝트로 간주하기 위해 사용됩니다.
+아래의 예를 봐 주세요.
+
+    $a = {};
+    $b = $a;
+    bless $a, BLAH;
+    print "\$b is a ", ref($b), "\n";
+
+=begin original
+
+This reports $b as being a BLAH, so obviously bless()
+operated on the object and not on the reference.
+
+=end original
+
+이것은 "$b as being a BLAH" 라고 표시됩니다. 
+이것은 명확하게 bless() 는 리퍼런스에 대해서 가 아닌
+오브젝트에 작용하는 것을 말합니다.
+
+=head2 A Class is Simply a Package
+X<class> X<package> X<@ISA> X<inheritance>
+
+(클래스는 단순히 패키지)
+
+=begin original
+
+Unlike say C++, Perl doesn't provide any special syntax for class
+definitions.  You use a package as a class by putting method
+definitions into the class.
+
+=end original
+
+C++ 과는 달리, Perl 은 클래스정의에 대한 특별한 구문을 쓰지 않습니다.
+패키지를, 메소드정의를 무리하게 집어넣은 클래스로써 사용합니다.
+
+=begin original
+
+There is a special array within each package called @ISA, which says
+where else to look for a method if you can't find it in the current
+package.  This is how Perl implements inheritance.  Each element of the
+@ISA array is just the name of another package that happens to be a
+class package.  The classes are searched (depth first) for missing
+methods in the order that they occur in @ISA.  The classes accessible
+through @ISA are known as base classes of the current class.
+
+=end original
+
+각 패키지에서 메소드를 찾지 못했을 때에 메소드를 찾으러 가는 
+별도의 패키를 지시하는 @ISA 라고 불리는 특별한 배열이 있습니다.
+이것이 Perl 이 상속을 할 수 있는 방법입니다.
+배열 @ISA 의 각 요소는, 클래스 패키지인 별도의 패키지의 이름입니다.
+클래스는,  @ISA에 있는 순번으로 메소드의 검색을 수행합니다.
+@ISA 를 통해 접근하는 것이 가능한 클래스는 현재 클래스의
+기본클래스로 알려지게 됩니다.
+
+=begin original
+
+All classes implicitly inherit from class C<UNIVERSAL> as their
+last base class.  Several commonly used methods are automatically
+supplied in the UNIVERSAL class; see L<"Default UNIVERSAL methods"> for
+more details.
+X<UNIVERSAL> X<base class> X<class, base>
+
+=end original
+
+모든 클래스는 암묵적으로 베이스클래스로써 C<UNIVERSAL>이라고 하는
+클래스를 계승하고 있습니다.
+UNIVERSAL 클래스에서 자동적으로 제공되는 일반적으로 사용되는 메소드가
+몇 개가 있습니다.
+자세한 내용은 L<"Default UNIVERSAL methods"> 을 참조해주세요.
+X<UNIVERSAL> X<base class> X<class, base>
+
+=begin original
+
+If a missing method is found in a base class, it is cached
+in the current class for efficiency.  Changing @ISA or defining new
+subroutines invalidates the cache and causes Perl to do the lookup again.
+
+=end original
+
+베이스클래스에서 찾고 있는 메소드가 발견되면, 효율을 위해서
+그 메소드는 현재클래스에서 캐싱됩니다.
+@ISA 의 변경이나 새로운 서브루틴의 정의는 캐쉬를 무효화하고, Perl 에
+다시금 메소드를 찾게합니다.
+
+=begin original
+
+If neither the current class, its named base classes, nor the UNIVERSAL
+class contains the requested method, these three places are searched
+all over again, this time looking for a method named AUTOLOAD().  If an
+AUTOLOAD is found, this method is called on behalf of the missing method,
+setting the package global $AUTOLOAD to be the fully qualified name of
+the method that was intended to be called.
+X<AUTOLOAD>
+
+=end original
+
+현재 클래스, 이름붙은 기본 클래스, UNIVERSAL 클래스를 검색해서,
+이것 들중에 어느 것이 요구된 메소드를 가지고 있지 않으면,
+AUTOLOAD() 라고 하는 이름의 메소드를 검색합니다.
+AUTOLOAD 가 발견되면, 이 메소드는 놓쳐버린 메소드 도중에서
+호출되어, 패키지 글로벌의 $AUTOLOAD 를 메소드의 완전수식이름이 되도록
+설정합니다.
+X<AUTOLOAD>
+
+=begin original
+
+If none of that works, Perl finally gives up and complains.
+
+=end original
+
+여기까지 전부 실패했다면, Perl 은 소리높여 에러 메시지를 냅니다.
+
+=begin original
+
+If you want to stop the AUTOLOAD inheritance say simply
+X<AUTOLOAD>
+
+=end original
+
+AUTOLOAD 의 상속을 멈추고 싶은 경우는 간단하게 : 
+X<AUTOLOAD>
+
+	sub AUTOLOAD;
+
+=begin original
+
+and the call will die using the name of the sub being called.
+
+=end original
+
+그리고는 호출은 호출된 서브루틴의 이름을 사용해 죽습니다.
+
+=begin original
+
+Perl classes do method inheritance only.  Data inheritance is left up
+to the class itself.  By and large, this is not a problem in Perl,
+because most classes model the attributes of their object using an
+anonymous hash, which serves as its own little namespace to be carved up
+by the various classes that might want to do something with the object.
+The only problem with this is that you can't sure that you aren't using
+a piece of the hash that isn't already used.  A reasonable workaround
+is to prepend your fieldname in the hash with the package name.
+X<inheritance, method> X<inheritance, data>
+
+=end original
+
+Perl의 클래스는 메소드의 상속만을 수행합니다.
+데이터의 상속은 클래스 스스로 맡겨집니다.
+이 것은 Perl의 문제가 아닙니다.
+왜냐면, 대부분의 클래스는 이름없는 해쉬를 사용해서, 클래스의 오브젝트의
+속성을 모델화하고 있습니다.
+이 이름없는 해쉬는 그 오브젝트에 대해 무멋인가를 수행하는 것 처럼
+여러 클래스마다 고유의 이름공간을 작게 나누는 역할을 맡습니다.
+이것에 관해 문제는 사용한 해쉬의 조ㄱ이 이미 사용된 것이 아닌 것에
+확신이 가질 수 없다는 것입니다.
+이것에 관해 현실적인 대응책은 해쉬의 필드이름에 패키지이름을 사용하는
+것입니다.
+X<inheritance, method> X<inheritance, data>
+
+    sub bump {
+	my $self = shift;
+	$self->{ __PACKAGE__ . ".count"}++;
+    } 
+
+=head2 A Method is Simply a Subroutine
+X<method>
+
+(메소드는 단순히 서브루틴)
+
+=begin original
+
+Unlike say C++, Perl doesn't provide any special syntax for method
+definition.  (It does provide a little syntax for method invocation
+though.  More on that later.)  A method expects its first argument
+to be the object (reference) or package (string) it is being invoked
+on.  There are two ways of calling methods, which we'll call class
+methods and instance methods.  
+
+=end original
+
+C++ 과는 달리, Perl 은 메소드 정의에 대한 특별한 구문이 없습니다.
+(하지만, 나중에 기술하는 것처럼 메소드의 기동을 위해서 조금은
+구문을 제공하고 있습니다)
+메소드는 첫번째 인수로써, 메소드를 기동한 오브젝트(리퍼런스),
+혹은 패키지(문자열)을 기대하고 있습니다.
+메소드의 호출방법에는 두종류가 있는데, 각각 클래스 메소드,
+인스턴스 메소드라고 부릅니다.
+
+=begin original
+
+A class method expects a class name as the first argument.  It
+provides functionality for the class as a whole, not for any
+individual object belonging to the class.  Constructors are often
+class methods, but see L<perltoot> and L<perltooc> for alternatives.
+Many class methods simply ignore their first argument, because they
+already know what package they're in and don't care what package
+they were invoked via.  (These aren't necessarily the same, because
+class methods follow the inheritance tree just like ordinary instance
+methods.)  Another typical use for class methods is to look up an
+object by name:
+
+=end original
+
+클래스메소드는 첫번째 인수로써 클래스 이름을 기대합니다.
+클래스메소드는 클래스 전체에 대한 기능을 제공하는 것이고, 클래스에
+속한 각각의 오브젝트에 대한 것이 아닙니다.
+생성자는 보통은 클래스메소드이지만,
+대안에 대해서는 L<perltoot>와 L<perltooc>를 참조해주세요.
+많은 클래스메소드는 단순히 첫번째인수를 무시합니다.
+이것은 이미 자신이 놓여있는 패키지의 이름을 알고 있고,
+패키지가 어떤 경로로 기동되었는 가를 신경쓸 필요가 없기 때문입니다.
+(일반 인스턴스 메소드처럼 클래스메소드는 상속에 따르기 때문에,
+이것들이 동일할 필요는 없습니다) 클래스메소드의 검사를 위한 것입니다.
+
+    sub find {
+	my ($class, $name) = @_;
+	$objtable{$name};
+    }
+
+=begin original
+
+An instance method expects an object reference as its first argument.
+Typically it shifts the first argument into a "self" or "this" variable,
+and then uses that as an ordinary reference.
+
+=end original
+
+인스턴스메소드는 첫번째 인수로 오브젝트의 리퍼런스를 기대합니다.
+전형적으로 첫번째 인수는 "self" 든가 "this"라든가 하는 변수에 shift 되고,
+그 다음은 일반적인 러퍼런스처럼 취급합니다.
+
+    sub display {
+	my $self = shift;
+	my @keys = @_ ? @_ : sort keys %$self;
+	foreach $key (@keys) {
+	    print "\t$key => $self->{$key}\n";
+	}
+    }
+
+=head2 Method Invocation
+X<invocation> X<method> X<arrow> X<< -> >>
+
+(메소드의 호출)
+
+=begin original
+
+For various historical and other reasons, Perl offers two equivalent
+ways to write a method call.  The simpler and more common way is to use
+the arrow notation:
+
+=end original
+
+역사적, 혹은 그 외의 여러 이유에 의해, Perl 은 메소드 호출을
+쓰기위한 두개의 같은 방법을 제공하고 있습니다.
+보다 단순하고 보다 일반적인 방법은 화살표 표기법을 사용하는 것입니다.
+
+    my $fred = Critter->find("Fred");
+    $fred->display("Height", "Weight");
+
+=begin original
+
+You should already be familiar with the use of the C<< -> >> operator with
+references.  In fact, since C<$fred> above is a reference to an object,
+you could think of the method call as just another form of
+dereferencing.
+
+=end original
+
+이미 C<< -> >> 연산자를 리퍼런스로 쓰는 것에 익숙해 졌겠죠?
+사실 C<$fred> 이후는 오브젝트로의 리퍼런스이고, 
+다른 오브젝트의 디리퍼런스로써 메소드를 호출할 수 있다고 생각할 수 있습니다.
+
+=begin original
+
+Whatever is on the left side of the arrow, whether a reference or a
+class name, is passed to the method subroutine as its first argument.
+So the above code is mostly equivalent to:
+
+=end original
+
+화살표의 왼쪽에 있는 무엇이든, 리퍼런스나 클래스 이름이 첫번째 인수로
+메소드 서브루틴에 넘겨졌든 어떻든 간에 위의 코드는 거의 같은 것입니다.
+
+    my $fred = Critter::find("Critter", "Fred");
+    Critter::display($fred, "Height", "Weight");
+
+=begin original
+
+How does Perl know which package the subroutine is in?  By looking at
+the left side of the arrow, which must be either a package name or a
+reference to an object, i.e. something that has been blessed to a
+package.  Either way, that's the package where Perl starts looking.  If
+that package has no subroutine with that name, Perl starts looking for
+it in any base classes of that package, and so on.
+
+=end original
+
+Perl 은 어떻게해서 패키지에 서브루틴이 있는지 알고 있을까요? 
+How does Perl know which package the subroutine is in?  By looking at
+the left side of the arrow, which must be either a package name or a
+reference to an object, i.e. something that has been blessed to a
+package.  Either way, that's the package where Perl starts looking.  If
+that package has no subroutine with that name, Perl starts looking for
+it in any base classes of that package, and so on.
+(TBT)
+
+=begin original
+
+If you need to, you I<can> force Perl to start looking in some other package:
+
+=end original
+
+만약 필요하다면, Perl 에게 다른 패키지를 강제로 보게 I<할 수 있습니다>.
+
+    my $barney = MyCritter->Critter::find("Barney");
+    $barney->Critter::display("Height", "Weight");
+
+=begin original
+
+Here C<MyCritter> is presumably a subclass of C<Critter> that defines
+its own versions of find() and display().  We haven't specified what
+those methods do, but that doesn't matter above since we've forced Perl
+to start looking for the subroutines in C<Critter>.
+
+=end original
+
+Here C<MyCritter> is presumably a subclass of C<Critter> that defines
+its own versions of find() and display().  We haven't specified what
+those methods do, but that doesn't matter above since we've forced Perl
+to start looking for the subroutines in C<Critter>.
+(TBT)
+
+=begin original
+
+As a special case of the above, you may use the C<SUPER> pseudo-class to
+tell Perl to start looking for the method in the packages named in the
+current class's C<@ISA> list.  
+X<SUPER>
+
+=end original
+
+As a special case of the above, you may use the C<SUPER> pseudo-class to
+tell Perl to start looking for the method in the packages named in the
+current class's C<@ISA> list.  
+X<SUPER>
+(TBT)
+
+    package MyCritter;
+    use base 'Critter';    # sets @MyCritter::ISA = ('Critter');
+
+    sub display { 
+        my ($self, @args) = @_;
+        $self->SUPER::display("Name", @args);
+    }
+
+=begin original
+
+It is important to note that C<SUPER> refers to the superclass(es) of the
+I<current package> and not to the superclass(es) of the object. Also, the
+C<SUPER> pseudo-class can only currently be used as a modifier to a method
+name, but not in any of the other ways that class names are normally used,
+eg:
+X<SUPER>
+
+=end original
+
+It is important to note that C<SUPER> refers to the superclass(es) of the
+I<current package> and not to the superclass(es) of the object. Also, the
+C<SUPER> pseudo-class can only currently be used as a modifier to a method
+name, but not in any of the other ways that class names are normally used,
+eg:
+X<SUPER>
+(TBT)
+
+    something->SUPER::method(...);	# OK
+    SUPER::method(...);			# WRONG
+    SUPER->method(...);			# WRONG
+
+=begin original
+
+Instead of a class name or an object reference, you can also use any
+expression that returns either of those on the left side of the arrow.
+So the following statement is valid:
+
+=end original
+
+Instead of a class name or an object reference, you can also use any
+expression that returns either of those on the left side of the arrow.
+So the following statement is valid:
+(TBT)
+
+    Critter->find("Fred")->display("Height", "Weight");
+
+=begin original
+
+and so is the following:
+
+=end original
+
+
+그리고 아래처럼 합니다.
+
+    my $fred = (reverse "rettirC")->find(reverse "derF");
+
+=begin original
+
+The right side of the arrow typically is the method name, but a simple 
+scalar variable containing either the method name or a subroutine 
+reference can also be used.
+
+=end original
+
+The right side of the arrow typically is the method name, but a simple 
+scalar variable containing either the method name or a subroutine 
+reference can also be used.
+(TBT)
+
+=head2 Indirect Object Syntax
+X<indirect object syntax> X<invocation, indirect> X<indirect>
+
+(간접 오브젝트 구문)
+
+=begin original
+
+The other way to invoke a method is by using the so-called "indirect
+object" notation.  This syntax was available in Perl 4 long before
+objects were introduced, and is still used with filehandles like this:
+
+=end original
+
+The other way to invoke a method is by using the so-called "indirect
+object" notation.  This syntax was available in Perl 4 long before
+objects were introduced, and is still used with filehandles like this:
+(TBT)
+
+   print STDERR "help!!!\n";
+
+=begin original
+
+The same syntax can be used to call either object or class methods.
+
+=end original
+
+이것과 같은 구문을, 클래스메소드나 인스턴스메소드를 호출할 때에
+사용할 수가 있습니다.
+
+   my $fred = find Critter "Fred";
+   display $fred "Height", "Weight";
+
+=begin original
+
+Notice that there is no comma between the object or class name and the
+parameters.  This is how Perl can tell you want an indirect method call
+instead of an ordinary subroutine call.
+
+=end original
+
+Notice that there is no comma between the object or class name and the
+parameters.  This is how Perl can tell you want an indirect method call
+instead of an ordinary subroutine call.
+(TBT)
+
+=begin original
+
+But what if there are no arguments?  In that case, Perl must guess what
+you want.  Even worse, it must make that guess I<at compile time>.
+Usually Perl gets it right, but when it doesn't you get a function
+call compiled as a method, or vice versa.  This can introduce subtle bugs
+that are hard to detect.
+
+=end original
+
+하지만 인수가 없다면?
+이 경우, Perl 은 원하는 것을 추측하지 않으면 안됩니다.
+거기에 나쁜 것에, 이 추측은 B<컴파일시>에 이루어져야만 합니다.
+Perl은 보통 정확한 답을 얻지만, 그렇지 않은 경우, 당신은 메소드로써
+함수호출이 컴파일된 것을 얻게 됩니다.
+이것은 검출이 꽤나 곤란한 버그로 얻는 것입니다.
+
+=begin original
+
+For example, a call to a method C<new> in indirect notation -- as C++
+programmers are wont to make -- can be miscompiled into a subroutine
+call if there's already a C<new> function in scope.  You'd end up
+calling the current package's C<new> as a subroutine, rather than the
+desired class's method.  The compiler tries to cheat by remembering
+bareword C<require>s, but the grief when it messes up just isn't worth the
+years of debugging it will take you to track down such subtle bugs.
+
+=end original
+
+예를 들면, (C++ 프로그래머가 으레 할듯한)C<new> 라는
+메소드의 간접표기로 호출은, 최근의 스코프에서 이미 C<new> 함수가
+있었던 경우에는 틀린 서브루틴호출에 컴파일되어버립니다.
+결과로써, 바라고 있던 클래스 메소드가 아닌, 최근 패키지의
+C<new>가 서브루틴으로써 호출된 것이 되는 겁니다.
+컴파일러는 이 문제를 C<require> 를 기억해두는 것에 의해
+파하도록 시험하지만, 그것이 실패했을 경우에는 디버그하는 것이
+상당히 귀찮은 결과가 되어버릴 겁니다.
+
+=begin original
+
+There is another problem with this syntax: the indirect object is
+limited to a name, a scalar variable, or a block, because it would have
+to do too much lookahead otherwise, just like any other postfix
+dereference in the language.  (These are the same quirky rules as are
+used for the filehandle slot in functions like C<print> and C<printf>.)
+This can lead to horribly confusing precedence problems, as in these
+next two lines:
+
+=end original
+
+이 문법에도 문제가 있습니다: 간접오브젝트는 이름, 스칼라변수,
+블록에 한정됩니다; 왜냐면, 다른 언어에서의 postfix dereference 처럼
+미리 많은 읽어낼 필요가 있기때문입니다.
+(이것들은 C<print> 나 C<printf> 처럼 함수에서의 파일핸들슬롯처럼
+기묘한 룰입니다)
+이것은 다음에 들 예처럼, 혼란스러운 우선순위문제를 해결하게 됩니다.
+
+    move $obj->{FIELD};                 # probably wrong!
+    move $ary[$i];                      # probably wrong!
+
+=begin original
+
+Those actually parse as the very surprising:
+
+=end original
+
+이것들은 아래처럼 해석되게 됩니다.
+
+    $obj->move->{FIELD};                # Well, lookee here
+    $ary->move([$i]);                   # Didn't expect this one, eh?
+
+=begin original
+
+Rather than what you might have expected:
+
+=end original
+
+이런 것을 기대하셨을 수 있겠습니다.
+
+    $obj->{FIELD}->move();              # You should be so lucky.
+    $ary[$i]->move;                     # Yeah, sure.
+
+=begin original
+
+To get the correct behavior with indirect object syntax, you would have
+to use a block around the indirect object:
+
+=end original
+
+To get the correct behavior with indirect object syntax, you would have
+to use a block around the indirect object:
+(TBT)
+
+    move {$obj->{FIELD}};
+    move {$ary[$i]};
+
+=begin original
+
+Even then, you still have the same potential problem if there happens to
+be a function named C<move> in the current package.  B<The C<< -> >>
+notation suffers from neither of these disturbing ambiguities, so we
+recommend you use it exclusively.>  However, you may still end up having
+to read code using the indirect object notation, so it's important to be
+familiar with it.
+
+=end original
+
+Even then, you still have the same potential problem if there happens to
+be a function named C<move> in the current package.  B<The C<< -> >>
+notation suffers from neither of these disturbing ambiguities, so we
+recommend you use it exclusively.>  However, you may still end up having
+to read code using the indirect object notation, so it's important to be
+familiar with it.
+(TBT)
+
+=head2 Default UNIVERSAL methods
+X<UNIVERSAL>
+
+(Default 의 UNIVERSAL 메소드)
+
+=begin original
+
+The C<UNIVERSAL> package automatically contains the following methods that
+are inherited by all other classes:
+
+=end original
+
+C<UNIVERSAL> 패키지에는 다른 모든 클래스가 자동적으로 계승하는
+아래와 같은 메소드가 있습니다.
+
+=over 4
+
+=item isa(CLASS)
+X<isa>
+
+=begin original
+
+C<isa> returns I<true> if its object is blessed into a subclass of C<CLASS>
+
+=end original
+
+C<isa> 는, 오브젝트가 C<CLASS> 의 서브클래스에 bless 되어있다면
+I<true> 를 반환합니다.
+
+=begin original
+
+You can also call C<UNIVERSAL::isa> as a subroutine with two arguments.  Of
+course, this will do the wrong thing if someone has overridden C<isa> in a
+class, so don't do it.
+
+=end original
+
+You can also call C<UNIVERSAL::isa> as a subroutine with two arguments.  Of
+course, this will do the wrong thing if someone has overridden C<isa> in a
+class, so don't do it.
+(TBT)
+
+=begin original
+
+If you need to determine whether you've received a valid invocant, use the
+C<blessed> function from L<Scalar::Util>:
+X<invocant> X<blessed>
+
+=end original
+
+If you need to determine whether you've received a valid invocant, use the
+C<blessed> function from L<Scalar::Util>:
+X<invocant> X<blessed>
+(TBT)
+
+    if (blessed($ref) && $ref->isa( 'Some::Class')) {
+        # ...
+    }
+
+=begin original
+
+C<blessed> returns the name of the package the argument has been
+blessed into, or C<undef>.
+
+=end original
+
+C<blessed> 는, 인수가 bless 되어있는 패키지이름이나, C<undef>를
+반환합니다.
+
+=item can(METHOD)
+X<can>
+
+=begin original
+
+C<can> checks to see if its object has a method called C<METHOD>,
+if it does then a reference to the sub is returned, if it does not then
+I<undef> is returned.
+
+=end original
+
+C<can> 은 오브젝트가 C<METHOD> 라는 메소드를 가지고 있는지 어떤지를 검사해,
+가지고 있다면, 그 서브루틴에 대한 리퍼런스를 돌리고, 가지고 있지 않으면,
+I<undef>를 반환합니다.
+
+=begin original
+
+C<UNIVERSAL::can> can also be called as a subroutine with two arguments.  It'll
+always return I<undef> if its first argument isn't an object or a class name.
+The same caveats for calling C<UNIVERSAL::isa> directly apply here, too.
+
+=end original
+
+C<UNIVERSAL::can> can also be called as a subroutine with two arguments.  It'll
+always return I<undef> if its first argument isn't an object or a class name.
+The same caveats for calling C<UNIVERSAL::isa> directly apply here, too.
+(TBT)
+
+=item VERSION( [NEED] )
+X<VERSION>
+
+=begin original
+
+C<VERSION> returns the version number of the class (package).  If the
+NEED argument is given then it will check that the current version (as
+defined by the $VERSION variable in the given package) not less than
+NEED; it will die if this is not the case.  This method is normally
+called as a class method.  This method is called automatically by the
+C<VERSION> form of C<use>.
+
+=end original
+
+C<VERSION> 은 클래스(패키지)의 버젼번호를 반환합니다.
+인수 NEED 가 주어져 있는 경우, 최근버젼(지정된 패키지변수 $VERSION으로
+정의된)이 NEED보다 작지 않은 것을 검사합니다.
+만약 작다면 die 합니다.
+이 메소드는 일반적인 클래스메소드로써 호출됩니다.
+또, 이 메소드는 C<use>의 C<VERSION> 형식에 의해 자동적으로 호출됩니다.
+
+    use A 1.2 qw(some imported subs);
+    # implies:
+    A->VERSION(1.2);
+
+=back
+
+=begin original
+
+B<NOTE:> C<can> directly uses Perl's internal code for method lookup, and
+C<isa> uses a very similar method and cache-ing strategy. This may cause
+strange effects if the Perl code dynamically changes @ISA in any package.
+
+=end original
+
+B<주의:> C<can> 은 Perl 내부코드를 메소드의 검색을 위해 사용하고,
+C<isa>는 그것과 매우 비슷한 수법과, 캐싱을 수행합니다.
+이에 의해, @ISA를 패키지 안에서 동적으로 변경하거나 하면, 희한한 영향을
+일으킬 가능성이 있습니다.
+
+=begin original
+
+You may add other methods to the UNIVERSAL class via Perl or XS code.
+You do not need to C<use UNIVERSAL> to make these methods
+available to your program (and you should not do so).
+
+=end original
+
+Perl 프로그램이나 XS 프로그램을 통해서 UNIVERSAL 클래스에 다른 메소드를
+추가하는 것도 가능합니다.
+추가한 메소드를 스스로 만든 프로그램으로 사용할 수 있도록 하기 위해
+C<use UNIVERSAL> 을 수행할 필요는 없습니다.
+(그리고 그런 건 해서도 안됩니다)
+
+=head2 Destructors
+X<destructor> X<DESTROY>
+
+(파괴자)
+
+=begin original
+
+When the last reference to an object goes away, the object is
+automatically destroyed.  (This may even be after you exit, if you've
+stored references in global variables.)  If you want to capture control
+just before the object is freed, you may define a DESTROY method in
+your class.  It will automatically be called at the appropriate moment,
+and you can do any extra cleanup you need to do.  Perl passes a reference
+to the object under destruction as the first (and only) argument.  Beware
+that the reference is a read-only value, and cannot be modified by
+manipulating C<$_[0]> within the destructor.  The object itself (i.e.
+the thingy the reference points to, namely C<${$_[0]}>, C<@{$_[0]}>, 
+C<%{$_[0]}> etc.) is not similarly constrained.
+
+=end original
+
+어떤 오브젝트에 대해 마지막의 리퍼런스가 소멸했을 때, 그 오브젝트는
+자동적으로 파괴됩니다(이것은 당신이 리퍼런스를 대역변수에 넣어서,
+프로그램을 종료할 때도 같습니다).
+만약 오브젝트가 해방되기 직전에 제어를 얻고싶다면, 클래스 안에서
+DESTROY 메소드를 정의할 수 있습니다.
+이 메소드는 적절한 시기에 자동적으로 호출되어, 당신이 필요로하는
+클린업을 수행할 수 있습니다.
+파괴된 오브젝트에 대한 첫번째인수(혹은 유일한 인수)로써
+리퍼런스를 건냅니다.
+이 리퍼런스는 읽기 전용의 값이며, 파괴자 안에서
+C<$_[0]> 를 조작하는 것에 의해 변경할 수 없습니다.
+오브젝트 그 자신을(C<${$_[0]}>, C<@{$_[0]}>, C<%{$_[0]}> 같은 이름이
+붙은 것에 대한 리퍼런스)는 마찬가지로 강제되지 않습니다.
+
+=begin original
+
+Since DESTROY methods can be called at unpredictable times, it is
+important that you localise any global variables that the method may
+update.  In particular, localise C<$@> if you use C<eval {}> and
+localise C<$?> if you use C<system> or backticks.
+
+=end original
+
+Since DESTROY methods can be called at unpredictable times, it is
+important that you localise any global variables that the method may
+update.  In particular, localise C<$@> if you use C<eval {}> and
+localise C<$?> if you use C<system> or backticks.
+(TBT)
+
+=begin original
+
+If you arrange to re-bless the reference before the destructor returns,
+perl will again call the DESTROY method for the re-blessed object after
+the current one returns.  This can be used for clean delegation of
+object destruction, or for ensuring that destructors in the base classes
+of your choosing get called.  Explicitly calling DESTROY is also possible,
+but is usually never needed.
+
+=end original
+
+파괴자에서 나오기 전에 리퍼런스를 다시 bless 하도록 정리하면,
+perl은 최근 파괴자에서 호출된 후, 다시 bless 된 오브젝트를 위해
+DESTROY 메소드를 다시금 호출합니다.
+이것은 오브젝트의 위임을 처음부터 끝까지 하는데 사용하거나,
+호출한 것을 선택한 베이스클래스의 파괴자를 보증하는 것에도 사용할 수 있습니다.
+명시적으로 DESTROY를 호출하는 것도 가능하지만, 
+일반적으로는 그럴 필요는 없습니다.
+
+=begin original
+
+Do not confuse the previous discussion with how objects I<CONTAINED> in the current
+one are destroyed.  Such objects will be freed and destroyed automatically
+when the current object is freed, provided no other references to them exist
+elsewhere.
+
+=end original
+
+최근에 파괴된 오브젝트에 속해있는 오브젝트에 관해서 혼동하지 않도록 해주세요.
+이런 오브젝트는 최근오브젝트가 해방된 때에 자동적으로 해방, 파괴가 이루어져
+다른 어떤 것에 대한 리퍼런스가 없도록 합니다.
+
+=head2 Summary
+
+(정리)
+
+=begin original
+
+That's about all there is to it.  Now you need just to go off and buy a
+book about object-oriented design methodology, and bang your forehead
+with it for the next six months or so.
+
+=end original
+
+이것으로, 여기에서 말할 것은 전부 끝났습니다.
+지금, 당신은 방을 나와 오브젝트 지향방법론에 관한 서적을 사서,
+6개월이 정도쯤은 고민할 필요가 있을 것입니다.
+
+=head2 Two-Phased Garbage Collection
+X<garbage collection> X<GC> X<circular reference>
+X<reference, circular> X<DESTROY> X<destructor>
+
+(2 단계 가비지컬렉션)
+
+=begin original
+
+For most purposes, Perl uses a fast and simple, reference-based
+garbage collection system.  That means there's an extra
+dereference going on at some level, so if you haven't built
+your Perl executable using your C compiler's C<-O> flag, performance
+will suffer.  If you I<have> built Perl with C<cc -O>, then this
+probably won't matter.
+
+=end original
+
+주된 목적을 위해, Perl 은 단순하고 빠른 리퍼런스 기반의
+가비지 컬렉션 시스템을 사용합니다.
+이 때문에, 몇 단계에 걸쳐서 쓸데없는 디리퍼런스가 발생하고, 사용하고 있는
+Perl 을 빌드할 때에 C<-O> 플래그를 컴파일러에 사용하지 않으면, 성능이 
+떨어지게 됩니다.
+Perl 을 빌드할 때에 C<cc -O> 를 사용하면, 이 디리퍼런스는 문제가
+되지 않을 겁니다.
+
+=begin original
+
+A more serious concern is that unreachable memory with a non-zero
+reference count will not normally get freed.  Therefore, this is a bad
+idea:
+
+=end original
+
+보다 심각한 문제는, 제로가 아닌 리퍼런스 카운터를 가지고 있는
+접근할 수 없는 메모리(unreachable memory)가 일반적으로는
+해방되지 않는다는 것입니다.
+따라서, 아래처럼 하는 것은 나쁜 아이디어입니다.
+
+    {
+	my $a;
+	$a = \$a;
+    }
+
+=begin original
+
+Even thought $a I<should> go away, it can't.  When building recursive data
+structures, you'll have to break the self-reference yourself explicitly
+if you don't care to leak.  For example, here's a self-referential
+node such as one might use in a sophisticated tree structure:
+
+=end original
+
+$a 가 없어지도록 생각할수 있지만, 그럴 수 없습니다.
+재귀적인 데이터구조를 구축할 때, Memory Leak 를 신경쓰지 않기위해서는 
+자기 자신이 명시적으로 자기참조를 파괴하지 않으면 안됩니다.
+예를 들면, 트리구조를 다룰 때에 사용하는 자기참조구조체로써 아래와 같은
+것을 생각해 봅시다.
+
+    sub new_node {
+	my $class = shift;
+	my $node  = {};
+	$node->{LEFT} = $node->{RIGHT} = $node;
+	$node->{DATA} = [ @_ ];
+	return bless $node => $class;
+    }
+
+=begin original
+
+If you create nodes like that, they (currently) won't go away unless you
+break their self reference yourself.  (In other words, this is not to be
+construed as a feature, and you shouldn't depend on it.)
+
+=end original
+
+이런 노드를 생성할 때, 당신 자신이 자기참조를 파괴하지 않는 한
+노드는 없어지지 않습니다(바꿔 말하면 , 이것은 스펙으로써
+해석되는 것이 아닌, 이것은 의존해서는 안된다는 것입니다)
+
+=begin original
+
+Almost.
+
+=end original
+
+대부분은요..
+
+=begin original
+
+When an interpreter thread finally shuts down (usually when your program
+exits), then a rather costly but complete mark-and-sweep style of garbage
+collection is performed, and everything allocated by that thread gets
+destroyed.  This is essential to support Perl as an embedded or a
+multithreadable language.  For example, this program demonstrates Perl's
+two-phased garbage collection:
+
+=end original
+
+인터프리터의 스레드가 최종적으로 종료할 때(일반적으로는
+프로그램을 종료할 때), Cost가 어느 정도 걸리지만, 완전한
+mark-and-sweep 형식의 가비지 컬렉션이 실행됩니다.
+그리고, (종료된) 스레드에 의해 할당된 모든 것은 파괴됩니다.
+이는 Perl 을 임베디드로 사용할 수 있도록 하거나, 멀티스레트에
+대응할 수 있는 언어로 하기위해 중요한 것입니다.
+예를 들면, 아래의 프로그램은 Perl 의 2 phase 가비지컬렉션 데모입니다.
+
+    #!/usr/bin/perl
+    package Subtle;
+
+    sub new {
+	my $test;
+	$test = \$test;
+	warn "CREATING " . \$test;
+	return bless \$test;
+    }
+
+    sub DESTROY {
+	my $self = shift;
+	warn "DESTROYING $self";
+    }
+
+    package main;
+
+    warn "starting program";
+    {
+	my $a = Subtle->new;
+	my $b = Subtle->new;
+	$$a = 0;  # break selfref
+	warn "leaving block";
+    }
+
+    warn "just exited block";
+    warn "time to die...";
+    exit;
+
+=begin original
+
+When run as F</foo/test>, the following output is produced:
+
+=end original
+
+F<foo/test> 로써 실행했을 때, 아래처럼 출력합니다.
+
+    starting program at /foo/test line 18.
+    CREATING SCALAR(0x8e5b8) at /foo/test line 7.
+    CREATING SCALAR(0x8e57c) at /foo/test line 7.
+    leaving block at /foo/test line 23.
+    DESTROYING Subtle=SCALAR(0x8e5b8) at /foo/test line 13.
+    just exited block at /foo/test line 26.
+    time to die... at /foo/test line 27.
+    DESTROYING Subtle=SCALAR(0x8e57c) during global destruction.
+
+=begin original
+
+Notice that "global destruction" bit there?  That's the thread
+garbage collector reaching the unreachable.
+
+=end original
+
+"global destruction" 이 어디에 있는 알고 있나요? 이것은, 
+스레드 가비지 컬렉터가 접근할 수 없는 오브젝트로 도달한 것입니다.
+
+=begin original
+
+Objects are always destructed, even when regular refs aren't.  Objects
+are destructed in a separate pass before ordinary refs just to 
+prevent object destructors from using refs that have been themselves
+destructed.  Plain refs are only garbage-collected if the destruct level
+is greater than 0.  You can test the higher levels of global destruction
+by setting the PERL_DESTRUCT_LEVEL environment variable, presuming
+C<-DDEBUGGING> was enabled during perl build time.
+See L<perlhack/PERL_DESTRUCT_LEVEL> for more information.
+
+=end original
+
+오브젝트는 항상 파괴됩니다.
+일반적인 리퍼런스(regular refs)가 파괴되지 않은 경우에서도 그렇고,
+일반적인 리퍼런스가 분할된 패스에서 파괴된 경우에만,
+보통의 오브젝트(ordinary refs)가 오브젝트 파괴자가 자기자신을
+파괴해버린 리퍼런스를 사용하는 것을 막으려고 하기 전에 파괴됩니다.
+평범한 리퍼런스는, 그 파괴레벨이 0이상일 때에는 
+가비지 컬렉션만 수행됩니다.
+Perl 을 빌드할 때에 C<-DDEBUGGInG> 이 유효가 되어 있다면,
+PERL_DESTRUCT_LEVEL 이라는 환경변수에 대한 설정을 해서,
+Global Destruction Level 을 검사할 수 있습니다.
+더 많은 정보에 대해서는 L<perlhack/PERL_DESTRUCT_LEVEL> 을 참조해주세요.
+
+=begin original
+
+A more complete garbage collection strategy will be implemented
+at a future date.
+
+=end original
+
+보다 완벽한 가비지 컬렉션의 전략은 이후에 만들어질 겁니다.
+
+=begin original
+
+In the meantime, the best solution is to create a non-recursive container
+class that holds a pointer to the self-referential data structure.
+Define a DESTROY method for the containing object's class that manually
+breaks the circularities in the self-referential structure.
+
+=end original
+
+최선의 방법은, 자기재귀적인 데이터 구조에 대해 포인터를
+가지는 비재귀적인 콘테이너클래스를 작성하는 것입니다.
+그런 오브젝트의 클래스에서의 DESTROY 메소드의 정의는
+자기 참조구조 중의 순환을 수작업으로 중단할 수 있습니다.
+
+=head1 SEE ALSO
+
+=begin original
+
+A kinder, gentler tutorial on object-oriented programming in Perl can
+be found in L<perltoot>, L<perlboot> and L<perltooc>.  You should
+also check out L<perlbot> for other object tricks, traps, and tips, as
+well as L<perlmodlib> for some style guides on constructing both
+modules and classes.
+
+=end original
+
+Perl 에서의 오브젝트 지향 프로그램에 관한 것 보다 친절한
+튜토리얼은 L<perltoot>, L<perlboot>, L<perltooc>에 있습니다.
+또, 그 외의 오브젝트 트릭에 대해서는 L<perlbot> 을,
+모듈과 클래스의 작성에 관한 스타일가이드에 대해서는 L<perlmodlib> 를
+참조해주세요.
+
+=begin meta
+
+Created: KIMURA Koichi
+Updated: Kentaro Shirakata <argrath@ub32.org>
+
+=end meta
+

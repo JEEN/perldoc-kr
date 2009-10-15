@@ -1,0 +1,2518 @@
+
+=encoding utf8
+
+=head1 NAME
+
+=begin original
+
+perlthrtut - Tutorial on threads in Perl
+
+=end original
+
+perlthrtut - Perl 에서의 스레드 튜토리얼
+
+=head1 DESCRIPTION
+
+=begin original
+
+This tutorial describes the use of Perl interpreter threads (sometimes
+referred to as I<ithreads>) that was first introduced in Perl 5.6.0.  In this
+model, each thread runs in its own Perl interpreter, and any data sharing
+between threads must be explicit.  The user-level interface for I<ithreads>
+uses the L<threads> class.
+
+=end original
+
+이 튜토리얼은 Perl 5.6.0 에서 도입된 새로운 Perl 인터프리터 스레드 (B<i스레드>(B<ithreads>)라고
+불림)의 특징을 설명한 것입니다.
+이 모델에서는 각각의 스레드는 그 자신의 Perl 인터프리터로 실행되고, 스레드 사이에서 공유하는 
+데이터도 명시적이지 않으면 안됩니다.
+I<threads>의 유저 레벨 인터페이스는 L<threadas>클래스를 사용합니다.
+
+=begin original
+
+B<NOTE>: There was another older Perl threading flavor called the 5.005 model
+that used the L<Threads> class.  This old model was known to have problems, is
+deprecated, and was removed for release 5.10.  You are
+strongly encouraged to migrate any existing 5.005 threads code to the new
+model as soon as possible.
+
+=end original
+
+B<주의>: Perl 의 버젼 5.005 에서는 5.005 모델이라고 불리는 L<Threads> 클래스를 사용하는 
+별도의 낡은 스레드 기능이 있었습니다.
+이 낡은 모델은 문제가 있다고 알려져, 추천하지 않고, 버젼 5.10 에서는 삭제되었습니다.
+가능한한 빠르고 기존의 5.005 스레드를 새로운 것으로 이행하는 것을 강력하게 추천합니다.
+
+=begin original
+
+You can see which (or neither) threading flavour you have by
+running C<perl -V> and looking at the C<Platform> section.
+If you have C<useithreads=define> you have ithreads, if you
+have C<use5005threads=define> you have 5.005 threads.
+If you have neither, you don't have any thread support built in.
+If you have both, you are in trouble.
+
+=end original
+
+C<perl -V> 에서 C<Platform> 섹션을 보면, 어느 쪽의 스레드 기능이 있는가
+(혹은 없는가) 를 알 수 있습니다.
+만약 C<useithreads=define> 으로 되어있다면, 
+i스레드를 지원하는 것이고 C<use5005threads=define> 이라면 
+5.005 스레드입니다.
+양쪽 모두 나오지 않는 경우는 당신의 Perl 은 스레드를 지원하지 않습니다. 
+양쪽 모두 있는 경우는 문제가 있습니다.
+
+=begin original
+
+The L<threads> and L<threads::shared> modules are included in the core Perl
+distribution.  Additionally, they are maintained as a separate modules on
+CPAN, so you can check there for any updates.
+
+=end original
+
+L<threads> 와 L<threads::shared> 모델은 코어 Perl 배포에 포함되어 있습니다.
+거기에 CPAN 에서는 개별 모듈로써 보수되고 있기 때문에, 갱신에 대해서는 
+CPAN 을 체크할 수있습니다.
+
+=head1 What Is A Thread Anyway?
+
+(그런데 스레드는 뭐죠?)
+
+=begin original
+
+A thread is a flow of control through a program with a single
+execution point.
+
+=end original
+
+스레드란 프로그램 안을 통해서 하나의 실행점을 가진 제어 플로우입니다.
+
+=begin original
+
+Sounds an awful lot like a process, doesn't it? Well, it should.
+Threads are one of the pieces of a process.  Every process has at least
+one thread and, up until now, every process running Perl had only one
+thread.  With 5.8, though, you can create extra threads.  We're going
+to show you how, when, and why.
+
+=end original
+
+이렇게 말하면 꽤 많은 점에서 프로세스와 닮아있다고 물어보겠죠?
+확실히 그 말대로, 스레드는 하나의 프로세스에서의 작은 부분 중의 하나입니다.
+모든 프로세스가 ㅈ거어도 하나의 스레드를 가집니다.
+그리고 지금까지는 Perl 을 움직인 프로세스는 모두 하나의 스레드를 가지고 있었습니다.
+그러나 5.8 이 되고부터는 남의 스레드를 만들 수 있게 되었습니다.
+그것이 언제 어떻게해서 되는지를 지금부터 보이도록 하겠습니다.
+
+=head1 Threaded Program Models
+
+(스레드 프로그램의 모델)
+
+=begin original
+
+There are three basic ways that you can structure a threaded
+program.  Which model you choose depends on what you need your program
+to do.  For many non-trivial threaded programs, you'll need to choose
+different models for different pieces of your program.
+
+=end original
+
+스레드 프로그램을 구축하는 3가지의 기본적인 방법이 있습니다.
+많은 중요한 스레드 프로그램에서는 프로그램 안의 다른 부분에 
+다른 모델을 선택할 필요가 있습니다.
+
+=head2 Boss/Worker
+
+(보스/워커)
+
+=begin original
+
+The boss/worker model usually has one I<boss> thread and one or more
+I<worker> threads.  The boss thread gathers or generates tasks that need
+to be done, then parcels those tasks out to the appropriate worker
+thread.
+
+=end original
+
+보스 워커모델에서는 보통, 하나의 I<보스> 스레드와 하나 이상의 I<워커> 스레드를 가집니다.
+보스 스레드는 필요한 태스크를 집약하지 않고 생성합니다.
+거기에서 그 태스크들을 적합한 워커 스레드에게 배포합니다.
+
+=begin original
+
+This model is common in GUI and server programs, where a main thread
+waits for some event and then passes that event to the appropriate
+worker threads for processing.  Once the event has been passed on, the
+boss thread goes back to waiting for another event.
+
+=end original
+
+이 모델은 GUI 와 서버 프로그램에 공통입니다.
+거기에서 메인스레드가 이벤트 발생을 가지고, 처리를 위한 적합한 
+워커 스레드에 이벤트를 넘깁니다.
+하나마다 이벤트가 넘어오면, 보스 스레드는 다음 이벤트를 위해 대기합니다.
+
+=begin original
+
+The boss thread does relatively little work.  While tasks aren't
+necessarily performed faster than with any other method, it tends to
+have the best user-response times.
+
+=end original
+
+보스 스레드는 상대적으로 일의 양은 적습니다.
+태스크는 다른 방법을 사용한 것보다 반드시 빠르게 실행되는 것은 아니지만,
+제일 유저응답시간이 좋아지는 경향이 있습니다.
+
+=head2 Work Crew
+
+(업무 동료)
+
+=begin original
+
+In the work crew model, several threads are created that do
+essentially the same thing to different pieces of data.  It closely
+mirrors classical parallel processing and vector processors, where a
+large array of processors do the exact same thing to many pieces of
+data.
+
+=end original
+
+업무 동료 모델에서는 데이터의 여러 부분에 대해서 본직적으로 같은 작업을 수행하는 
+몇가지의 스레드를 만들 수 있습니다.
+이것은 프로세서의 거대한 배열이 많은 데이터 조각에 대해서 와넞ㄴ히 같은 것을 
+수행하는 고전적인 병렬처리나 벡터처리와 같습니다.
+
+=begin original
+
+This model is particularly useful if the system running the program
+will distribute multiple threads across different processors.  It can
+also be useful in ray tracing or rendering engines, where the
+individual threads can pass on interim results to give the user visual
+feedback.
+
+=end original
+
+프로그램을 움직이는 시스템이 다른 프로세스를 사용해서 멀티스레드를 
+분배하는 경우 이 모델은 꽤 편리합니다.
+또, ray tracing 이나 렌더링 엔진같은 각각의 스레드가 결과를 유저에 대해서 
+시각적으로 피드백하도록 하는 경우에도 편리합니다.
+
+=head2 Pipeline
+
+(파이프라인)
+
+=begin original
+
+The pipeline model divides up a task into a series of steps, and
+passes the results of one step on to the thread processing the
+next.  Each thread does one thing to each piece of data and passes the
+results to the next thread in line.
+
+=end original
+
+파이프라인 모델은 어떤 태스크를 몇 단계의 처리의 연속으로 나눕니다.
+그리고 하나의 스텝의 결과를 다음 처리를 수행하는 스레드에 넘깁니다.
+각각의 스레드는 데이터의 각 부분에 대해서 하나의 일을 수행하고, 
+결과를 다음 스레드로 넘깁니다.
+
+=begin original
+
+This model makes the most sense if you have multiple processors so two
+or more threads will be executing in parallel, though it can often
+make sense in other contexts as well.  It tends to keep the individual
+tasks small and simple, as well as allowing some parts of the pipeline
+to block (on I/O or system calls, for example) while other parts keep
+going.  If you're running different parts of the pipeline on different
+processors you may also take advantage of the caches on each
+processor.
+
+=end original
+
+여러번 다른 문맥에서도 같은 의미가 있지만, 두개 이상의 스레드가 
+병렬로 처리를 수행하도록 당신이 멀티프로세서를 가지고 있다면, 이 
+모델은 가장 의미가 있습니다.
+그것은 어떤 파이프라인의 일부가 진행중인 사이에 다른 파이프라인의 일부가 
+(예를들어 I/O 나 시스템콜) 블록하는 것을 허가하는 것과 같고, 
+각각의 태스크를 작고 단순한 것으로 만드는 경향이 있습니다.
+만약 다른 프로세서 상에서 별개의 파이프라인을 달리고 있다면,
+각각의 프로세서의 캐쉬를 이용하는 이익을 가질 수 있을 겁니다.
+
+=begin original
+
+This model is also handy for a form of recursive programming where,
+rather than having a subroutine call itself, it instead creates
+another thread.  Prime and Fibonacci generators both map well to this
+form of the pipeline model. (A version of a prime number generator is
+presented later on.)
+
+=end original
+
+이 모델은 또, 자기자신을 호출하는 서브루틴을 가지는 것보다도, 
+다른 스레드를 생성해내는 재기적 프로그램의 형태에 이용하기 쉽습니다.
+소수나 피보나치 수열 생성기 모두 이 파이프라인 모델의 형태에 
+맞습니다(소수 생성기의 예제는 나중에 등장합니다).
+
+=head1 What kind of threads are Perl threads?
+
+(Perl 스레드는 어떤 스레드?)
+
+=begin original
+
+If you have experience with other thread implementations, you might
+find that things aren't quite what you expect.  It's very important to
+remember when dealing with Perl threads that I<Perl Threads Are Not X
+Threads> for all values of X.  They aren't POSIX threads, or
+DecThreads, or Java's Green threads, or Win32 threads.  There are
+similarities, and the broad concepts are the same, but if you start
+looking for implementation details you're going to be either
+disappointed or confused.  Possibly both.
+
+=end original
+
+만약 당신이 다른 스레드의 구성을 경험한 적이 있다면, 사태는 당신이 예상한 것과는 
+전혀 다르다는 것을 알 수 있을 겁니다.
+Perl 스레드를 취급할 때에는 모든 X 에 대해서 
+I<Perl 스레드는 X 스레드가 아니다> 라는 것을 잊어서는 안됩니다.
+그것들은 POSIX 스레드가 아닙니다.
+DecThread 도 아니라면 Java 의 그레이스레드도 아니고 
+Win32 스레드도 아닙니다.
+유사점은 있고, 넓은 의미의 개념은 같습니다.
+하지만, 구성의 자세한 내용을 조사해보면, 당신은 실망하거나 혼란할 겁니다.
+혹은 그 양쪽 모두일지도 모르죠.
+
+=begin original
+
+This is not to say that Perl threads are completely different from
+everything that's ever come before -- they're not.  Perl's threading
+model owes a lot to other thread models, especially POSIX.  Just as
+Perl is not C, though, Perl threads are not POSIX threads.  So if you
+find yourself looking for mutexes, or thread priorities, it's time to
+step back a bit and think about what you want to do and how Perl can
+do it.
+
+=end original
+
+이것은 지금까지 등장해온 모든 스레드와 Perl 스레드가 완전히 
+다르다는 것을 말하고 있는 것은 아닙니다.
+Perl 스레드는 다른 모델, 특히 POSIX 스레드에 많은 것을 의지하고 있습니다.
+그렇지만, Perl 이 C 가 아닌 것 처럼, Perl 스레드는 POSIX 스레드가 아닙니다.
+그래서, 만약 당신이 뮤텍스나 스레드 프라이어리티 를 기대하고 있다면,
+조금 돌아와서 자신이 무엇을 하고 싶은가, Perl 은 어떻게 그것이 가능한 가를 
+생각할 때입니다.
+
+=begin original
+
+However, it is important to remember that Perl threads cannot magically
+do things unless your operating system's threads allow it. So if your
+system blocks the entire process on C<sleep()>, Perl usually will, as well.
+
+=end original
+
+그러나, 당신의 OS 스레드가 허가하지 않는 한, 
+Perl 스레드가 마법처럼 무엇인가를 수행하는 일은 없을 것이라는 것을 기억해두죠.
+그래서 만약, 시스템이 C<slee()> 로 프로세스를 완전히 블록한다면,
+보통은 Perl 도 마찬가지로 그렇게 될 겁니다.
+
+=begin original
+
+B<Perl Threads Are Different.>
+
+=end original
+
+B<Perl 스레드는 다릅니다>。
+
+=head1 Thread-Safe Modules
+
+(스레드 세이프한 모듈)
+
+=begin original
+
+The addition of threads has changed Perl's internals
+substantially. There are implications for people who write
+modules with XS code or external libraries. However, since Perl data is
+not shared among threads by default, Perl modules stand a high chance of
+being thread-safe or can be made thread-safe easily.  Modules that are not
+tagged as thread-safe should be tested or code reviewed before being used
+in production code.
+
+=end original
+
+스레드의 추가는 Perl 의 내부적인 실태를 변화시켜 버렸습니다.
+이것에는 XS 모듈이나 외부 라이브러리를 쓰고 있는 사람들도 포함됩니다.
+그렇지만, 기본값이 아닌 스레드 사이에서 Perl 의 데이터는 공유되지 않습니다.
+그 때문에 Perl 모듈은 스레드 세이프라는 기회에 마주치게 되고,
+혹은 편하게 스레드 세이프할 수 있습니다.
+스레드 세이프가 되지 않는 모듈은 제품판의 앞에 테스트되었는 가 
+코드리뷰를 받아야 합니다.
+
+=begin original
+
+Not all modules that you might use are thread-safe, and you should
+always assume a module is unsafe unless the documentation says
+otherwise.  This includes modules that are distributed as part of the
+core.  Threads are a relatively new feature, and even some of the standard
+modules aren't thread-safe.
+
+=end original
+
+당신이 사용하려고 하는 모듈의 모든 것이 스레드 세이프한 것은 아니고, 
+모듈의 문서에 오나전하게 쓰여있지 않다면, 항상 안전하지 않은 것이라고 가정해야 됩니다.
+이 것은, 코어의 일부로써 배포되고 있는 모듈에도 맞춰볼 수 있습니다.
+스레드는 비교적 새로운 기능이기때문에 표준 모듈의 안에서만 스레드 세이프하지 않는 것이 있습니다.
+
+=begin original
+
+Even if a module is thread-safe, it doesn't mean that the module is optimized
+to work well with threads. A module could possibly be rewritten to utilize
+the new features in threaded Perl to increase performance in a threaded
+environment.
+
+=end original
+
+예를 들어 어느 모듈이 스레드 세이프하다고 해도, 그 모듈이 잘 움직이도록 최적화 
+되어 있다고 하는 것을 의미하는 것은 아닙니다.
+가능한ㅎㄴ 스레드 환경에서 퍼포먼스가 향상되게 스레드화된 Perl 의 새로운 기능을 
+이용하도록 모듈을 다시 쓰는 편이 좋습니다.
+
+=begin original
+
+If you're using a module that's not thread-safe for some reason, you
+can protect yourself by using it from one, and only one thread at all.
+If you need multiple threads to access such a module, you can use semaphores and
+lots of programming discipline to control access to it.  Semaphores
+are covered in L</"Basic semaphores">.
+
+=end original
+
+만약 어떤 이유에서 스레드 세이프하지 않은 모듈을 사용하고 있다면,
+단 하나의 스레드에서 그것을 사용하는 것에 의해 막을 수 있습니다.
+그런 모듈에 접근하는 멀티 ㅡㅅ레드가 필요하다면, 세마포어 나 
+접근을 제어하기 위한 프로그래밍 원칙을 사용할 수 있습니다.
+세마포어는 L</"Basic semaphores"> 로 커버하고 있습니다.
+
+=begin original
+
+See also L</"Thread-Safety of System Libraries">.
+
+=end original
+
+L</"Thread-Safety of System Libraries"> 도 참조해주세요.
+
+=head1 Thread Basics
+
+(스레드의 기본)
+
+=begin original
+
+The L<threads> module provides the basic functions you need to write
+threaded programs.  In the following sections, we'll cover the basics,
+showing you what you need to do to create a threaded program.   After
+that, we'll go over some of the features of the L<threads> module that
+make threaded programming easier.
+
+=end original
+
+L<threads> 모듈은 당신이 스레드 프로그램을 쓰는 것에 필요로 하는 
+기본적인 기능을 제공합니다.
+다음 섹션부터는 스레드 프로그램을 만드는 것에 필요한 것을 나타내면서 
+기초적인 부분을 커버하겠습니다.
+그 뒤에 스레드 프로그램을 쓰기 쉽게 해주는 L<threads> 모듈의 
+기능을 보도록 하겠습니다.
+
+=head2 Basic Thread Support
+
+(기본적인 스레드의 지원)
+
+=begin original
+
+Thread support is a Perl compile-time option -- it's something that's
+turned on or off when Perl is built at your site, rather than when
+your programs are compiled. If your Perl wasn't compiled with thread
+support enabled, then any attempt to use threads will fail.
+
+=end original
+
+스레드의 지원은 당신의 프로그램이 컴파일된 때가 아니라,
+Perl 의 컴파일 시의 옵션에 따라 다릅니다.
+즉, Perl 을 빌드할 때에 스레드 지원을 선택할 수 있습니다.
+스레드가 지원되도록 Perl 이 컴파일 되어 있지 않으면, 스레드를 
+사용하려고 해도 실패할 겁니다.
+
+=begin original
+
+Your programs can use the Config module to check whether threads are
+enabled. If your program can't run without them, you can say something
+like:
+
+=end original
+
+스레드가 사용가능한지 어떤지를 체크하기 위해서는 Config 모듈을 이용할 수 있습니다.
+당신의 프로그램이 스레드없이 실행할 수 없다면, 다음처럼 기술할 수 있습니다:
+
+    use Config;
+    $Config{useithreads} or die('Recompile Perl with threads to run this program.');
+
+=begin original
+
+A possibly-threaded program using a possibly-threaded module might
+have code like this:
+
+=end original
+
+스레드를 이용할지도 모르는 모듈을 사용하는 프로그램에는 
+다음처럼 코드를 붙여 두면 좋겠죠:
+
+    use Config;
+    use MyMod;
+
+    BEGIN {
+        if ($Config{useithreads}) {
+            # We have threads
+            require MyMod_threaded;
+            import MyMod_threaded;
+        } else {
+            require MyMod_unthreaded;
+            import MyMod_unthreaded;
+        }
+    }
+
+=begin original
+
+Since code that runs both with and without threads is usually pretty
+messy, it's best to isolate the thread-specific code in its own
+module.  In our example above, that's what C<MyMod_threaded> is, and it's
+only imported if we're running on a threaded Perl.
+
+=end original
+
+스레드의 유무에 상관없이 움직이는 코드는 보통, 꽤 난잡한 것이 되기에, 
+스레드 전용 코드는 모듈로 분리해두는 것이 좋습니다.
+위의 예제에서는 C<MyMod_threaded> 가 그것으로, 스레드 가능한 Perl 상에서 
+움직일 때에만 임포트 됩니다.
+
+=head2 A Note about the Examples
+
+(예제에 대한 주의)
+
+=begin original
+
+In a real situation, care should be taken that all threads are finished
+executing before the program exits.  That care has B<not> been taken in these
+examples in the interest of simplicity.  Running these examples I<as is> will
+produce error messages, usually caused by the fact that there are still
+threads running when the program exits.  You should not be alarmed by this.
+
+=end original
+
+실제 상황에서는 프로그램이 종료하기 전에 모든 스레드가 실행을 끝내는 것에 주의를
+기울이지 않으면 안됩니다.
+간단하고 명료함을 중시하기 때문에 여기에서 다루는 예제에 대해서는 그런 주의 
+기울이고 있지 B<않습니다>.
+이 예제들을 I<그대로> 실행하면, 프로그램이 종료할 때에 아직 스레드가 
+달리고 있는 이유로 항상 에러메시지가 출력될 겁니다.
+이 경고는 신경쓰지 않아도 됩니다.
+
+=head2 Creating Threads
+
+(스레드 생성)
+
+=begin original
+
+The L<threads> module provides the tools you need to create new
+threads.  Like any other module, you need to tell Perl that you want to use
+it; C<use threads;> imports all the pieces you need to create basic
+threads.
+
+=end original
+
+L<threads> 모듈은 새로운 스레드를 생성하기에 필요한 툴을 제공합니다.
+다른 모듈처럼 그것을 사용하고 싶다면 Perl 에 전달할 필요가 있습니다;
+C<use threads;> 에 의해 기본적인 스레드를 생성하는 것에 필요한 
+모든 부품이 임포트됩니다.
+
+=begin original
+
+The simplest, most straightforward way to create a thread is with C<create()>:
+
+=end original
+
+제일 간단하게 직접적인 스레드를 생성하는 방법은 C<create()>에 의한 것입니다;
+
+    use threads;
+
+    my $thr = threads->create(\&sub1);
+
+    sub sub1 {
+        print("In the thread\n");
+    }
+
+=begin original
+
+The C<create()> method takes a reference to a subroutine and creates a new
+thread that starts executing in the referenced subroutine.  Control
+then passes both to the subroutine and the caller.
+
+=end original
+
+C<create()> 메소드는 서브루틴으로의 리퍼런스를 인수로써 새로운 스레드를 생성합니다.
+이 스레드는 리퍼런스된 서브루틴의 실행을 시작합니다.
+이 때, 제어는 서브루틴과 호출 측 양쪽에 넘깁니다.
+
+=begin original
+
+If you need to, your program can pass parameters to the subroutine as
+part of the thread startup.  Just include the list of parameters as
+part of the C<threads-E<gt>create()> call, like this:
+
+=end original
+
+만약 필요하다면 스레드 시작시의 서브루틴에 파라메터를 넘길 수 있습니다.
+아래처럼, C<threads-E<gt>create()> 호출로 파라메터의 리스트를 포함합니다:
+
+    use threads;
+
+    my $Param3 = 'foo';
+    my $thr1 = threads->create(\&sub1, 'Param 1', 'Param 2', $Param3);
+    my @ParamList = (42, 'Hello', 3.14);
+    my $thr2 = threads->create(\&sub1, @ParamList);
+    my $thr3 = threads->create(\&sub1, qw(Param1 Param2 Param3));
+
+    sub sub1 {
+        my @InboundParameters = @_;
+        print("In the thread\n");
+        print('Got parameters >', join('<>', @InboundParameters), "<\n");
+    }
+
+=begin original
+
+The last example illustrates another feature of threads.  You can spawn
+off several threads using the same subroutine.  Each thread executes
+the same subroutine, but in a separate thread with a separate
+environment and potentially separate arguments.
+
+=end original
+
+마지막 예제는 스레드의 다른 하나의 특징을 나타내고 있습니다.
+같은 서브루틴을 이용하는 몇가지 스레드를 생성할 수 있습니다.
+각각의 스레드는 동일 서브루틴을 실행하지만, 각각의 스레드는 
+각각 별도의 환경과 인수를 얻을 수 있습니다.
+
+=begin original
+
+C<new()> is a synonym for C<create()>.
+
+=end original
+
+C<new()> 는 C<create()> 를 바꾼 말입니다.
+
+=head2 Waiting For A Thread To Exit
+
+(스레드 종료대기)
+
+=begin original
+
+Since threads are also subroutines, they can return values.  To wait
+for a thread to exit and extract any values it might return, you can
+use the C<join()> method:
+
+=end original
+
+스레드는 서브루틘이기도 하기에, 값을 넘길 수 있습니다.
+스레드가 종료해서 뭔가의 반환값을 얻는 것을 기다리기 위해서 C<join()> 을 사용할 수 있습니다:
+
+    use threads;
+
+    my ($thr) = threads->create(\&sub1);
+
+    my @ReturnData = $thr->join();
+    print('Thread returned ', join(', ', @ReturnData), "\n");
+
+    sub sub1 { return ('Fifty-six', 'foo', 2); }
+
+=begin original
+
+In the example above, the C<join()> method returns as soon as the thread
+ends.  In addition to waiting for a thread to finish and gathering up
+any values that the thread might have returned, C<join()> also performs
+any OS cleanup necessary for the thread.  That cleanup might be
+important, especially for long-running programs that spawn lots of
+threads.  If you don't want the return values and don't want to wait
+for the thread to finish, you should call the C<detach()> method
+instead, as described next.
+
+=end original
+
+위에 의제에서는 스레드가 종료하면 곧장 C<join()> 메소드가 반환됩니다.
+스레드의 종료와, 반환되어야하는 값을 수집하기 위한 대기에 더해서, C<join()> 는 
+스레드가 필요로하는 OS 레벨의 클린업을 실행합니다.
+이 클린업은 중요합니다; 특히 긴 시간에 걸쳐서 실행되는 프로그램이 대량의 스레드를 
+생성하는 경우에는,
+만약 반환값을 필요로 하지 않고, 스레드의 종료를 기다리는 필요도 없으면, 대신에 
+다음에 설명할 C<detach()> 메소드를 호출해야 합니다.
+
+=begin original
+
+NOTE: In the example above, the thread returns a list, thus necessitating
+that the thread creation call be made in list context (i.e., C<my ($thr)>).
+See L<threads/"$thr->join()"> and L<threads/"THREAD CONTEXT"> for more
+details on thread context and return values.
+
+=end original
+
+주의: 위의 예제에서는 스레드는 리스트를 반환하기 때문에, 스레드 작성 호출은
+C<my ($thr)> 처럼) 리스트 컨텍스트에서 수행될 필요가 있습니다.
+스레드의 컨텍스트와 반환값에 관한 보다 자세한 내용에 대해서는
+L<threads/"$thr->join()"> 과 L<threads/"THREAD CONTEXT"> 를 참조해주세요.
+
+=head2 Ignoring A Thread
+
+(스레드를 무시한다)
+
+=begin original
+
+C<join()> does three things: it waits for a thread to exit, cleans up
+after it, and returns any data the thread may have produced.  But what
+if you're not interested in the thread's return values, and you don't
+really care when the thread finishes? All you want is for the thread
+to get cleaned up after when it's done.
+
+=end original
+
+C<join()> 는 두가지 일을 수행합니다.
+스레드 종료 대기, 그 뒤의 클린업, 그리고 스레드가 뽑아낸 데이터를 반환하는 일입니다.
+그러나, 스레드의 반환값에 관심이 없고, 언제 스레드가 끝나는 가를 신경쓰는 경우에는?
+필요한 것은 일이 없어진 뒤에 스레드가 클린업되는 것입니다.
+
+=begin original
+
+In this case, you use the C<detach()> method.  Once a thread is detached,
+it'll run until it's finished; then Perl will clean up after it
+automatically.
+
+=end original
+
+이런 경우, C<detach()> 메소드를 사용합니다.
+하나의 메소드마다 detach 되면, 스레든느 종료하기 까지 실행을 계속하고, 
+그 뒤에 Perl 이 자동적으로 클린업을 수행합니다.
+
+    use threads;
+
+    my $thr = threads->create(\&sub1);   # Spawn the thread
+
+    $thr->detach();   # Now we officially don't care any more
+
+    sleep(15);        # Let thread run for awhile
+
+    sub sub1 {
+        $a = 0;
+        while (1) {
+            $a++;
+            print("\$a is $a\n");
+            sleep(1);
+        }
+    }
+
+=begin original
+
+Once a thread is detached, it may not be joined, and any return data
+that it might have produced (if it was done and waiting for a join) is
+lost.
+
+=end original
+
+한번 어떤 스레드가 detach 되었다면, 그 스레드는 join되지 않을 겁니다.
+(join을 위해서는 대기해도) 스레드가 생성했을 데이터는 잃어버립니다.
+
+=begin original
+
+C<detach()> can also be called as a class method to allow a thread to
+detach itself:
+
+=end original
+
+C<detach()> 는 스레드가 자기 자신을 detach 하기 위해서 클래스 메소드로써 호출됩니다:
+
+    use threads;
+
+    my $thr = threads->create(\&sub1);
+
+    sub sub1 {
+        threads->detach();
+        # Do more work
+    }
+
+=head2 Process and Thread Termination
+
+(프로세스와 스레드의 종료)
+
+=begin original
+
+With threads one must be careful to make sure they all have a chance to
+run to completion, assuming that is what you want.
+
+=end original
+
+스레드를 사용하는 경우는, 모든 스레드가 확실하게 완전히 실행되도록(그것이 당신이 
+원하는 것일 겁니다) 주의하지 않으면 안됩니다.
+
+=begin original
+
+An action that terminates a process will terminate I<all> running
+threads.  die() and exit() have this property,
+and perl does an exit when the main thread exits,
+perhaps implicitly by falling off the end of your code,
+even if that's not what you want.
+
+=end original
+
+프로세스를 종료시키는 행동은 실행중의 I<모든> 스레드를 종료시킵니다.
+die() 와 exit() 는 이 성질을 갖지고 (ㄷ아신이 원하지 않는다고 해도)
+아마도 암묵적인 코드의 최후에 도달함에 따라 메인 스레드가 
+종료하면 perl 은 종료합니다.
+
+=begin original
+
+As an example of this case, this code prints the message
+"Perl exited with active threads: 2 running and unjoined":
+
+=end original
+
+이 경우의 예제로써, 이 코드는 
+"Perl exited with active threads: 2 running and unjoined" 이라는 메시지를 
+표시합니다:
+
+    use threads;
+    my $thr1 = threads->new(\&thrsub, "test1");
+    my $thr2 = threads->new(\&thrsub, "test2");
+    sub thrsub {
+       my ($message) = @_;
+       sleep 1;
+       print "thread $message\n";
+    }
+
+=begin original
+
+But when the following lines are added at the end:
+
+=end original
+
+그러나 아래의 줄이 마지막으로 추가되면:
+
+    $thr1->join;
+    $thr2->join;
+
+=begin original
+
+it prints two lines of output, a perhaps more useful outcome.
+
+=end original
+ 
+2 줄의 출력이 있고, 아마도 보다 유용한 성과가 됩니다.
+
+=head1 Threads And Data
+
+(스레드와 데이터)
+
+=begin original
+
+Now that we've covered the basics of threads, it's time for our next
+topic: Data.  Threading introduces a couple of complications to data
+access that non-threaded programs never need to worry about.
+
+=end original
+
+이것으로 스레드의 기본부분에 대해서는 끝입니다.
+다음 화제는 데이터입니다.
+스레드를 다루면, 비 스레드 프로그램이 결코 걱정할 일이 없는 데이터 접근에 대한 
+두가지 복잡함을 도입하게 됩니다.
+
+=head2 Shared And Unshared Data
+
+(공유데이터와 비공유데이터)
+
+=begin original
+
+The biggest difference between Perl I<ithreads> and the old 5.005 style
+threading, or for that matter, to most other threading systems out there,
+is that by default, no data is shared. When a new Perl thread is created,
+all the data associated with the current thread is copied to the new
+thread, and is subsequently private to that new thread!
+This is similar in feel to what happens when a UNIX process forks,
+except that in this case, the data is just copied to a different part of
+memory within the same process rather than a real fork taking place.
+
+=end original
+
+I<i스레드> 와 옛 5.005 형 스레드 사이의(자세하게 말하면, 거기에서 벗어나는 많은
+스레드 시스템에 있어서) 가장 큰 차이는, 기본값으로는 데이터가 공유되지 않는다는 점입니다.
+새로운 Perl 스레드가 생성될 때, 현재의 스레드에 관련한 모든 데이터는 새로운 스레드에 
+복사됩니다.
+계속해서 그 데이터는 새로운 스레드 안에서 프라이베이트한 것이 됩니다.
+이것은 UNIX 의 프로세스가 fork 할 때에 일어나는 것과 비슷합니다.
+단, 이경우는 실제 fork 에서는 메모리 상에서의 치환이 일어나는 것에 대해서, 
+이 데이터는 같은 프로세서 안의 다른 메모리 부분에 복사되는 것 뿐이라는 점이 다릅니다.
+
+=begin original
+
+To make use of threading, however, one usually wants the threads to share
+at least some data between themselves. This is done with the
+L<threads::shared> module and the C<:shared> attribute:
+
+=end original
+
+그러나 스레드 기능을 이용한다면, 보통은 스레드 사이에서 적어도 몇가지의 데이터를 
+공유하고 싶을 겁니다.
+이것은 L<threads::shared> 모듈과 C<:shared> 속송에 의해 수행됩니다:
+
+    use threads;
+    use threads::shared;
+
+    my $foo :shared = 1;
+    my $bar = 1;
+    threads->create(sub { $foo++; $bar++; })->join();
+
+    print("$foo\n");  # Prints 2 since $foo is shared
+    print("$bar\n");  # Prints 1 since $bar is not shared
+
+=begin original
+
+In the case of a shared array, all the array's elements are shared, and for
+a shared hash, all the keys and values are shared. This places
+restrictions on what may be assigned to shared array and hash elements: only
+simple values or references to shared variables are allowed - this is
+so that a private variable can't accidentally become shared. A bad
+assignment will cause the thread to die. For example:
+
+=end original
+
+공유화된 배열의 경우는 배열의 요소 모두가 공유화됩니다.
+공유화된 해쉬의 경우, 모든 키와 값이 공유됩니다.
+공유화 된 배열이나 해쉬의 요소에 대입하는 것에 대해서는 제한이 있습니다:
+단순한 값이나 공유화된 변수에 리퍼런스는 가능합니다.
+이것은 프라이베이트 변수가 공유되는 일이 없기 때문입니다.
+부정한 대입은 스레드를 죽여버릴 겁니다.
+예를 들면:
+
+    use threads;
+    use threads::shared;
+
+    my $var          = 1;
+    my $svar :shared = 2;
+    my %hash :shared;
+
+    ... create some threads ...
+
+=begin original
+
+    $hash{a} = 1;       # All threads see exists($hash{a}) and $hash{a} == 1
+    $hash{a} = $var;    # okay - copy-by-value: same effect as previous
+    $hash{a} = $svar;   # okay - copy-by-value: same effect as previous
+    $hash{a} = \$svar;  # okay - a reference to a shared variable
+    $hash{a} = \$var;   # This will die
+    delete($hash{a});   # okay - all threads will see !exists($hash{a})
+
+=end original
+
+    $hash{a} = 1;	# 어느 스레드에서도  exists($hash{a}) and $hash{a} == 1
+    $hash{a} = $var;	# OK、값의 복사. 효율은 위와 같음
+    $hash{a} = $svar;	# OK、값의 복사. 효율은 위와 같음
+    $hash{a} = \$svar;	# OK、공유변수로의 리퍼런스
+    $hash{a} = \$var;	# 이것은 die
+    delete($hash{a});	# OK、어느 스레드에서도 !exists($hash{a})
+
+=begin original
+
+Note that a shared variable guarantees that if two or more threads try to
+modify it at the same time, the internal state of the variable will not
+become corrupted. However, there are no guarantees beyond this, as
+explained in the next section.
+
+=end original
+
+공유변수가 여러개의 스레드가 동시에 그 변수에 변경을 수행하려고 해도, 
+변수의 내부 상태는 파괴되지 않는 것을 보증한다는 것에 주의해주세요.
+그러나, 다음 섹션에서 설명하는 것 처럼, 여기를 넘어버리면 보증은 잃어버리게 됩니다.
+
+=head2 Thread Pitfalls: Races
+
+(스레드의 함정: 경합)
+
+=begin original
+
+While threads bring a new set of useful tools, they also bring a
+number of pitfalls.  One pitfall is the race condition:
+
+=end original
+
+스레드는 새로운 편리한 툴을 한번에 가지게 해주는 반면, 많은 함정도 가지고 있습니다.
+그 하나는 경합조건입니다:
+
+    use threads;
+    use threads::shared;
+
+    my $a :shared = 1;
+    my $thr1 = threads->create(\&sub1);
+    my $thr2 = threads->create(\&sub2);
+
+    $thr1->join;
+    $thr2->join;
+    print("$a\n");
+
+    sub sub1 { my $foo = $a; $a = $foo + 1; }
+    sub sub2 { my $bar = $a; $a = $bar + 1; }
+
+=begin original
+
+What do you think C<$a> will be? The answer, unfortunately, is I<it
+depends>. Both C<sub1()> and C<sub2()> access the global variable C<$a>, once
+to read and once to write.  Depending on factors ranging from your
+thread implementation's scheduling algorithm to the phase of the moon,
+C<$a> can be 2 or 3.
+
+=end original
+
+C<$a> 는 어떻게 될까요?
+아쉽게도, 그 답은 I<상황에 따라> 다릅니다.
+C<sub1()> 과  C<sub2()> 는 어느쪽도 한번만 읽어들이고, 한번만 쓰기 위해서 
+글로벌 변수 C<$a> 에 접근합니다.
+당신이 사용하고 있는 스레드 구성의 스케쥴링 알고리즘에서 
+달의 주기 요인에 대해서는 C<$a> 는 2도 되고 3도 될 수 있습니다.
+
+=begin original
+
+Race conditions are caused by unsynchronized access to shared
+data.  Without explicit synchronization, there's no way to be sure that
+nothing has happened to the shared data between the time you access it
+and the time you update it.  Even this simple code fragment has the
+possibility of error:
+
+=end original
+
+경합조건은 공유 데이터에 대해서 비동기 접근을 수행하는 것에 의해 태어납니다.
+명시적으로 동기를 얻지 ㅇ낳는 한, 접근해서 갱신하기까지의 사이에 
+공유 데이터에 아무것도 발생하지 않는 경우를 확실하게 하는 방법은 없습니다.
+이런 단순한 코드조차도, 에러의 가능성이 있습니다:
+
+    use threads;
+    my $a :shared = 2;
+    my $b :shared;
+    my $c :shared;
+    my $thr1 = threads->create(sub { $b = $a; $a = $b + 1; });
+    my $thr2 = threads->create(sub { $c = $a; $a = $c + 1; });
+    $thr1->join;
+    $thr2->join;
+
+=begin original
+
+Two threads both access C<$a>.  Each thread can potentially be interrupted
+at any point, or be executed in any order.  At the end, C<$a> could be 3
+or 4, and both C<$b> and C<$c> could be 2 or 3.
+
+=end original
+
+두개의 스레드가 C<$a> 에 접근합니다.
+각각의 스레드는 어느쪽인가의 시점에서 할당되거나, 어떤 순서로 실행될 가능성이 있습니다.
+결국 C<$a> 는 3 이나 4에, C<$b> 와 C<$c> 는 2 나 3이 될 겁니다.
+
+=begin original
+
+Even C<$a += 5> or C<$a++> are not guaranteed to be atomic.
+
+=end original
+
+C<$a += 5> 나 C<$a++> 라도 아토믹한 계산인 것을 보증하지 않습니다.
+
+=begin original
+
+Whenever your program accesses data or resources that can be accessed
+by other threads, you must take steps to coordinate access or risk
+data inconsistency and race conditions. Note that Perl will protect its
+internals from your race conditions, but it won't protect you from you.
+
+=end original
+
+다른 스레드에 의해 접근되는 가능성이 있는 데이터나 리소스에 당신의 
+프로그램이 접근할 때는 항상 정합적인 접근을 위한 수순을 밟지 않으면 안됩니다.
+그렇지 않으면 데이터의 일관성이 무너지거나, 경합조건에 맞는 리스크를 
+부담하게 됩니다.
+
+=head1 Synchronization and control
+
+(동기와 제어)
+
+=begin original
+
+Perl provides a number of mechanisms to coordinate the interactions
+between themselves and their data, to avoid race conditions and the like.
+Some of these are designed to resemble the common techniques used in thread
+libraries such as C<pthreads>; others are Perl-specific. Often, the
+standard techniques are clumsy and difficult to get right (such as
+condition waits). Where possible, it is usually easier to use Perlish
+techniques such as queues, which remove some of the hard work involved.
+
+=end original
+
+경합조건이나 그와 비슷한 상태를 회피하기 위해서는 스레드와 데이터와의 사이의 상호작용을 
+조정하는 많은 메커내즘을 Perl 은 제공합니다.
+그 중 어느 것은 C<pthreads> 같은 스레드 라이브러리에서 
+사용되는 공통의 테크닉같은 설계가 되어 있습니다.
+또, 어떤 것은 Perl 에 특화되어 있습니다.
+종종 표준적인 테크닉이란 것은 바르게 다루기에는 어렵습니다.
+가능한 것은 보통, 큐 같은 Perl 의 테크닉은 보다 간단하고, 어려운 
+일 중의 어떤 것을 빼줍니다.
+
+=head2 Controlling access: lock()
+
+(접근 제어：lock())
+
+=begin original
+
+The C<lock()> function takes a shared variable and puts a lock on it.
+No other thread may lock the variable until the variable is unlocked
+by the thread holding the lock. Unlocking happens automatically
+when the locking thread exits the block that contains the call to the
+C<lock()> function.  Using C<lock()> is straightforward: This example has
+several threads doing some calculations in parallel, and occasionally
+updating a running total:
+
+=end original
+
+C<lock()> 함수는 공유변수를 인수로 얻고, 그것에 락을 겁니다.
+락을 가지고 있는 스레드에 의해서 변수의 락이 해제되기 까지, 다른 스레드는 락을 걸 수 없습니다.
+락을 건 스레드가 C<lock()> 함수의 호출을 포함하는 블록의 밖으로 나가면,
+락은 자동적으로 해제되비다.
+C<lock()> 이용은 솔직한 방법입니다.
+이 예제는 어떤 계산을 병렬적으로 처리하고, 시간해석 그 통계값을 갱신하는 
+몇가지의 스레드를 움직이고 있습니다:
+
+    use threads;
+    use threads::shared;
+
+    my $total :shared = 0;
+
+    sub calc {
+        while (1) {
+            my $result;
+            # (... do some calculations and set $result ...)
+            {
+                lock($total);  # Block until we obtain the lock
+                $total += $result;
+            } # Lock implicitly released at end of scope
+            last if $result == 0;
+        }
+    }
+
+    my $thr1 = threads->create(\&calc);
+    my $thr2 = threads->create(\&calc);
+    my $thr3 = threads->create(\&calc);
+    $thr1->join();
+    $thr2->join();
+    $thr3->join();
+    print("total=$total\n");
+
+=begin original
+
+C<lock()> blocks the thread until the variable being locked is
+available.  When C<lock()> returns, your thread can be sure that no other
+thread can lock that variable until the block containing the
+lock exits.
+
+=end original
+
+락이 걸린 변수가 이용가능하기 까지, C<lock()> 은 그 스레드를 블록합니다.
+C<lock()> 이 돌아오면, 그 락이 존재하는 블록 밖으로 나가지 않는 한,
+다른 스레드가 그 변수에 락을 걸 수 없다는 것이 확실해집니다.
+
+=begin original
+
+It's important to note that locks don't prevent access to the variable
+in question, only lock attempts.  This is in keeping with Perl's
+longstanding tradition of courteous programming, and the advisory file
+locking that C<flock()> gives you.
+
+=end original
+
+락은 문제의 변수에 접근하는 것을 방지하는 것이 아니라, 락의 시험을 
+방지하는 것에 주의할 필요가 있습니다.
+이것은 Perl 의 긴 세월에 걸친 방법대로의 프로그래밍 전통과 flock() 이 
+제공하는 락과 조화하는 것입니다.
+
+=begin original
+
+You may lock arrays and hashes as well as scalars.  Locking an array,
+though, will not block subsequent locks on array elements, just lock
+attempts on the array itself.
+
+=end original
+
+스칼라 변수나 배열이나 해쉬에도 락을 걸 수 있을지도 모릅니다.
+그러나, 배열에 거는 락은 배열의 요소에 대한 이차적인 락을 
+블록하는 것이 아니라 배열 그 것에 락을 거는 것을 블록합니다.
+
+=begin original
+
+Locks are recursive, which means it's okay for a thread to
+lock a variable more than once.  The lock will last until the outermost
+C<lock()> on the variable goes out of scope. For example:
+
+=end original
+
+락은 재귀적, 즉, 스레드는 어떤 변수에 대해서 몇번이고 락을 걸어도 괜찮습니다.
+제일 바깥의 C<lock()> 이 영역을 벋어나기 까지 락은 계속됩니다.
+예를들면:
+
+    my $x :shared;
+    doit();
+
+    sub doit {
+        {
+            {
+                lock($x); # Wait for lock
+                lock($x); # NOOP - we already have the lock
+                {
+                    lock($x); # NOOP
+                    {
+                        lock($x); # NOOP
+                        lockit_some_more();
+                    }
+                }
+            } # *** Implicit unlock here ***
+        }
+    }
+
+    sub lockit_some_more {
+        lock($x); # NOOP
+    } # Nothing happens here
+
+=begin original
+
+Note that there is no C<unlock()> function - the only way to unlock a
+variable is to allow it to go out of scope.
+
+=end original
+
+C<unlock()> 함수는 없다는 것에 주의해주세요
+변수의 락을 해제하는 방법은 영역을 벗어나는 것 뿐입니다.
+
+=begin original
+
+A lock can either be used to guard the data contained within the variable
+being locked, or it can be used to guard something else, like a section
+of code. In this latter case, the variable in question does not hold any
+useful data, and exists only for the purpose of being locked. In this
+respect, the variable behaves like the mutexes and basic semaphores of
+traditional thread libraries.
+
+=end original
+
+락되어 있는 변수 안에 가지고 있는 데이터를 방어하거나, 혹은 코드의 섹션 같은 것을 
+지키기 위해서 락은 사용됩니다.
+후자의 경우, 문제의 변수는 도움이 되는 데이터를 가지지 않고, 락의 목적을 위해서만 
+존재합니다.
+이 점에서 보면, 그 변수는 전통적인 스레드 라이브러리에서의 뮤텍스나 
+기본적인 세마포어 같은 행동을 한다고 말할 수 있습니다.
+
+=head2 A Thread Pitfall: Deadlocks
+
+(스레드의 함정 : 데드락)
+
+=begin original
+
+Locks are a handy tool to synchronize access to data, and using them
+properly is the key to safe shared data.  Unfortunately, locks aren't
+without their dangers, especially when multiple locks are involved.
+Consider the following code:
+
+=end original
+
+락은 데이터에 동기 접근하기 위한 편리한 툴입니다.
+적절하게 사용하면 안전한 공유 데이터의 열쇠가 됩니다.
+아쉽게도, 락에는 위험이 따릅니다.
+특히 복수의 락이 얽히면 그렇게 됩니다.
+다음 코드를 생각해봅시다:
+
+    use threads;
+
+    my $a :shared = 4;
+    my $b :shared = 'foo';
+    my $thr1 = threads->create(sub {
+        lock($a);
+        sleep(20);
+        lock($b);
+    });
+    my $thr2 = threads->create(sub {
+        lock($b);
+        sleep(20);
+        lock($a);
+    });
+
+=begin original
+
+This program will probably hang until you kill it.  The only way it
+won't hang is if one of the two threads acquires both locks
+first.  A guaranteed-to-hang version is more complicated, but the
+principle is the same.
+
+=end original
+
+이 프로그램은 아마도 당신이 kill 하기까지 멈춰버리겠죠.
+멈춰버리지 않게 하기 위한 유일한 방법은 어느 한쪽의 스레드가 먼저 양쪽의 락을 
+획득하는 것입니다.
+hang 을 보증하는 방법은 더욱 복잡하지만, 원리는 이것과 같습니다.
+
+=begin original
+
+The first thread will grab a lock on C<$a>, then, after a pause during which
+the second thread has probably had time to do some work, try to grab a
+lock on C<$b>.  Meanwhile, the second thread grabs a lock on C<$b>, then later
+tries to grab a lock on C<$a>.  The second lock attempt for both threads will
+block, each waiting for the other to release its lock.
+
+=end original
+
+최초의 스레드가 C<$a> 의 락을 손에 얻습니다.
+그리고 두번째 스레드가 뭔가 하고 있는 사이에 일시정지한 다음에, C<$b> 로의 
+락을 손에 얻으려고 합니다.
+하지만, 그 두번째 스레드는 C<$b> 의 락을 손에 넣었습니다.
+그리고 그 뒤에 C<$a> 의 락을 얻으려고 합니다.
+각각의 스레드가 다른 스레드의 락이 개방되기를 기다리기 때문에,
+두번째의 락을 걸려면 블록해버립니다.
+
+=begin original
+
+This condition is called a deadlock, and it occurs whenever two or
+more threads are trying to get locks on resources that the others
+own.  Each thread will block, waiting for the other to release a lock
+on a resource.  That never happens, though, since the thread with the
+resource is itself waiting for a lock to be released.
+
+=end original
+
+이 상태를 데드락이라고 합니다.
+두가지 이상의 스레드가 다른 스레드가 가지는 리소스를 락 하려고 
+시도할 때에는 항상 발생합니다.
+다른 스레드가 리소스에 락을 개방하는 것을 기다리고, 상호간에 스레드가 블록합니다.
+그러나, 리소스를 기다리는 스레드가 자기자신의 락의 개방을 기다리는 경우는 발생하지 않습니다.
+
+=begin original
+
+There are a number of ways to handle this sort of problem.  The best
+way is to always have all threads acquire locks in the exact same
+order.  If, for example, you lock variables C<$a>, C<$b>, and C<$c>, always lock
+C<$a> before C<$b>, and C<$b> before C<$c>.  It's also best to hold on to locks for
+as short a period of time to minimize the risks of deadlock.
+
+=end original
+
+이런 류의 문제를 다루는 방법은 많이 있습니다.
+제일 좋은 방법은 항상 모든 스레드가 정화갛게 같은 순서대로 락을 얻도록 하는 것입니다.
+예를들어, C<$a>, C<$b>, C<$c> 에 락을 건다면, 항상 C<$b> 앞에 C<$a> 를 
+그리고 C<$c> 앞에 C<$b> 에 락을 걸도록 합니다.
+데드락의 위험을 최소한으로 하기 위해서는 짧은 시간만 락을 가지는 것도 좋은 방법입니다.
+
+=begin original
+
+The other synchronization primitives described below can suffer from
+similar problems.
+
+=end original
+
+아래에 설명하는 다른 프리미티브한 동기도 마찬가지로 문제를 안고 있을 가능성이 있습니다.
+
+=head2 Queues: Passing Data Around
+
+(큐 : 데이터의 패싱)
+
+=begin original
+
+A queue is a special thread-safe object that lets you put data in one
+end and take it out the other without having to worry about
+synchronization issues.  They're pretty straightforward, and look like
+this:
+
+=end original
+
+큐란, 한쪽의 데이터를 받아, 다른 쪽에서 뽑아내는 것에 의해, 
+동기의 문제를 걱정하지 않아도 되는 특별한 스레드 세이프 오브젝트입니다.
+이것들은 꽤 소박하고, 아래와 같은 것입니다:
+
+    use threads;
+    use Thread::Queue;
+
+    my $DataQueue = Thread::Queue->new();
+    my $thr = threads->create(sub {
+        while (my $DataElement = $DataQueue->dequeue()) {
+            print("Popped $DataElement off the queue\n");
+        }
+    });
+
+    $DataQueue->enqueue(12);
+    $DataQueue->enqueue("A", "B", "C");
+    sleep(10);
+    $DataQueue->enqueue(undef);
+    $thr->join();
+
+=begin original
+
+You create the queue with C<Thread::Queue-E<gt>new()>.  Then you can
+add lists of scalars onto the end with C<enqueue()>, and pop scalars off
+the front of it with C<dequeue()>.  A queue has no fixed size, and can grow
+as needed to hold everything pushed on to it.
+
+=end original
+
+C<Thread::Queue-E<gt>new()> 로 큐를 생성합니다.
+그리고 C<enqueue()> 를 사용해서 큐의 마지막에 스칼라의 리스트를 추가합니다.
+그리고 C<dequeue()> 로 큐의 전방에서 스칼라를 뽑아냅니다.
+큐의 사이즈는 고정되어 있지 않습니다.
+큐 안에 집어넣은 것을 가지는 필요에 따라서 사이즈는 성장합니다.
+
+=begin original
+
+If a queue is empty, C<dequeue()> blocks until another thread enqueues
+something.  This makes queues ideal for event loops and other
+communications between threads.
+
+=end original
+
+만약 큐가 비어있는 경우, 다른 스레드가 뭔가를 큐의 안에 집어넣기 까지,
+C<dequeue()> 는 블록합니다.
+그 때문에, 이벤트 루프나 스레드 사이에서의 커뮤니케이션에 있어서는 
+큐는 이상적이라고 할 수 있습니다.
+
+=head2 Semaphores: Synchronizing Data Access
+
+(세마포어: 데이터 접근 동기)
+
+=begin original
+
+Semaphores are a kind of generic locking mechanism. In their most basic
+form, they behave very much like lockable scalars, except that they
+can't hold data, and that they must be explicitly unlocked. In their
+advanced form, they act like a kind of counter, and can allow multiple
+threads to have the I<lock> at any one time.
+
+=end original
+
+세마포어는 포괄적인 락 메커니즘의 한 종류입니다.
+제일 기본이 되는 형태로는 
+세마포어는 데이터를 가질 수 없고, 명시적으로 락 해제가 되지 않으면 안되는 것을 빼고,
+락이 가능한 스칼라 처럼 행동합니다.
+발전적인 형태에 대해서는 일종의 카운터처럼 동작하고, 항상 복수의 
+스레드가 I<락> 을 가질 수 있습니다.
+
+=head2 Basic semaphores
+
+(기본적인 세마포어)
+
+=begin original
+
+Semaphores have two methods, C<down()> and C<up()>: C<down()> decrements the resource
+count, while C<up()> increments it. Calls to C<down()> will block if the
+semaphore's current count would decrement below zero.  This program
+gives a quick demonstration:
+
+=end original
+
+세마포어는 두가지 메소드, C<down()> 과 C<up()> 을 가집니다.
+C<down()> 은 리소스의 카운트를 감소시키고, C<up()> 쪽은 증가시킵니다.
+세마포어의 현재의 카운트가 0 아래라면 C<down()> 호출은 블록합니다.
+이 프로그램은 짧은 예제입니다:
+
+    use threads;
+    use Thread::Semaphore;
+
+    my $semaphore = Thread::Semaphore->new();
+    my $GlobalVariable :shared = 0;
+
+    $thr1 = threads->create(\&sample_sub, 1);
+    $thr2 = threads->create(\&sample_sub, 2);
+    $thr3 = threads->create(\&sample_sub, 3);
+
+    sub sample_sub {
+        my $SubNumber = shift(@_);
+        my $TryCount = 10;
+        my $LocalCopy;
+        sleep(1);
+        while ($TryCount--) {
+            $semaphore->down();
+            $LocalCopy = $GlobalVariable;
+            print("$TryCount tries left for sub $SubNumber (\$GlobalVariable is $GlobalVariable)\n");
+            sleep(2);
+            $LocalCopy++;
+            $GlobalVariable = $LocalCopy;
+            $semaphore->up();
+        }
+    }
+
+    $thr1->join();
+    $thr2->join();
+    $thr3->join();
+
+=begin original
+
+The three invocations of the subroutine all operate in sync.  The
+semaphore, though, makes sure that only one thread is accessing the
+global variable at once.
+
+=end original
+
+이 서브루틴에 대해서는 세가지의 호출은 동기로 작용합니다.
+그러나, 한번에 하나의 스레드만이 글로벌 변수에 접근하는 것을 
+세마포어가 보증합니다.
+
+=head2 Advanced Semaphores
+
+(고도한 세마포어)
+
+=begin original
+
+By default, semaphores behave like locks, letting only one thread
+C<down()> them at a time.  However, there are other uses for semaphores.
+
+=end original
+
+기본적으로 세마포어는 락처럼 행동합니다.
+한번에 단 하나의 스레드만을 C<down()> 할 수 있습니다.
+그러나, 세마포어에는 별도의 사용법이 있습니다.
+
+=begin original
+
+Each semaphore has a counter attached to it. By default, semaphores are
+created with the counter set to one, C<down()> decrements the counter by
+one, and C<up()> increments by one. However, we can override any or all
+of these defaults simply by passing in different values:
+
+=end original
+
+각각의 세마포어는 관련된 카운터를 가집니다.
+기본적으로 세마포어는 생성시, 카운터에 1이 정의됩니다.
+C<down()> 은 카운터라면 1을 빼고, C<up()> 은 1일 더합니다.
+그러나, 이 규정값의 일부는 전부를 별도의 값으로 덮어쓸 수 있습니다:
+
+    use threads;
+    use Thread::Semaphore;
+
+    my $semaphore = Thread::Semaphore->new(5);
+                    # Creates a semaphore with the counter set to five
+
+    my $thr1 = threads->create(\&sub1);
+    my $thr2 = threads->create(\&sub1);
+
+    sub sub1 {
+        $semaphore->down(5); # Decrements the counter by five
+        # Do stuff here
+        $semaphore->up(5); # Increment the counter by five
+    }
+
+    $thr1->detach();
+    $thr2->detach();
+
+=begin original
+
+If C<down()> attempts to decrement the counter below zero, it blocks until
+the counter is large enough.  Note that while a semaphore can be created
+with a starting count of zero, any C<up()> or C<down()> always changes the
+counter by at least one, and so C<< $semaphore->down(0) >> is the same as
+C<< $semaphore->down(1) >>.
+
+=end original
+
+만약 C<down()> 이 카운터를 0 보다 작은 값으로 내리려고 하면,
+카운터가 충분한 크기가 될때까지 블록합니다.
+세마포어는 카운터의 값을 0으로 해서 생성하는 한편, C<up()> 이나 
+C<down()> 은 항상, 적어도 1 의 변화를 카운터에 대해서 수행할 수 있는 것에 주의해주세요.
+그래서 C<< $semaphore->down(0) >> 은 C<< $semaphore->down(1) >> 과 같습니다.
+
+=begin original
+
+The question, of course, is why would you do something like this? Why
+create a semaphore with a starting count that's not one, or why
+decrement or increment it by more than one? The answer is resource
+availability.  Many resources that you want to manage access for can be
+safely used by more than one thread at once.
+
+=end original
+
+물론 문제는 어떻게 이런 것을 하는 가 하는 것입니다.
+왜 세마포어를 1이 아닌 0부터 시작하도록 생성하는 것일ㄲ요?
+혹은, 왜 1 보다 큰 값으로 증감을 수행하는 것일까요?
+그 답은 리소스의 이용가능성입니다.
+당신이 접근관리를 하고 싶은 리소스의 많은 부분은 동시에 하나를 넘는 수의 
+스레드에 의해 안전하게 이용됩니다.
+
+=begin original
+
+For example, let's take a GUI driven program.  It has a semaphore that
+it uses to synchronize access to the display, so only one thread is
+ever drawing at once.  Handy, but of course you don't want any thread
+to start drawing until things are properly set up.  In this case, you
+can create a semaphore with a counter set to zero, and up it when
+things are ready for drawing.
+
+=end original
+
+예를 들어, GUI 프로그램을 보도록하죠.
+프로그램을 디스플레이에 동기 접근하기 위해 세마포어를 가지고 있습니다.
+그리고 한번에 하나의 스레드만이 그림을 그립니다.
+간단한 이야기지만, 물론, 제대로 준비가 되기까지 어느 스레드에도 그림을 
+그릴 수는 없습니다.
+이런 경우에, 카운터를 0 으로 해서 세마포어를 생성하는 것입니다.
+그리고 그림 준비가 되었다면, 카운터를 증가시킵니다.
+
+=begin original
+
+Semaphores with counters greater than one are also useful for
+establishing quotas.  Say, for example, that you have a number of
+threads that can do I/O at once.  You don't want all the threads
+reading or writing at once though, since that can potentially swamp
+your I/O channels, or deplete your process' quota of filehandles.  You
+can use a semaphore initialized to the number of concurrent I/O
+requests (or open files) that you want at any one time, and have your
+threads quietly block and unblock themselves.
+
+=end original
+
+1 보다 큰 카운터를 가지는 세마포어는 쿼터의 확립에도 도움이 됩니다.
+예를들어, 동시에 I/O 를 사용하는 스레드가 몇가지 있다고 합니다.
+그러나, 모든 스레드가 동시에 읽고 쓰기를 하는 것은 바라지 않습니다.
+그런 짓을 하면 I/O 채널을 압박할지도 모르고, 프로세스에 
+할당된 파일 핸들을 고갈시켜버릴 지도 모르기 때문입니다.
+당신이 항상 필요로 하고, 스레드에 암묵적으로 블록, 언블록을 
+시키고 싶을 뿐인 동시 I/O 리퀘스트수(혹은 오픈파일수)로 
+초기설저된 세마포어를 이용하면 됩니다.
+
+=begin original
+
+Larger increments or decrements are handy in those cases where a
+thread needs to check out or return a number of resources at once.
+
+=end original
+
+어떤 스레드가 한번에 많은 리소스를 빌리거나 반환하는 이런 케이스에서는 
+큰 수로 증감을 수행하는 것이 편리합니다.
+
+=head2 Waiting for a Condition
+
+(조건 대기)
+
+=begin original
+
+The functions C<cond_wait()> and C<cond_signal()>
+can be used in conjunction with locks to notify
+co-operating threads that a resource has become available. They are
+very similar in use to the functions found in C<pthreads>. However
+for most purposes, queues are simpler to use and more intuitive. See
+L<threads::shared> for more details.
+
+=end original
+
+함수 C<conf_wait()> 와 C<conf_signal()> 은 락이 동시발생할 때에 
+리소스를 이용하능하게 한 협조형 스레드에 알리기 위해서 이용합니다.
+이것들은 C<pthreads> 에 있는 함수와 비슷합니다.
+그러나 대부분의 목적에서 큐가 보다 단순하고 직감적입니다.
+보다 자세한 내용에 대해서는 L<threads::shared> 를 참조해주세요.
+
+=head2 Giving up control
+
+(제어 포기)
+
+=begin original
+
+There are times when you may find it useful to have a thread
+explicitly give up the CPU to another thread.  You may be doing something
+processor-intensive and want to make sure that the user-interface thread
+gets called frequently.  Regardless, there are times that you might want
+a thread to give up the processor.
+
+=end original
+
+어떤 스레드가 명시적으로 다른 스레드에 CPU 를 넘겨주면 편리하다고 생각할 수 있겠죠.
+당신은 프로세서 집약적인 것을 하려고 할지도 모르겠지만, 
+유저 인터페이스 담당의 스레드가 호출되는 것을 확인하고 싶다고 생각할지도 모릅니다.
+어쨌든, 스레드가 프로세서를 포기하는 경우가 종종 있습니다.
+
+=begin original
+
+Perl's threading package provides the C<yield()> function that does
+this. C<yield()> is pretty straightforward, and works like this:
+
+=end original
+
+Perl 의 스레드 패키지는 이것을 실현하는 C<yield()> 함수를 제공하고 있습니다.
+C<yield()> 는 매우 소박하하며, 이렇게 동작합니다:
+
+    use threads;
+
+    sub loop {
+        my $thread = shift;
+        my $foo = 50;
+        while($foo--) { print("In thread $thread\n"); }
+        threads->yield();
+        $foo = 50;
+        while($foo--) { print("In thread $thread\n"); }
+    }
+
+    my $thr1 = threads->create(\&loop, 'first');
+    my $thr2 = threads->create(\&loop, 'second');
+    my $thr3 = threads->create(\&loop, 'third');
+
+=begin original
+
+It is important to remember that C<yield()> is only a hint to give up the CPU,
+it depends on your hardware, OS and threading libraries what actually happens.
+B<On many operating systems, yield() is a no-op.>  Therefore it is important
+to note that one should not build the scheduling of the threads around
+C<yield()> calls. It might work on your platform but it won't work on another
+platform.
+
+=end original
+
+C<yield()> 는 CPU 를 넘겨주기 위한 힌트일 뿐입니다.
+실제로 뭔가 발생하는 가는 하드웨어나 OS, 그리고 스레드 라이브러리에 의존하고 있습니다.
+B< 많은 OS 에서, yield() 는 아무런 기능도 하지 않습니다. > 
+그래서 C<yield()> 를 호출하고 스레드의 스케쥴링을 세워야하는 것은 
+아니라는 것에 주의하는 것이 중요합니다.
+당신의 플랫폼에서는 동작했다고 해도, 다른 플랫폼에서는 
+움직이지 않을지도 모릅니다.
+
+=head1 General Thread Utility Routines
+
+(일반적인 스레드 유틸리티 루틴)
+
+=begin original
+
+We've covered the workhorse parts of Perl's threading package, and
+with these tools you should be well on your way to writing threaded
+code and packages.  There are a few useful little pieces that didn't
+really fit in anyplace else.
+
+=end original
+
+Perl 의 스레드 패키지의 움직이는 부분을 보았습니다.
+이 도구들을 사용해서 당신의 방식으로 스레드 코드와 패키지를 쓸 수 있을 겁니다.
+다른 장소에서는 실제로는 맞지 않을 지도 모르지만, 편리한 점도 조금은 있습니다.
+
+=head2 What Thread Am I In?
+
+(나는 어느 스레드에 있지?)
+
+=begin original
+
+The C<threads-E<gt>self()> class method provides your program with a way to
+get an object representing the thread it's currently in.  You can use this
+object in the same way as the ones returned from thread creation.
+
+=end original
+
+C<threads-E<gt>self()> 클래스 메소드를 사용하면, 현재의 스레드를 표현하는 
+오브젝트를 얻을 수 있습니다.
+스레드를 생성할 때에 반환해주는 오브젝트와 마찬가지로, 이 오브젝트를 사용할 수 있습니다.
+
+=head2 Thread IDs
+
+(스레드 ID)
+
+=begin original
+
+C<tid()> is a thread object method that returns the thread ID of the
+thread the object represents.  Thread IDs are integers, with the main
+thread in a program being 0.  Currently Perl assigns a unique TID to
+every thread ever created in your program, assigning the first thread
+to be created a TID of 1, and increasing the TID by 1 for each new
+thread that's created.  When used as a class method, C<threads-E<gt>tid()>
+can be used by a thread to get its own TID.
+
+=end original
+
+C<tid()> 는 오브젝트가 나타내는 스레드의 ID 를 반환하는 메소드입니다.
+스레드 ID 는 변수이고, 프로그램 안의 메인스레드는 0 입니다.
+현재의 Perl 은 프로그램 안에서 생성된 모든 스레드에 임의의 ID 를 붙입니다.
+최초에 생성된 스레드에는 1이 할당되고, 새로운 스레드가 만들어 질 때마다 
+ID 는 1씩 늘어납니다.
+클래스 메소드로 사용되면, C<threads-E<gt>tid()> 는 스레드가 
+자신의 TID 를 얻기 위해 사용됩니다.
+
+=head2 Are These Threads The Same?
+
+(이 스레드는 같은 것인가?)
+
+=begin original
+
+The C<equal()> method takes two thread objects and returns true
+if the objects represent the same thread, and false if they don't.
+
+=end original
+
+C<equal()> 메소드는 두가지 스레드 오브젝트를 인수로 해서, 오브젝트가 
+같은 스레드를 나타내고 있으면 참을, 그렇지 않으면 거짓을 반환합니다.
+
+=begin original
+
+Thread objects also have an overloaded C<==> comparison so that you can do
+comparison on them as you would with normal objects.
+
+=end original
+
+스레드 오브젝트는 비교연산자 C<==> 를 오버로드하기 때문에, 보통 오브젝트처럼 
+그것들을 비교할 수도 있습니다.
+
+=head2 What Threads Are Running?
+
+(어느 스레드가 실행되는 가?)
+
+=begin original
+
+C<threads-E<gt>list()> returns a list of thread objects, one for each thread
+that's currently running and not detached.  Handy for a number of things,
+including cleaning up at the end of your program (from the main Perl thread,
+of course):
+
+=end original
+
+C<threads-E<gt>list()> 는 스레드 오브젝트의 리스트를 반환합니다.
+각각은 현재 실행중이고 detach 되지 않는 스레드입니다.
+프로그램의 끝에(물론 Perl 의 메인스레드에서) 
+클린업하는 것도 포함해서 여러가지 점에서 편리합니다:
+
+    # Loop through all the threads
+    foreach my $thr (threads->list()) {
+        $thr->join();
+    }
+
+=begin original
+
+If some threads have not finished running when the main Perl thread
+ends, Perl will warn you about it and die, since it is impossible for Perl
+to clean up itself while other threads are running.
+
+=end original
+
+만약 메인 스레드가 종료할 때에 어떤 스레드가 실행을 종료하지 않았다면, 
+Perl 은 경고를 내고 die 합니다.
+이것은 다른 스레드가 실행중일 때는 Perl 이 자기자신을 클린업할 수 없기 때문입니다.
+
+=begin original
+
+NOTE:  The main Perl thread (thread 0) is in a I<detached> state, and so
+does not appear in the list returned by C<threads-E<gt>list()>.
+
+=end original
+
+주의: Perl 의 메인스레드 ( 스레드 0 )은 I<detach 된> 상태에 있기 때문에
+C<threads-E<gt>list()> 로 반환되는 리스트에는 나타납니다.
+
+=head1 A Complete Example
+
+(완전한 예제)
+
+=begin original
+
+Confused yet? It's time for an example program to show some of the
+things we've covered.  This program finds prime numbers using threads.
+
+=end original
+
+아직도 헷갈리시나요?
+그럼, 샘플 프로그램을 사용해서 여기까지 봐온 것들 중 몇가지를 보일 땡빈디ㅏ.
+이 프로그램은 스레드를 사용해서 소수를 발견해냅니다.
+
+     1 #!/usr/bin/perl
+     2 # prime-pthread, courtesy of Tom Christiansen
+     3
+     4 use strict;
+     5 use warnings;
+     6
+     7 use threads;
+     8 use Thread::Queue;
+     9
+    10 my $stream = Thread::Queue->new();
+    11 for my $i ( 3 .. 1000 ) {
+    12     $stream->enqueue($i);
+    13 }
+    14 $stream->enqueue(undef);
+    15
+    16 threads->create(\&check_num, $stream, 2);
+    17 $kid->join();
+    18
+    19 sub check_num {
+    20     my ($upstream, $cur_prime) = @_;
+    21     my $kid;
+    22     my $downstream = Thread::Queue->new();
+    23     while (my $num = $upstream->dequeue()) {
+    24         next unless ($num % $cur_prime);
+    25         if ($kid) {
+    26             $downstream->enqueue($num);
+    27         } else {
+    28             print("Found prime $num\n");
+    29             $kid = threads->create(\&check_num, $downstream, $num);
+    30         }
+    31     }
+    32     if ($kid) {
+    33         $downstream->enqueue(undef);
+    34         $kid->join();
+    35     }
+    36 }
+
+=begin original
+
+This program uses the pipeline model to generate prime numbers.  Each
+thread in the pipeline has an input queue that feeds numbers to be
+checked, a prime number that it's responsible for, and an output queue
+into which it funnels numbers that have failed the check.  If the thread
+has a number that's failed its check and there's no child thread, then
+the thread must have found a new prime number.  In that case, a new
+child thread is created for that prime and stuck on the end of the
+pipeline.
+
+=end original
+
+이 프로그램은 소수를 발생시키기 위해서 파이프라인모델을 이용하고 있습니다.
+파이프라인에서의 각각의 스레드는 소수를 발견하기 위해서 체크되는 수를 넘기는 입력 큐와 
+체크에 실패한 수를 모아두는 출력 큐를 가집니다.
+체크에 실패한 수가 스레드에 있고, 자식 스레드가 없는 경우, 그 스레드는 새로운 소수를 
+별견하게 됩니다.
+이 경우, 새로운 자식 스레드는 그 소수를 위해서 생성되고, 파이프라인의 뒤에 붙여집니다.
+
+=begin original
+
+This probably sounds a bit more confusing than it really is, so let's
+go through this program piece by piece and see what it does.  (For
+those of you who might be trying to remember exactly what a prime
+number is, it's a number that's only evenly divisible by itself and 1.)
+
+=end original
+
+이것은 실제보다 알기 어려울지도 모르겠습니다.
+그래서 이 프로그램을 부분부분 나눠서 무엇을 하고 있는 가를 보겠습니다.
+
+=begin original
+
+The bulk of the work is done by the C<check_num()> subroutine, which
+takes a reference to its input queue and a prime number that it's
+responsible for.  After pulling in the input queue and the prime that
+the subroutine is checking (line 20), we create a new queue (line 22)
+and reserve a scalar for the thread that we're likely to create later
+(line 21).
+
+=end original
+
+작업의 대부분은 C<check_num()> 루틴에 의해 이루어집니다.
+이 루틴은 입력 큐의 리퍼런스와 스레드가 기다리는 소수를 인수로 얻습니다.
+[인수를] 입력 큐와 서브루틴이 체크하는 소수[의 로컬변수]에 
+언흥ㄴ 다음(20 줄째), 새로운 큐를 생성합니다(22 줄째).
+그리고, 뒤에 생성할지도 모르는 스레드를 넣는 스칼라 변수를 준비합니다(21 줄째).
+
+=begin original
+
+The while loop from lines 23 to line 31 grabs a scalar off the input
+queue and checks against the prime this thread is responsible
+for.  Line 24 checks to see if there's a remainder when we divide the
+number to be checked by our prime.  If there is one, the number
+must not be evenly divisible by our prime, so we need to either pass
+it on to the next thread if we've created one (line 26) or create a
+new thread if we haven't.
+
+=end original
+
+23 줄째부터 31 줄째까지 while 루프에서 입력 큐에서 스칼라 값을 
+뽑아내, 이 스레드가 기다리는 소수로 체크합니다.
+24 줄에서는 체크된 수에 대한 제산을 수행하고, 나머지가 있는지를 조사합니다.
+만약 있다면 그 수는 소수로는 나눌 수 없다는 것입니다.
+거기에서 그 수를 이미 생성했다면 다음 스레드에 넘기고, 
+그렇지 않으면 새로운 스레드를 만듭니다.
+
+=begin original
+
+The new thread creation is line 29.  We pass on to it a reference to
+the queue we've created, and the prime number we've found.
+
+=end original
+
+29 줄에서 새로운 스레드의 생성을 수행하고 있습니다.
+그 스레드에 앞서 만든 큐의 리퍼런스와 발견된 소수를 넘깁니다.
+
+=begin original
+
+Finally, once the loop terminates (because we got a 0 or C<undef> in the
+queue, which serves as a note to terminate), we pass on the notice to our
+child and wait for it to exit if we've created a child (lines 32 and
+35).
+
+=end original
+
+마지막으로 (큐의 안에 0 이나 C<undef> 가 있고) 루프가 끝나면, 
+자식 스레드를 만든 경우는 자식 스레드에 주의를 촉구하고 [(undef 를 보냅니다)], 
+실행이 종료하는 것을 기다립니다(32, 35 줄).
+
+=begin original
+
+Meanwhile, back in the main thread, we first create a queue (line 10) and
+queue up all the numbers from 3 to 1000 for checking (lines 11-13),
+plus a termination notice (line 14).  Then we create the initial child
+threads (line 16), passing it the queue and the first prime: 2.  Finally,
+we wait for the first child thread to terminate (line 17).  Because a
+child won't terminate until its child has terminated, we know that we're
+done once we return from the C<join()>.
+
+=end original
+
+한편, 메인 스레드에 돌아와 보면, 우선 큐를 생성하고(10 줄), 
+체크하기 위한 3 에서 1000까지의 모든 수를 큐에 넣고(11-13), 
+종료체크용 마클를 추가합니다(14).
+그리고 청므의 자식 스레드를 만들고(16), 큐와 최초의 소수인 2를 넘깁니다.
+마지막으로 최초의 자식 스레드가 종료하는 것을 기다립니다(17줄).
+어떤 자식 스레드의 자식 스레드가 종료하기 까지, 그 스레드는 종료하지 않기 때문에, 
+C<join()> 에서 돌아온 시점에서 작업이 끝나게 됩니다.
+
+=begin original
+
+That's how it works.  It's pretty simple; as with many Perl programs,
+the explanation is much longer than the program.
+
+=end original
+
+위처럼 움직입니다.
+매우 단순하죠; 많은 Perl 프로그램에 있어서 그렇듯, 
+설명하는 것이 프로그램 이상으로 매우 길어집니다.
+
+=head1 Different implementations of threads
+
+(여러가지 스레드 구성)
+
+=begin original
+
+Some background on thread implementations from the operating system
+viewpoint.  There are three basic categories of threads: user-mode threads,
+kernel threads, and multiprocessor kernel threads.
+
+=end original
+
+OS 의 관점에서 본, 스레드 구성에 대한 배경입니다.
+스레드에는 3개의 기본적인 카테고리가 있습니다: 유저 모드 스레드, 커널스레드, 멀티프로세서 스레드입니다.
+
+=begin original
+
+User-mode threads are threads that live entirely within a program and
+its libraries.  In this model, the OS knows nothing about threads.  As
+far as it's concerned, your process is just a process.
+
+=end original
+
+유저모드 스레드란, 완전히 프로그램과 라이브러리 안에 존재하는 스레드입니다.
+이 모델에서는 OS 는 스레드에 대해서 아무것도 관여하지 않습니다.
+OS 에서 보는 한, 당신의 프로세스는 단지 하나의 프로세스입니다.
+
+=begin original
+
+This is the easiest way to implement threads, and the way most OSes
+start.  The big disadvantage is that, since the OS knows nothing about
+threads, if one thread blocks they all do.  Typical blocking activities
+include most system calls, most I/O, and things like C<sleep()>.
+
+=end original
+
+이것은 가장 단순한 스레드 구성이고, 대부분의 OS 가 맨처음으로 취한 방법입니다.
+이 방법의 가장 큰 결점은 OS 가 스레드에 관해서 알지 않기 위해서 
+하나의 스레드가 블록을 했다면, 모든 스레드가 블록해버린다는 것입니다.
+전형적인 블록 행위에는 대부분의 시스템 콜, 대부분의 I/O 그리고 
+C<sleep()> 같은 것이 포함되어 있습니다.
+
+=begin original
+
+Kernel threads are the next step in thread evolution.  The OS knows
+about kernel threads, and makes allowances for them.  The main
+difference between a kernel thread and a user-mode thread is
+blocking.  With kernel threads, things that block a single thread don't
+block other threads.  This is not the case with user-mode threads,
+where the kernel blocks at the process level and not the thread level.
+
+=end original
+
+커널 스레드는 진화의 제 2단계입니다.
+OS 는 커널 스렏으ㅔ 대해서 알고 있고, 그 허가를 냅니다.
+커널  스레드와 유저 모드 스레드의 주요한 차이는 
+블록킹에 대한 것입니다.
+커널 스레드에서는 하나의 스레드를 블록한 것에서 다른 스레드까지 
+블록하는 일은 없습니다.
+이것은 유저 모드 스레드에서는 성립하지 않습니다.
+유저모드에서는 커널이 블록하는 것은 프로세스 레벨이지,
+스레드 레벨이 아니기 때문입니다.
+
+=begin original
+
+This is a big step forward, and can give a threaded program quite a
+performance boost over non-threaded programs.  Threads that block
+performing I/O, for example, won't block threads that are doing other
+things.  Each process still has only one thread running at once,
+though, regardless of how many CPUs a system might have.
+
+=end original
+
+이것은 큰 전진이고, 비 스레드 프로그램에 대해서, 스레드 프로그램이 
+큰 퍼포먼스의 향상을 얻을 수 있는 가능하게 합니다.
+예를들어, I/O 실행을 블록하는 스레드는 다른 일을 수행하는 스레드를 
+블록하지 않을 겁니다.
+그러나, 시스템이 몇 개의 CPU를 가지고 있는 것과 관계없이, 각각의 프로세스는 
+한번에 하나의 스레드밖에 움직일 수 없습니다.
+
+=begin original
+
+Since kernel threading can interrupt a thread at any time, they will
+uncover some of the implicit locking assumptions you may make in your
+program.  For example, something as simple as C<$a = $a + 2> can behave
+unpredictably with kernel threads if C<$a> is visible to other
+threads, as another thread may have changed C<$a> between the time it
+was fetched on the right hand side and the time the new value is
+stored.
+
+=end original
+
+커널의 스레드 제어가 항상 들어가기 때문에, 당신이 프로그램 안에 
+만든 암묵의 락의 전제가 드러나 버릴겁니다.
+예를들어, C<$a = $a + 2> 같은 단순한 것이어도, C<$a> 가 다른 스레드에서 
+보인다면, 좌변치를 얻어내는 시간과 새로운 값을 넣는 시간 사이에 
+다른 스레드가 C<$a> 를 바꾸어버리고, 당신이 예상하지 않는 행동을 할 
+가능성이 있습니다.
+
+=begin original
+
+Multiprocessor kernel threads are the final step in thread
+support.  With multiprocessor kernel threads on a machine with multiple
+CPUs, the OS may schedule two or more threads to run simultaneously on
+different CPUs.
+
+=end original
+
+멀티 프로세서 커널 스레드는 스레드의 지원에서의 최종단계입니다.
+한대의 머신이 복수의 CPU 를 가지고 있는 멀티 프로세서 커널 스레드에서는 
+OS 는 각각의 CPU 상에서 동시에 하나 이상의 스레드를 움직이도록 스케쥴 관리를 합니다.
+
+=begin original
+
+This can give a serious performance boost to your threaded program,
+since more than one thread will be executing at the same time.  As a
+tradeoff, though, any of those nagging synchronization issues that
+might not have shown with basic kernel threads will appear with a
+vengeance.
+
+=end original
+
+하나 이상의 스레드가 동시에 실행하기 때문에, 이것에 의해 스레드 프로그램은 
+비약적인 퍼포먼스 향상을 얻을 수 있습니다.
+그러나, 바꿔생각하면, 기본적인 커널 스레드에서는 발생하지 않을 
+동기성 문제가 한번에 모습을 드러냅니다.
+
+=begin original
+
+In addition to the different levels of OS involvement in threads,
+different OSes (and different thread implementations for a particular
+OS) allocate CPU cycles to threads in different ways.
+
+=end original
+
+스레드를 갖춘 OS 의 차이라는 레벨에 더해서, 각각의 OS 는(그리고 
+각각의 스레드 구성은) 각각의 방법으로 가지고 CPU 사이클을 스레드에 할당합니다.
+
+=begin original
+
+Cooperative multitasking systems have running threads give up control
+if one of two things happen.  If a thread calls a yield function, it
+gives up control.  It also gives up control if the thread does
+something that would cause it to block, such as perform I/O.  In a
+cooperative multitasking implementation, one thread can starve all the
+others for CPU time if it so chooses.
+
+=end original
+
+다음의 두가지 중 하나가 발생하는 경우 협조적 멀티 태스크 시스템은 실행중인 
+스레드에 제어를 넘깁니다.
+어떤 스레드가 yield 함수를 호출하면, 제어를 넘깁니다.
+또, 스레드가 I/O 실행 등의 블록을 일으키도록 뭔가를 수행하는 경우도, 
+제어를 넘깁니다.
+협조적 멀티태스크 시스템의 구성에서는 그렇게 선택한다면, 
+하나의 스레드가 다른 모든 스레드의 CPU 시간을 잡아먹을 수 있습니다.
+
+=begin original
+
+Preemptive multitasking systems interrupt threads at regular intervals
+while the system decides which thread should run next.  In a preemptive
+multitasking system, one thread usually won't monopolize the CPU.
+
+=end original
+
+프리엠티브 한 멀티 태스크 시스템은 다음에 어느 스레드를 실행하는 지 
+결정하면서, 일정 간격으로 스레드에 집어넣습니다.
+프리엠티브한 멀티태스크 시스템에서 통상 하나의 스레드가 CPU 를 
+독접하는 일은 없습니다.
+
+=begin original
+
+On some systems, there can be cooperative and preemptive threads
+running simultaneously. (Threads running with realtime priorities
+often behave cooperatively, for example, while threads running at
+normal priorities behave preemptively.)
+
+=end original 
+
+몇가지의 시스템에서는 협조적 스레드와 프리엠티브한 스레드를 동시에 
+실행할 수 있습니다(예를들어, 일반적인 우선도를 가진 스레드가 프리엠티브하게 
+움직이는 것에 대해서 리얼 타임 우선도를 가진 스레드는 잠시 협조적으로 움직입니다).
+
+=begin original
+
+Most modern operating systems support preemptive multitasking nowadays.
+
+=end original
+
+지금은 대부분의 근대적인 OS 에서 프리엠티브한 멀티 태스크를 지원하고 있습니다.
+
+=head1 Performance considerations
+
+(퍼포먼스의 고려)
+
+=begin original
+
+The main thing to bear in mind when comparing Perl's I<ithreads> to other threading
+models is the fact that for each new thread created, a complete copy of
+all the variables and data of the parent thread has to be taken. Thus,
+thread creation can be quite expensive, both in terms of memory usage and
+time spent in creation. The ideal way to reduce these costs is to have a
+relatively short number of long-lived threads, all created fairly early
+on -- before the base thread has accumulated too much data. Of course, this
+may not always be possible, so compromises have to be made. However, after
+a thread has been created, its performance and extra memory usage should
+be little different than ordinary code.
+
+=end original
+
+Perl 의 I<i스레드> 와 다른 스레등 모델을 비교할 때에 잊어서는 안되는 것이 
+새로운 스레드는 모두, 부모 스레드의 변수와 데이터를 모두 완전하게 복사해서 
+넘겨진다는 사실입니다.
+그 때문에, 메모리 사용률과 실행시간의 양쪽에서 스레드의 생성은 꽤 높아집니다.
+이 비용을 줄이는 이상적인 방법은 오래 살아있는 스레드를 비교적 짧게 
+가지는 것입니다.
+이 스레드는 모두, 베이스가 되는 스레드가 매우 많은 데이터를 축적하기 전에 
+적절하게 이른 단계에서 생성됩니다.
+물론, 이것은 항상 가능하다는 것은 아닙니다.
+그러나, 스레드가 생성된 다음은 그 퍼포먼스와 추가 메모리 사용량은 
+보통 코드의 그것과 큰 차이는 없습니다.
+
+=begin original
+
+Also note that under the current implementation, shared variables
+use a little more memory and are a little slower than ordinary variables.
+
+=end original
+
+또, 현재의 구성 아래에서는 공유 변수는 통상의 변수에 비교해서 조금 쓸데없이 메모리를 
+사용하고, 스피드도 조금 느리다는 것에도 주의해주세요.
+
+=head1 Process-scope Changes
+
+(프로세스 스코프 변경)
+
+=begin original
+
+Note that while threads themselves are separate execution threads and
+Perl data is thread-private unless explicitly shared, the threads can
+affect process-scope state, affecting all the threads.
+
+=end original
+
+스레드 그 자신은 별도로 실행되고, Perl 의 데이터는 명시적으로 공유하지 않는 한은 
+스레드 안에서 프라이베이트한 것입니다;
+한편, 스레드는 모든 스레드에 영향을 주면서, 프로세스 영역의 
+상태에 영향을 줘버리는 것에 주의해주세요.
+
+=begin original
+
+The most common example of this is changing the current working
+directory using C<chdir()>.  One thread calls C<chdir()>, and the working
+directory of all the threads changes.
+
+=end original
+
+이 제일 일반적인 예는 C<chdir()> 을 사용할 때에 현재 작업중인 디렉토리가 
+변경되어버린 다는 것입니다.
+하나의 스레드가 C<chdir()> 을 호출하면, 모든 스레드의 작업 디렉토리가 변경됩니다.
+
+=begin original
+
+Even more drastic example of a process-scope change is C<chroot()>:
+the root directory of all the threads changes, and no thread can
+undo it (as opposed to C<chdir()>).
+
+=end original
+
+거기에 극적인 프로세스 영역의 변경 예제는 C<chroot()> 입니다.
+모든 스레드의 루트 디렉토리가 변경됩니다.
+스레드는 그것을 기반으로 되돌릴 수는 없습니다(C<chdir()> 의 경우는 가능합니다).
+
+=begin original
+
+Further examples of process-scope changes include C<umask()> and
+changing uids and gids.
+
+=end original
+
+보다 자세한 프로세스 영역 변화의 예제는 C<umask()> 및 uid 나 gid 의 변경입니다.
+
+=begin original
+
+Thinking of mixing C<fork()> and threads?  Please lie down and wait
+until the feeling passes.  Be aware that the semantics of C<fork()> vary
+between platforms.  For example, some UNIX systems copy all the current
+threads into the child process, while others only copy the thread that
+called C<fork()>. You have been warned!
+
+=end original
+
+C<fork()> 와 스레드를 혼재시키면 어떻게될까요?
+그런 기분이 없어지기 까지, 누워서 쉬어주세요.
+C<fork()> 의 동작은 플랫폼에 의해 다르다는 것에 주읳주세요.
+예를들어, UNIX 시스템에는 현재의 모든 스레드를 자식 프로세스에 
+복사하는 것도 있지만, C<fork()> 를 호출한 스레드만을 
+복사하는 것도 있습니다.
+당신은 경고를 받았습니다!
+
+=begin original
+
+Similarly, mixing signals and threads may be problematic.
+Implementations are platform-dependent, and even the POSIX
+semantics may not be what you expect (and Perl doesn't even
+give you the full POSIX API).  For example, there is no way to
+guarantee that a signal sent to a multi-threaded Perl application
+will get intercepted by any particular thread.  (However, a recently
+added feature does provide the capability to send signals between
+threads.  See L<threads/"THREAD SIGNALLING> for more details.)
+
+=end original
+
+마찬가지로 시그널과 스레드를 섞는 것도 해서는 안됩니다.
+구성은 플랫폼 의존이고, POSIX 의 세만틱스 에서도 당신의 
+기대대로는 되지 않을지도 모릅니다.
+(그리고 Perl 은 풀셋의 POSIX API 를 제공하는 것마저 불가능합니다).
+예를들어, 멀티스레드 Perl 어플리케이션에 보내진 시그널이 
+특정 스레드에 의해 수신되는 것을 보증하는 방법은 없습니다.
+(그러나, 최근 추가된 기능은 스레드 사이에 시그널을 보내는 능력을 제공합니다.
+보다 자세한 내용에 대해서는 L<threads/"THREAD SIGNALLING> 를 참조해주세요)
+
+=head1 Thread-Safety of System Libraries
+
+(시스템 라이브러리에서 스레드 안전성)
+
+=begin original
+
+Whether various library calls are thread-safe is outside the control
+of Perl.  Calls often suffering from not being thread-safe include:
+C<localtime()>, C<gmtime()>,  functions fetching user, group and
+network information (such as C<getgrent()>, C<gethostent()>,
+C<getnetent()> and so on), C<readdir()>,
+C<rand()>, and C<srand()> -- in general, calls that depend on some global
+external state.
+
+=end original
+
+여러가지 라이브러리의 함수호출이 스레드에 의해 안전한지 어떤지 하는 것은 
+Perl 의 컨트롤의 논외입니다. 당분간 스레드 세마포어가 아닌 것에 의해 
+문제 있는 호출에는 아래와 같은 것이 있습니다;
+C<localtime()>, C<gmtime()>,
+(C<getgrent()>, C<gethostent()>, C<getnetent()> 등과 같은)유저、
+그룹, 네트워크의 정보를 얻어내는 함수, C<readdir()>,
+C<rand()>, C<srand()> -- 일반적으로 말해서, 글로벌한 외부상황에 의존하는 
+호출만 포함됩니다.
+
+=begin original
+
+If the system Perl is compiled in has thread-safe variants of such
+calls, they will be used.  Beyond that, Perl is at the mercy of
+the thread-safety or -unsafety of the calls.  Please consult your
+C library call documentation.
+
+=end original
+
+Perl 이 컴파일된 시스템이 그런 호출의 스레드 세이프한 버젼을 가지고 있다면, 
+그것이 사용됩니다.
+그것을 넘으면, Perl 은 호출이 스레드 세이프한지 어떤지 그대로 사용됩니다.
+C 라이브러리의 문서를 잘 참조해주세요.
+
+=begin original
+
+On some platforms the thread-safe library interfaces may fail if the
+result buffer is too small (for example the user group databases may
+be rather large, and the reentrant interfaces may have to carry around
+a full snapshot of those databases).  Perl will start with a small
+buffer, but keep retrying and growing the result buffer
+until the result fits.  If this limitless growing sounds bad for
+security or memory consumption reasons you can recompile Perl with
+C<PERL_REENTRANT_MAXSIZE> defined to the maximum number of bytes you will
+allow.
+
+=end original
+
+몇가지 플랫폼에서는 결과 버퍼가 너무 작은 경우에 
+스레드 세이프한 라이브러리의 인터페이스가 실패를 발생시킬 지도 모릅니다
+(예를들어, 유저 그룹의 데이터베이스가 꽤 크고, 리엔트런트한 
+인터페이스가 이 데이터베이스들의 완전한 스냅샷을 얻지 않으면 
+안되는 경우).
+Perl 은 작은 버퍼에서 시작합니다.
+그러나 결과를 적합하게 하기 까지 결과 버퍼의 확보를 다시 실행하고, 
+크게하려고 합니다. 이 무제한 성장이 보안이나 메모리 소비의 이유에서 
+선호되지 않는 다면, C<PERL_REENTRANT_MAXSIZE> 에서 
+당신이 허가하는 최대 바이트 수를 정의해서 Perl 을 다시 컴파일 할 수 있습니다.
+
+=head1 Conclusion
+
+(끝으로)
+
+=begin original
+
+A complete thread tutorial could fill a book (and has, many times),
+but with what we've covered in this introduction, you should be well
+on your way to becoming a threaded Perl expert.
+
+=end original
+
+완전한 스레드 튜토리얼을 만들면 한권의 책이 되어버립니다.
+그러나, 이 도입에서 커버한 것을 사용해서, 당신 나름대로의 방법으로 
+스레드 Perl 의 전문가가 되어보세요.
+
+=head1 SEE ALSO
+
+Annotated POD for L<threads>:
+L<http://annocpan.org/?mode=search&field=Module&name=threads>
+
+Lastest version of L<threads> on CPAN:
+L<http://search.cpan.org/search?module=threads>
+
+Annotated POD for L<threads::shared>:
+L<http://annocpan.org/?mode=search&field=Module&name=threads%3A%3Ashared>
+
+Lastest version of L<threads::shared> on CPAN:
+L<http://search.cpan.org/search?module=threads%3A%3Ashared>
+
+Perl threads mailing list:
+L<http://lists.cpan.org/showlist.cgi?name=iThreads>
+
+=head1 Bibliography
+
+(참고문헌)
+
+=begin original
+
+Here's a short bibliography courtesy of J?gen Christoffel:
+
+=end original
+
+Jurgen Christoffel 의 제공에 의한 간결한 참고문헌집
+
+=head2 Introductory Texts
+
+(도입 텍스트)
+
+Birrell, Andrew D. An Introduction to Programming with
+Threads. Digital Equipment Corporation, 1989, DEC-SRC Research Report
+#35 online as
+http://gatekeeper.dec.com/pub/DEC/SRC/research-reports/abstracts/src-rr-035.html
+(highly recommended)
+
+Robbins, Kay. A., and Steven Robbins. Practical Unix Programming: A
+Guide to Concurrency, Communication, and
+Multithreading. Prentice-Hall, 1996.
+
+Lewis, Bill, and Daniel J. Berg. Multithreaded Programming with
+Pthreads. Prentice Hall, 1997, ISBN 0-13-443698-9 (a well-written
+introduction to threads).
+
+Nelson, Greg (editor). Systems Programming with Modula-3.  Prentice
+Hall, 1991, ISBN 0-13-590464-1.
+
+Nichols, Bradford, Dick Buttlar, and Jacqueline Proulx Farrell.
+Pthreads Programming. O'Reilly & Associates, 1996, ISBN 156592-115-1
+(covers POSIX threads).
+
+=head2 OS-Related References
+
+(OS관련 리퍼런스)
+
+Boykin, Joseph, David Kirschen, Alan Langerman, and Susan
+LoVerso. Programming under Mach. Addison-Wesley, 1994, ISBN
+0-201-52739-1.
+
+Tanenbaum, Andrew S. Distributed Operating Systems. Prentice Hall,
+1995, ISBN 0-13-219908-4 (great textbook).
+
+Silberschatz, Abraham, and Peter B. Galvin. Operating System Concepts,
+4th ed. Addison-Wesley, 1995, ISBN 0-201-59292-4
+
+=head2 Other References
+
+(그 외의 리퍼런스)
+
+Arnold, Ken and James Gosling. The Java Programming Language, 2nd
+ed. Addison-Wesley, 1998, ISBN 0-201-31006-6.
+
+comp.programming.threads FAQ,
+L<http://www.serpentine.com/~bos/threads-faq/>
+
+Le Sergent, T. and B. Berthomieu. "Incremental MultiThreaded Garbage
+Collection on Virtually Shared Memory Architectures" in Memory
+Management: Proc. of the International Workshop IWMM 92, St. Malo,
+France, September 1992, Yves Bekkers and Jacques Cohen, eds. Springer,
+1992, ISBN 3540-55940-X (real-life thread applications).
+
+Artur Bergman, "Where Wizards Fear To Tread", June 11, 2002,
+L<http://www.perl.com/pub/a/2002/06/11/threads.html>
+
+=head1 Acknowledgements
+
+Thanks (in no particular order) to Chaim Frenkel, Steve Fink, Gurusamy
+Sarathy, Ilya Zakharevich, Benjamin Sugars, J?gen Christoffel, Joshua
+Pritikin, and Alan Burlison, for their help in reality-checking and
+polishing this article.  Big thanks to Tom Christiansen for his rewrite
+of the prime number generator.
+
+=head1 AUTHOR
+
+Dan Sugalski E<lt>dan@sidhe.org<gt>
+
+=begin original
+
+Slightly modified by Arthur Bergman to fit the new thread model/module.
+
+=end original
+
+새로운 스레드 모델, 모듈에 대응하도록 Arthur Bergman 에 의해 약간 수정되었습니다.
+
+=begin original
+
+Reworked slightly by J?g Walter E<lt>jwalt@cpan.org<gt> to be more concise
+about thread-safety of Perl code.
+
+=end original
+
+Perl 코드의 스레드 세이프티에 대해서 보다 알기 쉽도록
+Jorg Walter E<lt>jwalt@cpan.org<gt> 에 의해 개정되었습니다.
+
+=begin original
+
+Rearranged slightly by Elizabeth Mattijsen E<lt>liz@dijkmat.nl<gt> to put
+less emphasis on yield().
+
+=end original
+
+Elizabeth Mattijsen E<lt>liz@dijkmat.nl<gt> 에 의해 yield() 를 이전보다 
+강조하지 않도록 약간 바꾸었습니다.
+
+=head1 Copyrights
+
+The original version of this article originally appeared in The Perl
+Journal #10, and is copyright 1998 The Perl Journal. It appears courtesy
+of Jon Orwant and The Perl Journal.  This document may be distributed
+under the same terms as Perl itself.
+
+=cut
+

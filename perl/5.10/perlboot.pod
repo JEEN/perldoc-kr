@@ -1,0 +1,1094 @@
+=head1 NAME
+
+perlboot - Beginner's Object-Oriented Tutorial
+perlboot - 초보자를 위한 객체 지향 튜토리얼
+
+=head1 DESCRIPTION
+
+다른 언어의 객체지향에 익숙하지 않다면
+L<perlobj> 나 L<perltoot> 같은 다른 펄 객체에 관한 문서는 다소 위압적일 수 있다.
+L<perlobj>는 객체를 사용하기 위한 기본적인 레퍼런스이고,
+L<pretoot> 는 
+If you're not familiar with objects from other languages, some of the
+other Perl object documentation may be a little daunting, such as
+L<perlobj>, a basic reference in using objects, and L<perltoot>, which
+introduces readers to the peculiarities of Perl's object system in a
+tutorial way.
+
+이제 객체에 대한 경험이 없었다고 가정하고 다른 방법으로 접근해보자.
+서브루틴 (L<perlsub>) 과 레퍼런스L<perlref> et. seq.), 
+패키지 (L<perlmod>)에 대해 아는 것이 도움이 되므로 아직 모른다면 
+먼저 이것 들에 익숙해지는 것이 좋다. 
+
+=head2 동물들에게 말할 수 있다면 If we could talk to the animals...
+
+동물들이 잠시 말할수 있게 해주자
+
+    sub Cow::speak {
+      print "a Cow goes moooo!\n";
+    }
+    sub Horse::speak {
+      print "a Horse goes neigh!\n";
+    }
+    sub Sheep::speak {
+      print "a Sheep goes baaaah!\n";
+    }
+
+    Cow::speak;
+    Horse::speak;
+    Sheep::speak;
+
+결과는 다음과 같다.
+
+    a Cow goes moooo!
+    a Horse goes neigh!
+    a Sheep goes baaaah!
+
+여기엔 별로 놀라운 점이 없다.
+패키지로 분리되어 있고 완전한 패키지 이름으로 호출되기는 하지만 
+결국 단순한 서브루틴들이다.
+이제 완전한 목장을 창조해보자.	
+
+    # Cow::speak, Horse::speak, Sheep::speak as before
+    @pasture = qw(Cow Cow Horse Sheep Sheep);
+    foreach $animal (@pasture) {
+      &{$animal."::speak"};
+    }
+
+결과는 다음과 같다.
+
+    a Cow goes moooo!
+    a Cow goes moooo!
+    a Horse goes neigh!
+    a Sheep goes baaaah!
+    a Sheep goes baaaah!
+
+와우! 
+That symbolic coderef de-referencing there is pretty nasty.
+우리는 지금 큰 프로그램에서는 분명히 추천되지 않는 
+C<no strict subs> 모드를 만났다. 이게 왜 필요한가?
+패키지의 이름이 서브루틴의 이름에서 분리될 수 없을것 처럼 보이기 때문에
+We're counting on C<no strict subs> mode, certainly not recommended
+for larger programs.  And why was that necessary?  Because the name of
+the package seems to be inseparable from the name of the subroutine we
+want to invoke within that package.
+
+Or is it?
+
+=head2 메소드 호출 화살표 소개(Introducing the method invocation arrow)
+
+이제 C<< Class->method >>가 패키지 C<Class> 안의 서브루틴 C<method> 을
+호출한다고 생각하자. 
+(여기서 "클래스"는 학교에서의 의미가 아니라 범주,종류의 의미로 사용된다.)
+이 말이 정확하지는 않지만 첫번째 단계에서는 그렇다고 치자.
+이제 이것을 다음과 같이 사용해 보자.
+
+    # Cow::speak, Horse::speak, Sheep::speak as before
+    Cow->speak;
+    Horse->speak;
+    Sheep->speak;
+
+결과는 다음과 같다.
+
+    a Cow goes moooo!
+    a Horse goes neigh!
+    a Sheep goes baaaah!
+
+아직은 별로 재미가 없다. 
+글자수도 같고 모두 고정되어 있고 변수도 사용되지 않았다.
+하지만 이제 부분 부분 분리가 가능하다. 봐라:
+
+    $a = "Cow";
+    $a->speak; # Cow->speak 가 호출된다.
+
+아! 이제 패키지이름이 서브루틴의 이름으로부터 분리되었기 때문에 
+패키지 이름 변수를 쓸 수 있다. 
+그리고 이제는 C<use strict refs>를 활성화 시켜도 작동한다.
+
+=head2 앞마당 호출(Invoking a barnyard)
+
+새로운 화살표 호출을 써서 앞마당 예제를 다시 써보자.
+
+    sub Cow::speak {
+      print "a Cow goes moooo!\n";
+    }
+    sub Horse::speak {
+      print "a Horse goes neigh!\n";
+    }
+    sub Sheep::speak {
+      print "a Sheep goes baaaah!\n";
+    }
+
+    @pasture = qw(Cow Cow Horse Sheep Sheep);
+    foreach $animal (@pasture) {
+      $animal->speak;
+    }
+
+There! 이제 심볼릭 코드 레퍼런스를 사용하지 않고 안전한 방법으로
+모든 동물들이 말을 한다.
+
+하지만 중복되는 코드들을 보라.
+각각의 C<speak> 루틴은 비슷한 구조를 가지고 있다.
+C<print> 연산자와 두 단어를 빼고는 같은 구조를 가지는 문자열들.
+이런 공통 요소들을 없앨 수 있다면 좋을것이다.
+이경우, 나중에 C<goes>대신 모두 C<says>로 바꾸기로 한다.
+But look at all that common code.  Each of the C<speak> routines has a
+similar structure: a C<print> operator and a string that contains
+common text, except for two of the words.  It'd be nice if we could
+factor out the commonality, in case we decide later to change it all
+to C<says> instead of C<goes>.
+
+사실 많은 fuss?없이 이렇게 할수 있는 길이 있지만 
+메소드 호출 화살표가 실제로 무엇을 하는지 좀더 알아야만 한다.
+And we actually have a way of doing that without much fuss, but we
+have to hear a bit more about what the method invocation arrow is
+actually doing for us.
+
+=head2 메소드 호출의 부가 인자? The extra parameter of method invocation
+
+다음 호출은 
+
+    Class->method(@args)
+
+다음과 같이 C<Class::method> 함수를 호출하는 attempts?이다.
+attempts to invoke subroutine C<Class::method> as:
+
+    Class::method("Class", @args);
+
+(함수를 찾지 못하면, 상속이 작동된다? 하지만 이것은 나중에 배울 것이다..)
+이것은 첫번째 인자로 클래스 이름을 받는다는 것을 의미한다.
+(아규먼트?가 없다면 유일한 인자로)
+따라서 우리는 C<Sheep>의 말하기 함수를 다음과 같이 다시 쓸 수 있다.
+(If the subroutine can't be found, "inheritance" kicks in, but we'll
+get to that later.)  This means that we get the class name as the
+first parameter (the only parameter, if no arguments are given).  So
+we can rewrite the C<Sheep> speaking subroutine as:
+
+    sub Sheep::speak {
+      my $class = shift;
+      print "a $class goes baaaah!\n";
+    }
+
+다른 두 동물들도 비슷하다.
+And the other two animals come out similarly:
+
+    sub Cow::speak {
+      my $class = shift;
+      print "a $class goes moooo!\n";
+    }
+    sub Horse::speak {
+      my $class = shift;
+      print "a $class goes neigh!\n";
+    }
+
+각각의 경우 C<$class>는 함수를 각 함수로 부터?
+In each case, C<$class> will get the value appropriate for that
+subroutine.  
+하지만, 아직도 비슷한 구조가 많이 있다.
+But once again, we have a lot of similar structure.
+좀더 분해할수 있을까?
+Can we factor that out even further?
+그렇다, 같은 클래스에서 다른 함수를 호출하면 된다.
+Yes, by calling another method in
+the same class.
+
+=head2 두번째 함수를 호출하면 간단해진다. Calling a second method to simplify things
+
+C<speak>로부터 C<sound>라는 헾퍼 클래스를 호출?해보자.
+Let's call out from C<speak> to a helper method called C<sound>.
+이 메소드는 자신의 소리 문자 상수를 제공한다.
+This method provides the constant text for the sound itself.
+
+    { package Cow;
+      sub sound { "moooo" }
+      sub speak {
+	my $class = shift;
+	print "a $class goes ", $class->sound, "!\n";
+      }
+    }
+
+이제, C<< Cow->speak >>를 호출할때 C<speak> 안에서 
+C<Cow>라는  C<$class>를 얻는다.
+Now, when we call C<< Cow->speak >>, we get a C<$class> of C<Cow> in
+C<speak>.  
+이로부터 C<mooo>를 반환하는 C<< Cow->Sound >> 메소드가 선택된다.
+This in turn selects the C<< Cow->sound >> method, which
+returns C<moooo>.  
+그러면 C<Horse>에서는 어떻게 달라지는가?
+But how different would this be for the C<Horse>?
+
+    { package Horse;
+      sub sound { "neigh" }
+      sub speak {
+	my $class = shift;
+	print "a $class goes ", $class->sound, "!\n";
+      }
+    }
+
+단지 패키지의 이름과 특정한 소리가 바뀌었다.
+그럼 Cow와 Horse사이에 C<speak>의 정의를 어떤 방식으로든 공유할수 있는가?
+그렇다, 상속으로 할 수 있다.
+Only the name of the package and the specific sound change.  So can we
+somehow share the definition for C<speak> between the Cow and the
+Horse?  Yes, with inheritance!
+
+=head2 Inheriting the windpipes?
+
+C<speak> 정의와 함께 C<Animal> 공용 함수 패키지를 정의할 것이다.
+We'll define a common subroutine package called C<Animal>, with the
+definition for C<speak>:
+
+    { package Animal;
+      sub speak {
+	my $class = shift;
+	print "a $class goes ", $class->sound, "!\n";
+      }
+    }
+
+각 동물에 대해 동물이 각 동물의 소리를  C<Animal>로부터 상속되었다고 말한다.?
+Then, for each animal, we say it "inherits" from C<Animal>, along
+with the animal-specific sound:
+
+    { package Cow;
+      @ISA = qw(Animal);
+      sub sound { "moooo" }
+    }
+C<@ISA>배열에 추가되는 것에 유의하자.
+곧 배울 것이다.
+Note the added C<@ISA> array.  We'll get to that in a minute.
+
+이제 C<< Cow->Speak >>를 호출하면 무슨 일이 벌어지는가?
+But what happens when we invoke C<< Cow->speak >> now?
+
+우선, 펄은 아규먼트? 목록을 만든다.
+이경우 그것은 단지 C<Cow>이다. 
+다음에 펄은 C<Cow::Speak>를 찾는다.
+하지만 Cow안에 없기 때문에 펄은 상속 배열 C<@Cow::ISA>를 체크한다.
+C<@Cow::ISA>가 존재하고 C<Animal> 하나의 이름만 들어있다. 
+First, Perl constructs the argument list.  In this case, it's just
+C<Cow>.  Then Perl looks for C<Cow::speak>.  But that's not there, so
+Perl checks for the inheritance array C<@Cow::ISA>.  It's there,
+and contains the single name C<Animal>.
+
+다음 펄은 C<speak>를 위해서 C<Animal::speak>라는 이름으로 
+C<Animal>안을 체크한다.
+C<Animal::speak>가 발견되었고, 펄은 이미 정해진 아규먼트? 목록과 함께 
+이 함수를 호출한다.
+Perl next checks for C<speak> inside C<Animal> instead, as in
+C<Animal::speak>.  And that's found, so Perl invokes that subroutine
+with the already frozen argument list.
+
+C<Animal::speak>함수 안에서, C<$class>는 C<Cow>가 된다(첫번재 인자).
+따라서 C<< $class->sound >> 호출하는 단계에서 펄은 C<@ISA>를 
+검색하지 않고 첫번째 시도에서 C<< Cow->sound >>를 얻는다.
+성공!
+Inside the C<Animal::speak> subroutine, C<$class> becomes C<Cow> (the
+first argument).  So when we get to the step of invoking
+C<< $class->sound >>, it'll be looking for C<< Cow->sound >>, which
+gets it on the first try without looking at C<@ISA>.  Success!
+
+=head2 A few notes about @ISA
+
+이 마법의 C<@ISA> 변수( "아이서(ice-uh)"가 아니라 "이즈 어(is a)"로 발음한다)
+는 C<Cow> 가(is a) C<Animal>이라고 선언되었다.
+C<@ISA>가 단순한 하나의 값이 아니라 배열이라는 것에 주목하자.
+?
+This magical C<@ISA> variable (pronounced "is a" not "ice-uh"), has
+declared that C<Cow> "is a" C<Animal>.  Note that it's an array,
+not a simple single value, because on rare occasions, it makes sense
+to have more than one parent class searched for the missing methods.
+
+C<Animal>도 C<@ISA>를 가진다면, 펄은 그곳도 체크한다. 
+기본값으로 검색은 재귀적이고, 깊이 우선이며, 
+각 C<@ISA>에 대해 왼쪽에서 오른쪽이다.
+(다른 방법으로 L<mro> 를 보라)
+전형적으로 각 C<@ISA>는 단지 하나의 요소만을 갖는다.
+(복수의 요소는 다중 상속과 다중 headaches?를 의미한다)
+따라서 우리는 훌륭한 상속 트리를 가지게 된다.
+If C<Animal> also had an C<@ISA>, then we'd check there too.  The
+search is recursive, depth-first, left-to-right in each C<@ISA> by
+default (see L<mro> for alternatives).  Typically, each C<@ISA> has
+only one element (multiple elements means multiple inheritance and
+multiple headaches), so we get a nice tree of inheritance.
+
+C<use strict>를 활성화 했을때 C<@ISA>가 명시적인 패키지 이름을 
+포함한 변수도 아니고 렉시컬("my")도 아니기 때문에 문제가 될것이다.
+그렇다고 이것을 렉시컬 변수로 만들수는 없기 때문에 
+(상속 메커니즘에의해 발견되기 위해서는 패키지에 속해야한다.)
+이것을 해결하기위해 straightforward?한 두가지 방법이 있다. 
+When we turn on C<use strict>, we'll get complaints on C<@ISA>, since
+it's not a variable containing an explicit package name, nor is it a
+lexical ("my") variable.  We can't make it a lexical variable though
+(it has to belong to the package to be found by the inheritance mechanism),
+so there's a couple of straightforward ways to handle that.
+
+가장 쉬운 방법은 패키지 이름을 적는 것이다.
+The easiest is to just spell the package name out:
+
+    @Cow::ISA = qw(Animal);
+
+또는 암시적으로 이름을 가진 패키지 변수로 만든다.
+Or allow it as an implicitly named package variable:
+
+    package Cow;
+    use vars qw(@ISA);
+    @ISA = qw(Animal);
+
+밖에서 객체지향 모듈을 통해 클래스 안으로 가져온다면,
+다음 코드를  
+If you're bringing in the class from outside, via an object-oriented
+module, you change:
+
+    package Cow;
+    use Animal;
+    use vars qw(@ISA);
+    @ISA = qw(Animal);
+
+이렇게 바꿀 수 있다.
+
+    package Cow;
+    use base qw(Animal);
+
+?
+And that's pretty darn compact.
+
+=head2 메소드 재정의  Overriding the methods
+
+barely? 들을수 있는 쥐를 추가하자.
+Let's add a mouse, which can barely be heard:
+
+    # Animal package from before
+    { package Mouse;
+      @ISA = qw(Animal);
+      sub sound { "squeak" }
+      sub speak {
+        my $class = shift;
+	print "a $class goes ", $class->sound, "!\n";
+	print "[but you can barely hear it!]\n";
+      }
+    }
+
+    Mouse->speak;
+
+결과는 다음과 같다.
+
+    a Mouse goes squeak!
+    [but you can barely hear it!]
+
+여기서 C<Mouse>는 자신의 말히기 루틴을 가지고 있기 때문에
+C<< Mouse->speak >>는 C<<Animal->speak>>를 호출하지 않는다.
+이것은 "오버라이딩"으로 알려져 있다. 
+C<speak>에 필요한 모든 메소드가 C<Mouse>에서 완전히 정의되어 있기 때문에 
+사실 심지어 우리는 아예 C<Mouse>가 C<Animal>었다고 말할 필요가 없다.
+Here, C<Mouse> has its own speaking routine, so C<< Mouse->speak >>
+doesn't immediately?? invoke C<< Animal->speak >>.  This is known as
+"overriding".  In fact, we didn't even need to say that a C<Mouse> was
+an C<Animal> at all, since all of the methods needed for C<speak> are
+completely defined with C<Mouse>.
+
+하지만 우리는 지금 C<< Animal->speak >> 로부터 어떤 코드를 복사해왔고, 
+이것은 다시한번 ?? 할수 있다. 
+이것을 피할 수 있을까?
+어떤 방법으로든?? C<Mouse>??
+물론이다!!
+But we've now duplicated some of the code from C<< Animal->speak >>,
+and this can once again be a maintenance headache.  So, can we avoid
+that?  Can we say somehow that a C<Mouse> does everything any other
+C<Animal> does, but add in the extra comment?  Sure!
+
+우선, C<Animal::speak> 메소드를 직접 호출할 수 있다. 
+First, we can invoke the C<Animal::speak> method directly:
+
+    # Animal package from before
+    { package Mouse;
+      @ISA = qw(Animal);
+      sub sound { "squeak" }
+      sub speak {
+        my $class = shift;
+        Animal::speak($class);
+	print "[but you can barely hear it!]\n";
+      }
+    }
+
+메소드 화살표를 사용하지 않았기 때문에 C<Animal::speak>의 첫번째 인자로 
+C<$class>(거의 확실하게 C<"Mouse>값을 가진??)
+를 포함해야만 한다는 것에 주목하자.
+왜 화살표를 사용하면 안되는가?
+여기에 C<< Animal->speak >>를 사용한다면 메소드의 첫번째 인자는
+C<"Mouse">가 아니라 C<"Animal">이 될것이고 C<sound>가 호출될때
+원래 패키지로 돌아오기 위한 옳은 클래스를 같지 못할 것이다.
+Note that we have to include the C<$class> parameter (almost surely
+the value of C<"Mouse">) as the first parameter to C<Animal::speak>,
+since we've stopped using the method arrow.  Why did we stop?  Well,
+if we invoke C<< Animal->speak >> there, the first parameter to the
+method will be C<"Animal"> not C<"Mouse">, and when time comes for it
+to call for the C<sound>, it won't have the right class to come back
+to this package.
+
+하지만 C<Animal::speak>를 직접 호출하는 것은 mess?이다.
+C<Animal::speak>가 존재하지 않는 다면 C<@Animal::ISA>에 거론된
+클래스로부터 무엇인가가 상속되는가?
+메소드 화살표를 더이상 사용하지 않기 때문에 우리는 옳은 함수를
+맞추기 위해 오직 한번의 기회밖에 없다.
+Invoking C<Animal::speak> directly is a mess, however.  What if
+C<Animal::speak> didn't exist before, and was being inherited from a
+class mentioned in C<@Animal::ISA>?  Because we are no longer using
+the method arrow, we get one and only one chance to hit the right
+subroutine.
+
+또한 C<Animal> 클래스이름이 함수안 hardwied?되어 있다는 점을 주목하자.
+누군가 C<Mouse>의 C<@ISA>를 바꾸고 ??
+따라서 이것은 아마도 옳은 방향이 아니다.
+Also note that the C<Animal> classname is now hardwired into the
+subroutine selection.  This is a mess if someone maintains the code,
+changing C<@ISA> for C<Mouse> and didn't notice C<Animal> there in
+C<speak>.  So, this is probably not the right way to go.
+
+=head2 다른 장소에서 검색을 시작하기 Starting the search from a different place
+
+더 나은 해결책은 펄에게 상속 체인에서 현재 클래스보다 
+더 높은 곳으로 부터 검색하라고 말해주는 것이다.
+A better solution is to tell Perl to search from a higher place
+in the inheritance chain:
+
+    # same Animal as before
+    { package Mouse;
+      # same @ISA, &sound as before
+      sub speak {
+        my $class = shift;
+        $class->Animal::speak;
+        print "[but you can barely hear it!]\n";
+      }
+    }
+
+아. 이것은 작동한다. 이 구문을 이용하면 C<speak>를 찾기위해 
+C<Animal>에서 출발하고 즉시 발견되지 않으면 C<Animal>의 
+상속체인을 모두 사용한다. 
+그리고 첫번째 인자는 여전히 C<$class>이기 때문에 
+찾은 C<speak> 메소드의 첫번째 인자는 C<Mouse>가 될것이고
+결과적으로 C<Mouse::Sound>로 돌아올것이다.
+Ahh.  This works.  Using this syntax, we start with C<Animal> to find
+C<speak>, and use all of C<Animal>'s inheritance chain if not found
+immediately.  And yet the first parameter will be C<$class>, so the
+found C<speak> method will get C<Mouse> as its first entry, and
+eventually work its way back to C<Mouse::sound> for the details.
+
+하지만 이것은 가장 훌륭한 해결책은 아니다.
+우리는 여전히 C<@ISA>와 첫번째 검색 패키지 위치??를 유지해야 한다.
+더 나쁜 것이, C<Mouse> 가 <@ISA> 여러 인자를 가진다면, 실제로 어떤것이 C<speak>의 
+정의를 가지고 있는지 알기 어렵다??
+그럼 더 나은 방법이 있긴 한가? 
+But this isn't the best solution.  We still have to keep the C<@ISA>
+and the initial search package coordinated.  Worse, if C<Mouse> had
+multiple entries in C<@ISA>, we wouldn't necessarily know which one
+had actually defined C<speak>.  So, is there an even better way?
+
+=head2 The SUPER way of doing things
+
+호출시에 C<Animal> 클래스를 C<SUPER>로 바꾸면 자동으로
+우리의 수퍼 클래스들(C<@ISA>에 있는 클래스들)를 모두 검색한다.
+By changing the C<Animal> class to the C<SUPER> class in that
+invocation, we get a search of all of our super classes (classes
+listed in C<@ISA>) automatically:
+
+    # same Animal as before
+    { package Mouse;
+      # same @ISA, &sound as before
+      sub speak {
+        my $class = shift;
+        $class->SUPER::speak;
+        print "[but you can barely hear it!]\n";
+      }
+    }
+
+C<SUPER::speak>는 C<speak>를 찾기위해 현재 패키지의 C<@ISA> 를 
+검색하고 처음으로 발견되는 것을 호출한다.
+C<$class>의 <@ISA>를 검색하는 것이 아님을 기억하자.
+So, C<SUPER::speak> means look in the current package's C<@ISA> for
+C<speak>, invoking the first one found. Note that it does I<not> look in
+the C<@ISA> of C<$class>.
+
+=head2 Where we're at so far...
+
+오래전에??, 메소드 화살표 구문을 배웠다.
+So far, we've seen the method arrow syntax:
+
+  Class->method(@args);
+
+또는 똑같은 의미로
+or the equivalent:
+
+  $a = "Class";
+  $a->method(@args);
+
+이들은 다음의 아규먼트? 목록을 구성한다.
+which constructs an argument list of:
+
+  ("Class", @args)
+
+??
+and attempts to invoke
+
+  Class::method("Class", @Args);
+
+하지만, C<Class::method>가 발견되지 않으면 C<method>를 가진
+패키지를 찾기위해 C<@Class::ISA>가 (재귀적으로) 시험되고
+그 함수가 대신 호출된다.
+However, if C<Class::method> is not found, then C<@Class::ISA> is examined
+(recursively) to locate a package that does indeed contain C<method>,
+and that subroutine is invoked instead.
+
+이 간단한 구문을 사용하여, 우리는 클래스 메소드, (다중)상속,
+오버라이딩, 그래고 확장??을 구현한다.
+그저 오래전에? 배운것들을 활용하여, 우리는 공통 코드들을 
+인수분해(?)하고 변화??를 유지하며 구현들을 재사용하는 
+훌륭한 방법들을 제공할 수 있다.
+이것이 객체가 제공하는 것의 핵심이지만, 객체는 또한
+아직 우리가 시도하지도 않은 인스턴스? 데이터를 제공해야 한다.
+
+Using this simple syntax, we have class methods, (multiple)
+inheritance, overriding, and extending.  Using just what we've seen so
+far, we've been able to factor out common code, and provide a nice way
+to reuse implementations with variations.  This is at the core of what
+objects provide, but objects also provide instance data, which we
+haven't even begun to cover.
+
+=head2 A horse is a horse, of course of course -- or is it?
+
+C<Animal> 클래스와 C<Horse> 클래스의 코드부터 시작하자.
+Let's start with the code for the C<Animal> class
+and the C<Horse> class:
+
+  { package Animal;
+    sub speak {
+      my $class = shift;
+      print "a $class goes ", $class->sound, "!\n";
+    }
+  }
+  { package Horse;
+    @ISA = qw(Animal);
+    sub sound { "neigh" }
+  }
+
+이제 말의 소리를 얻을 수 있는 C<Horse::sound> 를 호출하는 
+<Animal::Speak>를 사용하기 위해서 C<< Horse->Speak >>를 호출할 수 있다.
+결과는 다음과 같다.
+
+This lets us invoke C<< Horse->speak >> to ripple upward to
+C<Animal::speak>, calling back to C<Horse::sound> to get the specific
+sound, and the output of:
+
+  a Horse goes neigh!
+
+그러나 만들어진 모든 Horse 객체는 완전히 똑같을 것이다.
+Horse에 함수를 추가하면 자동으로 모든 말들이 그 함수를 공유한다.
+이것은 말들을 똑같이 만드는데는 적합하지만 각각의 말들의 구분은 어떻게 해야하는가?
+예를 들어 첫번째 말에게 이름을 주고 싶다면?
+서로 다른 말들의 이름들을 따로 보관하는 방법이 있어야한다(?)
+But all of our Horse objects would have to be absolutely identical.
+If I add a subroutine, all horses automatically share it.  That's
+great for making horses the same, but how do we capture the
+distinctions about an individual horse?  For example, suppose I want
+to give my first horse a name.  There's got to be a way to keep its
+name separate from the other horses.
+
+우리는 "인스턴스"라고 불리는 새로운 구분자를 만들어서 이것을 해결할 수 있다.(?)
+인스턴스는 보통 클래스에 의해 만들진다.
+펄에서 모든 레퍼런스는 인스턴스가 될 수 있다. 
+말의 이름을 저장할 수 있는 가장 간단한 레퍼런스로 시작해보자
+바로 스칼라 레퍼런스다.
+
+We can do that by drawing a new distinction, called an "instance".
+An "instance" is generally created by a class.  In Perl, any reference
+can be an instance, so let's start with the simplest reference
+that can hold a horse's name: a scalar reference.
+
+  my $name = "Mr. Ed";
+  my $talking = \$name;
+
+C<$talking> 이 인스턴스 마다의 데이터(이름)을 저장할 레퍼런스이다.
+이 레퍼런스를 진짜 인스턴스로 만드는 마지막 단계는 C<bless>라는 특별한 
+연산자를 사용하는 것이다.
+So now C<$talking> is a reference to what will be the instance-specific
+data (the name).  The final step in turning this into a real instance
+is with a special operator called C<bless>:
+
+  bless $talking, Horse;
+
+이 연산자는 C<Horse> 패키지의 정보를 레퍼런스가 가리키는 곳에 저장하는 것이다.
+(역주:오오.. 레퍼런스에 저장하는 것이 아니다!!)
+이제 C<$talking>은 C<Horse>의 인스턴스이다.
+됐다, 이것은 특별한 말이 되었다.
+다른 관점에서 레퍼런스는 바뀌지 않았고 
+여전히 전통적인 디레퍼런스 연산자를 사용할 수 있다.
+This operator stores information about the package named C<Horse> into
+the thing pointed at by the reference.  At this point, we say
+C<$talking> is an instance of C<Horse>.  That is, it's a specific
+horse.  The reference is otherwise unchanged, and can still be used
+with traditional dereferencing operators.
+
+=head2 인스턴스 메소드 호출 Invoking an instance method
+
+메소드 화살표는 패키지 이름(클래스)에 쓰는 것처럼 인스턴스에도 쓸 수 있다. 
+이제 C<$takling> 이 만드는 소리를 들어보자.
+The method arrow can be used on instances, as well as names of
+packages (classes).  So, let's get the sound that C<$talking> makes:
+
+  my $noise = $talking->sound;
+
+C<sound>를 호출하기 위해서, 펄은 우선 C<$talking> 이 블레스된
+레퍼런스인지(인스턴스인지)를 확인한다. 
+그리고 인자 목록을 만든다. 이경우에는 그냥 C<$talking>이다.
+(나중에 인자들이 클래스에서 처럼 인스턴스 변수뒤에 위치한다는 것을 배울것이다.)
+To invoke C<sound>, Perl first notes that C<$talking> is a blessed
+reference (and thus an instance).  It then constructs an argument
+list, in this case from just C<($talking)>.  (Later we'll see that
+arguments will take their place following the instance variable,
+just like with classes.)
+
+여기가 재밌는 부분이다: 펄은 인스턴스가 무엇으로 블레스되었는지를 보고
+클래스를 얻어낸다. 이경우에는 C<Horse>이다. 
+그리고 메소드를 호출할때 이 클래스에 있는 함수를 사용한다.
+이 경우에는 C<Horse::sound>가 바로 발견되고 (상속을 사용하지 않고),
+최종적으로 다음의 함수가 실행된다.
+Now for the fun part: Perl takes the class in which the instance was
+blessed, in this case C<Horse>, and uses that to locate the subroutine
+to invoke the method.  In this case, C<Horse::sound> is found directly
+(without using inheritance), yielding the final subroutine invocation:
+
+  Horse::sound($talking)
+
+여기서 첫번째 인자는 전처럼 클래스 이름이 아니라 여전히 인스턴스라는 것에 주목하자.
+우리는 리턴값으로 C<neigh>를 얻을 것이고 C<$nose> 변수에 저장된다. 
+Note that the first parameter here is still the instance, not the name
+of the class as before.  We'll get C<neigh> as the return value, and
+that'll end up as the C<$noise> variable above.
+
+만약 Hoise::sound가 발견되지 않으면, 펄은 클래스메소드에서 그랬던 것 처럼
+슈퍼클래스에서 해당 메소드를 찾기위해 C<@Horse::ISA>를 찾을 것이다.
+클래스 메소드와 인스턴스 메소드의 유일한 차이점은 첫번째 인자가 
+인스턴스(블레스된 레퍼런스)냐 클래스이름(문자열)이냐 뿐이다.
+If Horse::sound had not been found, we'd be wandering up the
+C<@Horse::ISA> list to try to find the method in one of the
+superclasses, just as for a class method.  The only difference between
+a class method and an instance method is whether the first parameter
+is an instance (a blessed reference) or a class name (a string).
+
+=head2 인스턴스 데이터에 접근하기 Accessing the instance data
+
+첫번째 인자로 인스턴스를 얻기 때문에 인스턴스 마다의 데이터에 접근할 수 있다.
+이경우, 이름을 얻는 방법을 추가해 보자.
+Because we get the instance as the first parameter, we can now access
+the instance-specific data.  In this case, let's add a way to get at
+the name:
+
+  { package Horse;
+    @ISA = qw(Animal);
+    sub sound { "neigh" }
+    sub name {
+      my $self = shift;
+      $$self;
+    }
+  }
+
+이제 name을 호출하 수 있다.
+Now we call for the name:
+
+  print $talking->name, " says ", $talking->sound, "\n";
+
+C<Horse::name> 안에 C<@_> 배열이 C<$talking>을 포함하고 있고 
+C<shift>가 이것을 C<$self>에 저장한다.
+(첫번째 인자를 C<shift>로 꺼내서 C<$self>에 저장하는 것이 
+전형적이기 때문에 특별한 이유가 없다면 이렇게 하는 것이 좋다.)
+다음에 C<$self> 를 스칼라 레퍼런스로서 디레퍼런스해서 C<Er. Ed>를 얻는다.
+해보면 다음처럼 나온다.
+Inside C<Horse::name>, the C<@_> array contains just C<$talking>,
+which the C<shift> stores into C<$self>.  (It's traditional to shift
+the first parameter off into a variable named C<$self> for instance
+methods, so stay with that unless you have strong reasons otherwise.)
+Then, C<$self> gets de-referenced as a scalar ref, yielding C<Mr. Ed>,
+and we're done with that.  The result is:
+
+  Mr. Ed says neigh.
+
+=head2 어떻게 말을 만드는가. How to build a horse
+
+물론, 수작업으로 모든 말들을 만든다면, 때때로 실수하기 쉽다.
+또한 말의 내장을 보이게 해서 객체지향 프로그래밍의 성질중의 하나를
+어길 수도 있다. 
+당신이 수의사라면 상관없지만, 그냥 말을 좋아하는 사람이라면 문제가 된다.
+따라서 Horse 클래스가 새로운 말을 만들수 있도록 해보자.
+Of course, if we constructed all of our horses by hand, we'd most
+likely make mistakes from time to time.  We're also violating one of
+the properties of object-oriented programming, in that the "inside
+guts" of a Horse are visible.  That's good if you're a veterinarian,
+but not if you just like to own horses.  So, let's let the Horse class
+build a new horse:
+
+  { package Horse;
+    @ISA = qw(Animal);
+    sub sound { "neigh" }
+    sub name {
+      my $self = shift;
+      $$self;
+    }
+    sub named {
+      my $class = shift;
+      my $name = shift;
+      bless \$name, $class;
+    }
+  }
+
+이제 새로운 C<named> 메소드로 말을 만들 수 있다.
+Now with the new C<named> method, we can build a horse:
+
+  my $talking = Horse->named("Mr. Ed");
+
+다시 클래스 메소드를 사용하고 있다는 것을 주목하자.
+C<Horse::named>의 두 인자는 C<Horse>와 C<Mr. Ed>이다. 
+C<bless> 연산자는 C<$name>을 블래스할 뿐 아니라 
+C<$name>의 레퍼런스를 반환하기도 하기 때문에
+리턴 값으로 사용할 수 있다.
+이것이 말을 만드는 방법이다.
+Notice we're back to a class method, so the two arguments to
+C<Horse::named> are C<Horse> and C<Mr. Ed>.  The C<bless> operator
+not only blesses C<$name>, it also returns the reference to C<$name>,
+so that's fine as a return value.  And that's how to build a horse.
+
+여기서 C<named> 메소드를 생성자라고 부르고 특정한 말의 이름이
+생성자의 인자가 된다.
+당신은 다른 방식으로 객체를 만들기 위해 
+다른 이름의 생성자들 만들 수 있다.
+(형통이나 생일을 기록할 수 있다?)
+그러나 다른 엄격한 언어에서 펄로 온 대부분의 사람들은 
+다양한 방법으로 인자들을 해석하여 C<new>라는 이름의
+하나의 생성자를 사용한다..
+객체를 만드는 방법에 대해서 문서화 하기만 한다면, 두가지 방법 모두 좋다. 
+(그렇게 하려고 했었죠?) 
+We've called the constructor C<named> here, so that it quickly denotes
+the constructor's argument as the name for this particular C<Horse>.
+You can use different constructors with different names for different
+ways of "giving birth" to the object (like maybe recording its
+pedigree or date of birth).  However, you'll find that most people
+coming to Perl from more limited languages use a single constructor
+named C<new>, with various ways of interpreting the arguments to
+C<new>.  Either style is fine, as long as you document your particular
+way of giving birth to an object.  (And you I<were> going to do that,
+right?)
+
+=head2 상속에서의 생성자 Inheriting the constructor
+
+C<Horse>에서 생성자 메소드에 어떤 특별한 점이 있었는가?
+아니다, 따라서 마찬가지로 C<Animal>에서 상속될수 있다.
+구현해보자.
+But was there anything specific to C<Horse> in that method?  No.  Therefore,
+it's also the same recipe for building anything else that inherited from
+C<Animal>, so let's put it there:
+
+  { package Animal;
+    sub speak {
+      my $class = shift;
+      print "a $class goes ", $class->sound, "!\n";
+    }
+    sub name {
+      my $self = shift;
+      $$self;
+    }
+    sub named {
+      my $class = shift;
+      my $name = shift;
+      bless \$name, $class;
+    }
+  }
+  { package Horse;
+    @ISA = qw(Animal);
+    sub sound { "neigh" }
+  }
+
+아, C<speak>를 호출하면, 무슨 일이 일어나는가?
+Ahh, but what happens if we invoke C<speak> on an instance?
+
+  my $talking = Horse->named("Mr. Ed");
+  $talking->speak;
+
+디버깅 값을 얻는다.
+We get a debugging value:
+
+  a Horse=SCALAR(0xaca42ac) goes neigh!
+
+왜일까? C<Animal::speak>는 첫번째 매개 변수로 인스턴스가 아니라 
+클래스 이름을 기대하기 때문이다.
+인스턴스가 넘어가면, 블레스된 스칼라 레퍼런스가 스트링으로 사용될 것이고
+위와 같은 결과가 보이게 된다. 
+Why?  Because the C<Animal::speak> routine is expecting a classname as
+its first parameter, not an instance.  When the instance is passed in,
+we'll end up using a blessed scalar reference as a string, and that
+shows up as we saw it just now.
+
+=head2 클래스와 인스턴스에서 모두 쓸 수 있는 메소드 만들기 Making a method work with either classes or instances
+
+메소드에 필요한 모든 것은 그저 메소드가 클래스 상에서 호출되었는지
+인스턴스 위에서 호출 되었는지를 알아내는 것이다.
+가장 간단한 방법은 C<ref> 연산자를 사용하는 것이다.
+이 연산자는 블레스된 레퍼런스에 대해서 클래스 이름 문자열을 반환하고
+문자열(클래스 이름 같은)에 대해서는 빈 문자열을 반환한다.
+우선 C<name>메소드가 변화?를 출력할 수 있도록 수정해 보자.
+All we need is for a method to detect if it is being called on a class
+or called on an instance.  The most straightforward way is with the
+C<ref> operator.  This returns a string (the classname) when used on a
+blessed reference, and an empty string when used on a string (like a
+classname).  Let's modify the C<name> method first to notice the change:
+
+  sub name {
+    my $either = shift;
+    ref $either
+      ? $$either # it's an instance, return name
+      : "an unnamed $either"; # it's a class, return generic
+  }
+
+여기서 C<?:> 오퍼레이터는 디레퍼런스와 파생된 문자열(?)을 선택하는 데 유용하다.
+이제 인스턴스와 클래스 모두에서 이 메소드를 사용할 수 있다.
+이것이 의도적이라는 것을 보이기 위해 
+첫번째 매개변수를 C<$either>에 저장했다는 점을 기억하자.
+Here, the C<?:> operator comes in handy to select either the
+dereference or a derived string.  Now we can use this with either an
+instance or a class.  Note that I've changed the first parameter
+holder to C<$either> to show that this is intended:
+
+  my $talking = Horse->named("Mr. Ed");
+  print Horse->name, "\n"; # prints "an unnamed Horse\n"
+  print $talking->name, "\n"; # prints "Mr Ed.\n"
+
+그리고 C<speak>가 이것을 사용할 수 있도록 고칠 것이다.
+and now we'll fix C<speak> to use this:
+
+  sub speak {
+    my $either = shift;
+    print $either->name, " goes ", $either->sound, "\n";
+  }
+
+C<sound>는 이미 클래스와 인스턴스에서 동작하고 있었기 때문에,
+다 했다!
+And since C<sound> already worked with either a class or an instance,
+we're done!
+
+=head2 메소드에 파라미터 추가하기 Adding parameters to a method
+
+우리의 동물들이 먹을수 있도록 훈련시켜보자.
+Let's train our animals to eat:
+
+  { package Animal;
+    sub named {
+      my $class = shift;
+      my $name = shift;
+      bless \$name, $class;
+    }
+    sub name {
+      my $either = shift;
+      ref $either
+	? $$either # it's an instance, return name
+	: "an unnamed $either"; # it's a class, return generic
+    }
+    sub speak {
+      my $either = shift;
+      print $either->name, " goes ", $either->sound, "\n";
+    }
+    sub eat {
+      my $either = shift;
+      my $food = shift;
+      print $either->name, " eats $food.\n";
+    }
+  }
+  { package Horse;
+    @ISA = qw(Animal);
+    sub sound { "neigh" }
+  }
+  { package Sheep;
+    @ISA = qw(Animal);
+    sub sound { "baaaah" }
+  }
+
+실행해 보자.
+And now try it out:
+
+  my $talking = Horse->named("Mr. Ed");
+  $talking->eat("hay");
+  Sheep->eat("grass");
+
+다음이 출력된다.
+which prints:
+
+  Mr. Ed eats hay.
+  an unnamed Sheep eats grass.
+
+매게변수를 가진 인스턴스 메소드는 인스턴스와 매개변수 리스트와 함께
+호출된다. 따라서 첫번째 호출은 다음과 같다.
+An instance method with parameters gets invoked with the instance,
+and then the list of parameters.  So that first invocation is like:
+
+  Animal::eat($talking, "hay");
+
+=head2 더 흥미로운 인스턴스 More interesting instances
+
+인스턴스에 더 많은 데이터가 필요하다면 어떻게 할 것인가?
+대부분의 흥미로운 인스턴스들은 각각이 레퍼런스나 다른 객체가 될수 있는 
+여러개의 아이템으로 구성된다.
+이것들을 저장하는 가장 쉬운 방법은 대게 해쉬에 저장하는 것이다.
+해쉬의 키가 객체의 부분들의 이름 역할을 한다.
+(종종, 인스턴스 변수나 멤버변수로 불린다.)
+그리고 값들은 뭐, 값들에 대응한다.
+What if an instance needs more data?  Most interesting instances are
+made of many items, each of which can in turn be a reference or even
+another object.  The easiest way to store these is often in a hash.
+The keys of the hash serve as the names of parts of the object (often
+called "instance variables" or "member variables"), and the
+corresponding values are, well, the values.
+
+말을 어떻게 해쉬로 바꿀수 있을까?
+객체가 블래스된 레퍼런스라는 것을 떠올려보자.
+레퍼런스를 사용하는 코드들을 적절리 바꾸기만 하면
+말을 블레스된 스칼라 레퍼런스처럼 쉽게 스칼라 해쉬 레퍼런스로 만들 수 있다
+But how do we turn the horse into a hash?  Recall that an object was
+any blessed reference.  We can just as easily make it a blessed hash
+reference as a blessed scalar reference, as long as everything that
+looks at the reference is changed accordingly.
+
+이름과 색깔을 가지는 양을 만들어보자.
+Let's make a sheep that has a name and a color:
+
+  my $bad = bless { Name => "Evil", Color => "black" }, Sheep;
+
+C<< $bad->{Name} >> 이 C<Evil>을 가지고 C<< $bad->{Color} >>이 
+C<black>을 가진다. 우리는 C<< bad->name >>으로 name에 접근하기를 원하지만
+그것이 스칼라 레퍼런스를 기대하기 때문에 좀 난감한 상황이다.
+걱정할 필요 없다, 아주 쉽게 바꿀 수 있다.
+so C<< $bad->{Name} >> has C<Evil>, and C<< $bad->{Color} >> has
+C<black>.  But we want to make C<< $bad->name >> access the name, and
+that's now messed up because it's expecting a scalar reference.  Not
+to worry, because that's pretty easy to fix up:
+
+  ## in Animal
+  sub name {
+    my $either = shift;
+    ref $either ?
+      $either->{Name} :
+      "an unnamed $either";
+  }
+
+당연히 C<named>은 여전히 스칼라 양을 만들기 때문에 이것도 바꿔보자.
+And of course C<named> still builds a scalar sheep, so let's fix that
+as well:
+
+  ## in Animal
+  sub named {
+    my $class = shift;
+    my $name = shift;
+    my $self = { Name => $name, Color => $class->default_color };
+    bless $self, $class;
+  }
+
+C<default_color>은 뭘까?
+C<named>가 단순한 이름이라면 우리는 여전히 color를 지정할 필요가 있기 때문에
+클래스에 해당하는 초기 색깔을 가지고 있을 것이다.
+What's this C<default_color>?  Well, if C<named> has only the name,
+we still need to set a color, so we'll have a class-specific initial color.
+For a sheep, we might define it as white:
+
+  ## in Sheep
+  sub default_color { "white" }
+
+각각의 추가된 클래스 마다 이 메소드를 추가하는 것을 피하기 위해서
+C<Animal> 클래스에 "기초값의 기초값"을 제공하는 "후방지원" 메소드를 만들 수 있다.
+And then to keep from having to define one for each additional class,
+we'll define a "backstop" method that serves as the "default default",
+directly in C<Animal>:
+
+  ## in Animal
+  sub default_color { "brown" }
+
+C<name>과 C<named>는 객체의 "구조"를 가리키는 단순한 메소드이기 때문에?
+메소드의 나머지 부분은 전과 동일하고  C<speak>는 이전과 똑같이 작동한다.
+Now, because C<name> and C<named> were the only methods that
+referenced the "structure" of the object, the rest of the methods can
+remain the same, so C<speak> still works as before.
+
+=head2 다른 색깔의 말 A horse of a different color
+
+하지만 모든 말이 갈색인 것은 좀 지루하다.
+색깔을 정하고(set) 얻는(get) 두 개의 메소드를 추가하자.
+But having all our horses be brown would be boring.  So let's add a
+method or two to get and set the color.
+
+  ## in Animal
+  sub color {
+    $_[0]->{Color}
+  }
+  sub set_color {
+    $_[0]->{Color} = $_[1];
+  }
+
+매개변수 인자에 접근하기 위해서 C<shift>를 사용하지 않고
+다른 방법으로 C<$_[0]>을 직접 사용한 것에 주목하라.
+(이것은 자주 호출되는 경우 실행 시간을 조금 줄여준다.)
+이제 Mr. Ed 의 색깔을 바꿀 수 있다.
+Note the alternate way of accessing the arguments: C<$_[0]> is used
+in-place, rather than with a C<shift>.  (This saves us a bit of time
+for something that may be invoked frequently.)  And now we can fix
+that color for Mr. Ed:
+
+  my $talking = Horse->named("Mr. Ed");
+  $talking->set_color("black-and-white");
+  print $talking->name, " is colored ", $talking->color, "\n";
+
+결과는 : 
+which results in:
+
+  Mr. Ed is colored black-and-white
+
+=head2 요약   Summary
+
+우리는 클래스 메소드, 생성자, 인스턴스 메소드, 인스턴스 데이터,
+그리고 액세서 까지 만들었다.
+하지만 여전히 펄이 지원하는  객체의 초기 단계이다.
+우리는 아직 게터와 세터를 합친 액세서, 소멸자, 간접 객체 표시법, 
+서브클래스에 인스턴스 데이터 추가하기, 
+클래스 데이터, 오버로딩, "isa"나 "can" 테스트, C<UNIVERSAL> 클래스
+등에 대해서는 언급하지도 않았다.
+나머지는 펄문서에서  커버하도록 남겨두자.
+바라건데, 이문서가 출발신호가 되었으면 한다.
+So, now we have class methods, constructors, instance methods,
+instance data, and even accessors.  But that's still just the
+beginning of what Perl has to offer.  We haven't even begun to talk
+about accessors that double as getters and setters, destructors,
+indirect object notation, subclasses that add instance data, per-class
+data, overloading, "isa" and "can" tests, C<UNIVERSAL> class, and so
+on.  That's for the rest of the Perl documentation to cover.
+Hopefully, this gets you started, though.
+
+=head1 SEE ALSO
+
+For more information, see L<perlobj> (for all the gritty details about
+Perl objects, now that you've seen the basics), L<perltoot> (the
+tutorial for those who already know objects), L<perltooc> (dealing
+with class data), L<perlbot> (for some more tricks), and books such as
+Damian Conway's excellent I<Object Oriented Perl>.
+
+Some modules which might prove interesting are Class::Accessor,
+Class::Class, Class::Contract, Class::Data::Inheritable,
+Class::MethodMaker and Tie::SecureHash
+
+=head1 COPYRIGHT
+
+Copyright (c) 1999, 2000 by Randal L. Schwartz and Stonehenge
+Consulting Services, Inc.  Permission is hereby granted to distribute
+this document intact with the Perl distribution, and in accordance
+with the licenses of the Perl distribution; derived documents must
+include this copyright notice intact.
+
+Portions of this text have been derived from Perl Training materials
+originally appearing in the I<Packages, References, Objects, and
+Modules> course taught by instructors for Stonehenge Consulting
+Services, Inc. and used with permission.
+
+Portions of this text have been derived from materials originally
+appearing in I<Linux Magazine> and used with permission.

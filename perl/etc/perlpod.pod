@@ -1,0 +1,1457 @@
+
+=encoding utf-8
+
+=for comment
+This document is in Pod format.  To read this, use a Pod formatter,
+like "perldoc perlpod".
+
+=head1 NAME
+
+perlpod - the Plain Old Documentation format
+
+=head1 DESCRIPTION
+
+=begin original
+
+Pod is a simple-to-use markup language used for writing documentation
+for Perl, Perl programs, and Perl modules.
+
+=end original
+
+Pod 는  Perl, Perl 프로그램, Perl 모듈을 위한 도큐멘트를 쓰기위해
+간단히 쓸 수 있는 마크업 언어입니다.
+
+=begin original
+
+Translators are available for converting Pod to various formats
+like plain text, HTML, man pages, and more.
+
+=end original
+
+Pod 에서 평문(plain text), HTML, man 페이지 등 여러가지 포맷으로
+바꾸기 위한 변환기가 있습니다.
+
+=begin original
+
+Pod markup consists of three basic kinds of paragraphs:
+L<ordinary|/"Ordinary Paragraph">,
+L<verbatim|/"Verbatim Paragraph">, and 
+L<command|/"Command Paragraph">.
+
+=end original
+
+Pod 마크업은 3종류의 단락으로 구성됩니다. 
+L<ordinary|/"Ordinary Paragraph">,
+L<verbatim|/"Verbatim Paragraph">,
+L<command|/"Command Paragraph"> 입니다.
+
+
+=head2 Ordinary Paragraph
+
+(보통의 단락)
+
+=begin original
+
+Most paragraphs in your documentation will be ordinary blocks
+of text, like this one.  You can simply type in your text without
+any markup whatsoever, and with just a blank line before and
+after.  When it gets formatted, it will undergo minimal formatting, 
+like being rewrapped, probably put into a proportionally spaced
+font, and maybe even justified.
+
+=end original
+
+아마 대부분의 문서의 단락은 일반적으로 텍스트의 블록입니다.
+단순히 어떤 마크업도 사용하지 않고 텍스트를 쓰고, 앞뒤의 빈 줄을 놔둡니다.
+포맷팅될때, 최소한의 포맷팅이 수행됩니다.
+재래핑이나, 어울리는 폰트에서의 표시나 균등분할 같은 것 말이죠.
+
+=begin original
+
+You can use formatting codes in ordinary paragraphs, for B<bold>,
+I<italic>, C<code-style>, L<hyperlinks|perlfaq>, and more.  Such
+codes are explained in the "L<Formatting Codes|/"Formatting Codes">"
+section, below.
+
+=end original
+
+일반적인 단락에 B<강조> I<이탤릭> C<코드스타일> L<하이퍼링크|perlfaq>
+등의 포맷팅코드를 사용할 수도 있습니다.
+이런 코드는 아래의 "L<Formatting Codes|/"Formatting Codes">" 의
+항목에서 설명하겠습니다.
+
+=head2 Verbatim Paragraph
+
+(말그대로의 단락)
+
+=begin original
+
+Verbatim paragraphs are usually used for presenting a codeblock or
+other text which does not require any special parsing or formatting,
+and which shouldn't be wrapped.
+
+=end original
+
+그대로의 단락은 코드블록이나 특별한 패스나 포맷팅이 필요없고,
+래핑하지 않아도 되는 텍스트를 표현하기 위해 사용됩니다.
+
+=begin original
+
+A verbatim paragraph is distinguished by having its first character
+be a space or a tab.  (And commonly, all its lines begin with spaces
+and/or tabs.)  It should be reproduced exactly, with tabs assumed to
+be on 8-column boundaries.  There are no special formatting codes,
+so you can't italicize or anything like that.  A \ means \, and
+nothing else.
+
+=end original
+
+공백 혹은 탭에서 시작하는 것으로 인식됩니다.
+(간단히 말하면, 이 모든 줄은 공백 혹은 탭으로 시작됩니다)
+탭은 8칼럼간격으로 가정되어 그대로 출력됩니다.
+특별한 포맷코드는 없으므로, 이탤릭으로 한다거나 하는 것은 없습니다.
+\ 은 \으로, 그 외의 의미는 없습니다.
+
+=head2 Command Paragraph
+
+(커맨드 단락)
+
+=begin original
+
+A command paragraph is used for special treatment of whole chunks
+of text, usually as headings or parts of lists.
+
+=end original
+
+커맨드 단락은 텍스트의 덩어리 전체를 특별한 취급을 하기 위해 사용됩니다.
+보통은 표제나 리스트로써 이용됩니다.
+
+=begin original
+
+All command paragraphs (which are typically only one line long) start
+with "=", followed by an identifier, followed by arbitrary text that
+the command can use however it pleases.  Currently recognized commands
+are
+
+=end original
+
+모든 커맨드단락(전형적으로는 첫줄부터)은 "="로 시작되며,
+그 뒤는 식별자가 붙고,  거기에 커맨드를 필요로하는 텍스트가 붙습니다.
+현재 사용할수 있는 커맨드는 아래와 같습니다.
+
+    =head1 Heading Text
+    =head2 Heading Text
+    =head3 Heading Text
+    =head4 Heading Text
+    =over indentlevel
+    =item stuff
+    =back
+    =cut
+    =pod
+    =begin format
+    =end format
+    =for format text...
+
+=begin original
+
+To explain them each in detail:
+
+=end original
+
+아래는 자세한 내용을 설명하고 있습니다.
+
+=over
+
+=item C<=head1 I<Heading Text>>
+
+=item C<=head2 I<Heading Text>>
+
+=item C<=head3 I<Heading Text>>
+
+=item C<=head4 I<Heading Text>>
+
+=begin original
+
+Head1 through head4 produce headings, head1 being the highest
+level.  The text in the rest of this paragraph is the content of the
+heading.  For example:
+
+=end original
+
+head1 에서 head4 는 표제를 생성합니다. head1 이 최상위입니다.
+이 단락의 남은 텍스트는 표제의 내용입니다. 예제:
+
+  =head2 Object Attributes
+
+=begin original
+
+The text "Object Attributes" comprises the heading there.  (Note that
+head3 and head4 are recent additions, not supported in older Pod
+translators.)  The text in these heading commands can use
+formatting codes, as seen here:
+
+=end original
+
+"Object Attributes"라고 하는 텍스트가 여기에서의 표제가 됩니다.
+head4는 최근 추가되어서, 옛 Pod 번역기는 안됩니다.
+이런 표제 커맨드의 텍스트에서는 아래와 같은 포맷팅코드를 쓸 수 있습니다.
+
+  =head2 Possible Values for C<$/>
+
+=begin original
+
+Such commands are explained in the
+"L<Formatting Codes|/"Formatting Codes">" section, below.
+
+=end original
+
+이런 커맨드는 아래의 "L<Formatting Codes|/"Formatting Codes">" 의
+항목에서 설명하고 있습니다.
+
+=item C<=over I<indentlevel>>
+
+=item C<=item I<stuff...>>
+
+=item C<=back>
+
+=begin original
+
+Item, over, and back require a little more explanation:  "=over" starts
+a region specifically for the generation of a list using "=item"
+commands, or for indenting (groups of) normal paragraphs.  At the end
+of your list, use "=back" to end it.  The I<indentlevel> option to
+"=over" indicates how far over to indent, generally in ems (where
+one em is the width of an "M" in the document's base font) or roughly
+comparable units; if there is no I<indentlevel> option, it defaults
+to four.  (And some formatters may just ignore whatever I<indentlevel>
+you provide.)  In the I<stuff> in C<=item I<stuff...>>, you may
+use formatting codes, as seen here:
+
+=end original
+
+item, over, back 은 조금 더 설명이 필요합니다:
+"=over" 는 "=item" 을 사용한 리스트 생성이나 보통 단락을 인덴트하기 위한
+범위지정를 시작합니다.
+리스트의 끝에서는 그것을 나타내기 위해 "=back" 를 사용합니다.
+"=over"의 I<인덴트레벨> 옵션은 어느 정도 인덴트 할 것인가를 나타내고,
+일반적으로 단위는 ems (1 em은 도큐멘트의 기본폰트에서의 "M"의 폭입니다)
+나, 혹은 대개 같은 정도의 단위입니다; I<인덴트레벨> 옵션이
+없는 경우, 기본값은 4입니다.
+(무엇을 I<인덴트레벨> 에 지덩해도 무시하는 서식기도 있습니다)
+C<=item I<stuff...>> 의 I<stuff>  안에서는,
+아래와 같이 포맷팅코드를 사용할 수 있습니다.
+
+  =item Using C<$|> to Control Buffering
+
+=begin original
+
+Such commands are explained in the
+"L<Formatting Codes|/"Formatting Codes">" section, below.
+
+=end original
+
+이런 커맨드는 아래의 "L<Formatting Codes|/"Formatting Codes">" 에서
+설명하고 있습니다.
+
+=begin original
+
+Note also that there are some basic rules to using "=over" ...
+"=back" regions:
+
+=end original
+
+"=over" ... "=back" 영역을 사용하기 위한 몇가지의 
+기본적인 룰이 있는 것에 주의해 주세요.
+
+=over
+
+=item *
+
+=begin original
+
+Don't use "=item"s outside of an "=over" ... "=back" region.
+
+=end original
+
+"=over" ... "=back" 영역 밖에서는 "=item" 은 사용할 수 없습니다.
+
+=item *
+
+=begin original
+
+The first thing after the "=over" command should be an "=item", unless
+there aren't going to be any items at all in this "=over" ... "=back"
+region.
+
+=end original
+
+"=over" ... "=back" 영역 안에 "=item" 이 전혀 나타나지 않은 것이 아닌 한,
+"=over" 커맨드의 뒤, 맨처음에 써진 것은 "=item"이어야 합니다.
+
+=item *
+
+=begin original
+
+Don't put "=headI<n>" commands inside an "=over" ... "=back" region.
+
+=end original
+
+"=over" ... "=back"　영역 안에서 "=headI<n>" 은 사용할 수 없습니다.
+
+=item *
+
+=begin original
+
+And perhaps most importantly, keep the items consistent: either use
+"=item *" for all of them, to produce bullets; or use "=item 1.",
+"=item 2.", etc., to produce numbered lists; or use "=item foo",
+"=item bar", etc. -- namely, things that look nothing like bullets or
+numbers.
+
+=end original
+
+그리고, 아마도 제일 중요한 것으로써, item 의 일관성을 유지해 주세요:
+점을 출력하기위해서는 모든 item 에 "=item *"를 사용해 주세요;
+번호붙은 리스트를 출력하기 위해서는 "=item 1.", "=item 2." 등을 사용해주세요.
+점도 번호도 붙지 않는 경우는 "=item foo", "=item bar" 등을 사용해주세요.
+
+=begin original
+
+If you start with bullets or numbers, stick with them, as
+formatters use the first "=item" type to decide how to format the
+list.
+
+=end original
+
+점 혹은 번호로 시작했다면, 계속 그것을 사용해 주세요.
+서식기는 맨 처음의 "=item" 의 타입을 보고 리스트의 포맷방법을 결정합니다.
+
+=back
+
+=item C<=cut>
+
+=begin original
+
+To end a Pod block, use a blank line,
+then a line beginning with "=cut", and a blank
+line after it.  This lets Perl (and the Pod formatter) know that
+this is where Perl code is resuming.  (The blank line before the "=cut"
+is not technically necessary, but many older Pod processors require it.)
+
+=end original
+
+Pod 블록을 종료하기 위해서는, 빈 줄, "=cut"로 시작하는 줄, 빈줄을 씁니다.
+이것에 의해 Perl (과 Pod 서식기) 는 여기에서 Perl 코드가 다시 시작하는 것을
+알게됩니다.
+("=cut" 의 앞의 빈 줄은 기술적으로는 필요없지만, 많은 낡은 Pod 프로세서는
+이것이 필요합니다)
+
+=item C<=pod>
+
+=begin original
+
+The "=pod" command by itself doesn't do much of anything, but it
+signals to Perl (and Pod formatters) that a Pod block starts here.  A
+Pod block starts with I<any> command paragraph, so a "=pod" command is
+usually used just when you want to start a Pod block with an ordinary
+paragraph or a verbatim paragraph.  For example:
+
+=end original
+
+"=pod" 커맨드는 스스로는 거의 아무것도 하지 않지만,
+Perl (Pod 서식기)에 Pod 블록이 여기에서 시작한다는 것을 나타냅니다.
+Pod 블록은 I<어떤> 커맨트 단락에서 시작하므로, 
+"=pod" 커맨드는 Pod 블록을 보통의 단락 혹은 그대로의 단락에서
+시작하고 싶을 때에 사용합니다. 예제:
+
+  =item stuff()
+
+  This function does stuff.
+
+  =cut
+
+  sub stuff {
+    ...
+  }
+
+  =pod
+
+  Remember to check its return value, as in:
+
+    stuff() || die "Couldn't do stuff!";
+
+  =cut
+
+=item C<=begin I<formatname>>
+
+=item C<=end I<formatname>>
+
+=item C<=for I<formatname> I<text...>>
+
+=begin original
+
+For, begin, and end will let you have regions of text/code/data that
+are not generally interpreted as normal Pod text, but are passed
+directly to particular formatters, or are otherwise special.  A
+formatter that can use that format will use the region, otherwise it
+will be completely ignored.
+
+=end original
+
+for, begin, end 는 일반적인 Pod 텍스트로써 해석되는 것이 아니라,
+직접 특정의 서식기에 전달해야하는 텍스트/코드/데이터, 혹은
+그 외의 특별한 것의 영역을 정의할 수 있습니다.
+이 포맷을 사용하는 포맷은 이 영역을 사용해, 없다면 완전히 무시합니다.
+
+=begin original
+
+A command "=begin I<formatname>", some paragraphs, and a
+command "=end I<formatname>", mean that the text/data inbetween
+is meant for formatters that understand the special format
+called I<formatname>.  For example,
+
+=end original
+
+"=begin I<formatname>" 커맨드, 몇 개정도의 단락 
+"=end I<formatname>" 커맨드는 포함된 텍스트/데이터가 
+I<formatname> 이라고 불리는 특별한 포맷을 이해하는 서식기용인 것을 의미합니다.
+예제:
+
+  =begin html
+
+  <hr> <img src="thang.png">
+  <p> This is a raw HTML paragraph </p>
+
+  =end html
+
+=begin original
+
+The command "=for I<formatname> I<text...>"
+specifies that the remainder of just this paragraph (starting
+right after I<formatname>) is in that special format.  
+
+=end original
+
+"=for I<formatname> I<text...>" 커맨드는 
+이 단락의 남은 부분(I<formatname> 의 바로 다음부터)이 특별한 포맷인 것을
+정의합니다.
+
+  =for html <hr> <img src="thang.png">
+  <p> This is a raw HTML paragraph </p>
+
+=begin original
+
+This means the same thing as the above "=begin html" ... "=end html"
+region.
+
+=end original
+
+이것은 위의 "=begin html" ... "=end html" 영역과 같은 의미입니다. 
+
+=begin original
+
+That is, with "=for", you can have only one paragraph's worth
+of text (i.e., the text in "=foo targetname text..."), but with
+"=begin targetname" ... "=end targetname", you can have any amount
+of stuff inbetween.  (Note that there still must be a blank line
+after the "=begin" command and a blank line before the "=end"
+command.
+
+=end original
+
+이것은, "=for" 에서는 한 단락의 텍스트만을 정의할 수 있습니다만,
+(즉 "=foo targetname text...")
+"=begin targetname" ... "=end targetname" 에서는 그 사이의 적당량을 
+정의합니다.
+("=begin" 커맨드의 바로 다음과 "=end" 커맨드의 바로 앞에 빈 줄이 필요하다는
+것에 주의해주세요)
+
+=begin original
+
+Here are some examples of how to use these:
+
+=end original
+
+이것을 사용한 예제를 몇 개 정도 들어보도록 합시다.
+
+  =begin html
+
+  <br>Figure 1.<br><IMG SRC="figure1.png"><br>
+
+  =end html
+
+  =begin text
+
+    ---------------
+    |  foo        |
+    |        bar  |
+    ---------------
+
+  ^^^^ Figure 1. ^^^^
+
+  =end text
+
+=begin original
+
+Some format names that formatters currently are known to accept
+include "roff", "man", "latex", "tex", "text", and "html".  (Some
+formatters will treat some of these as synonyms.)
+
+=end original
+
+현재 사용하는 것의 가능한 포맷이름은 "roff", "man", "latex", "tex",
+"text", "html"입니다(일부의 서식기는 다른 것의 별명으로 취급합니다)
+
+=begin original
+
+A format name of "comment" is common for just making notes (presumably
+to yourself) that won't appear in any formatted version of the Pod
+document:
+
+=end original
+
+포맷이름 "comment"는(아마 작성자를 위한) 간단한 메모로,
+포맷팅한 Pod 문서에는 나타나지않아야 할 경우에 사용되는
+일반적인 명칭입니다.
+
+  =for comment
+  Make sure that all the available options are documented!
+
+=begin original
+
+Some I<formatnames> will require a leading colon (as in
+C<"=for :formatname">, or
+C<"=begin :formatname" ... "=end :formatname">),
+to signal that the text is not raw data, but instead I<is> Pod text
+(i.e., possibly containing formatting codes) that's just not for
+normal formatting (e.g., may not be a normal-use paragraph, but might
+be for formatting as a footnote).
+
+=end original
+
+서식기 중에는 텍스트가 수정되지 않은 데이터가 아닐지라도, Pod 텍스트인
+것(즉 포맷팅 코드를 포함하는 것이 있는)을 알리기 위해
+C<"=for :formatname"> 나 C<"=begin :formatname" ... "=end :formatname">) 처럼
+I<formatnames> 의 앞에 콜론이 필요한 경우도 있습니다. 
+(일반적인 단락이 아닌, 각주로써 포맷되는 것 따위입니다) 
+
+=item C<=encoding I<encodingname>>
+
+=begin original
+
+This command is used for declaring the encoding of a document.  Most
+users won't need this; but if your encoding isn't US-ASCII or Latin-1,
+then put a C<=encoding I<encodingname>> command early in the document so
+that pod formatters will know how to decode the document.  For
+I<encodingname>, use a name recognized by the L<Encode::Supported>
+module.  Examples:
+
+=end original
+
+이 커맨드는 문서의 인코딩을 결정하는 것에 사용됩니다.
+대부분의 유저에게는 불필요한 것입니다; 거기다가 만약 인코딩이 
+US-ASCII 나 Latin-1 이 아닌 경우,
+C<=encoding I<encodingname>> 커맨드를 문서의 시작부분에 놓는 것으로
+Pod 서식기가 문서를 어떻게 디코드하면 좋을 지를 알 수 있습니다.
+I<encodingname> 에 관해서는 L<Encode::Supported> 에서 인식되는 
+이름을 사용해 주세요. 예제:
+
+  =encoding utf8
+
+  =encoding koi8-r
+  
+  =encoding ShiftJIS
+  
+  =encoding big5
+
+=back
+
+=begin original
+
+And don't forget, when using any command, that the command lasts up
+until the end of its I<paragraph>, not its line.  So in the
+examples below, you can see that every command needs the blank
+line after it, to end its paragraph.
+
+=end original
+
+그리고 잊지 말아주었으면 하는 것은, 이런 커맨드를 사용한 경우, 
+그 커맨드가 영향을 주는 것은 커맨드가 놓은 줄이 아닌,
+커맨드가 있는 I<단락>의 마지막까지라는 것입니다. 그러므로, 앞의 예에서
+각 커맨드의 뒤에 단락을 끝내기 위해 빈 줄이 있는 것입니다.
+
+=begin original
+
+Some examples of lists include:
+
+=end original
+
+몇 개의 예를 들어보도록 하죠:
+
+  =over
+
+  =item *
+
+  First item
+
+  =item *
+
+  Second item
+
+  =back
+
+  =over
+
+  =item Foo()
+
+  Description of Foo function
+
+  =item Bar()
+
+  Description of Bar function
+
+  =back
+
+
+=head2 Formatting Codes
+
+(포맷팅 코드)
+
+=begin original
+
+In ordinary paragraphs and in some command paragraphs, various
+formatting codes (a.k.a. "interior sequences") can be used:
+
+=end original
+
+보통의 단락과 몇 개의 커맨드단락에서는 여러가지의 포맷팅코드
+(다른 이름은 "내부 시퀀스")를 사용할 수 있습니다.
+
+=for comment
+ "interior sequences" is such an opaque term.
+ Prefer "formatting codes" instead.
+
+=over
+
+=item C<IE<lt>textE<gt>> -- italic text
+
+=begin original
+
+Used for emphasis ("C<be IE<lt>careful!E<gt>>") and parameters
+("C<redo IE<lt>LABELE<gt>>")
+
+=end original
+
+강조 ("C<be IE<lt>careful!E<gt>>") 와 파라메터
+("C<redo IE<lt>LABELE<gt>>") 를 위해 사용합니다.
+
+=item C<BE<lt>textE<gt>> -- bold text
+
+=begin original
+
+Used for switches ("C<perl's BE<lt>-nE<gt> switch>"), programs
+("C<some systems provide a BE<lt>chfnE<gt> for that>"),
+emphasis ("C<be BE<lt>careful!E<gt>>"), and so on
+("C<and that feature is known as BE<lt>autovivificationE<gt>>").
+
+=end original
+
+스윗치("C<perl's BE<lt>-nE<gt> switch>"), 
+프로그램("C<some systems provide a BE<lt>chfnE<gt> for that>"),
+강조("C<be BE<lt>careful!E<gt>>"), 그외
+("C<and that feature is known as BE<lt>autovivificationE<gt>>")의
+경우에 사용합니다.
+
+=item C<CE<lt>codeE<gt>> -- code text
+
+=begin original
+
+Renders code in a typewriter font, or gives some other indication that
+this represents program text ("C<CE<lt>gmtime($^T)E<gt>>") or some other
+form of computerese ("C<CE<lt>drwxr-xr-xE<gt>>").
+
+=end original
+
+코드를 타자기 폰트나, 혹은 프로그램텍스트("C<CE<lt>gmtime($^T)E<gt>>")나
+그 외의 컴퓨터 용어 ("C<CE<lt>drwxr-xr-xE<gt>>") 를 표현하고 있다는 것을
+나타내는 그 외의 형태로 렌더링됩니다.
+
+=item C<LE<lt>nameE<gt>> -- a hyperlink
+
+=begin original
+
+There are various syntaxes, listed below.  In the syntaxes given,
+C<text>, C<name>, and C<section> cannot contain the characters
+'/' and '|'; and any '<' or '>' should be matched.
+
+=end original
+
+아래와 같이 여러가지 문법이 있습니다.
+문법의 안에, C<text>, C<name>, C<section> 에 '/' 와 '|' 를 
+넣을 수는 없습니다. 그리고 '<' 나 '>' 은 매치하지 않으면 안됩니다.
+
+=over
+
+=item *
+
+=begin original
+
+C<LE<lt>nameE<gt>>
+
+=end original
+
+C<LE<lt>nameE<gt>>
+
+=begin original
+
+Link to a Perl manual page (e.g., C<LE<lt>Net::PingE<gt>>).  Note
+that C<name> should not contain spaces.  This syntax
+is also occasionally used for references to UNIX man pages, as in
+C<LE<lt>crontab(5)E<gt>>.
+
+=end original
+
+Perl 매뉴얼 페이지로의 링크를 설정합니다.(e.g., C<LE<lt>Net::PingE<gt>>).
+C<name> 에 공백을 넣는 것은 안된다는 것에 주의하세요.
+이 문법은 C<LE<lt>crontab(5)E<gt>> 의 형태로 UNIX man 페이지로의
+리퍼런스를위해 사용하는 것도 가능합니다.
+
+=item *
+
+=begin original
+
+C<LE<lt>name/"sec"E<gt>> or C<LE<lt>name/secE<gt>>
+
+=end original
+
+C<LE<lt>name/"sec"E<gt>> 또는 C<LE<lt>name/secE<gt>>
+
+=begin original
+
+Link to a section in other manual page.  E.g.,
+C<LE<lt>perlsyn/"For Loops"E<gt>>
+
+=end original
+
+다른 매뉴얼페이지의 어느 항목으로의 링크를 설정합니다.
+예제: C<LE<lt>perlsyn/"For Loops"E<gt>>
+
+=item *
+
+=begin original
+
+C<LE<lt>/"sec"E<gt>> or C<LE<lt>/secE<gt>> or C<LE<lt>"sec"E<gt>>
+
+=end original
+
+C<LE<lt>/"sec"E<gt>> 또는 C<LE<lt>/secE<gt>> 또는 C<LE<lt>"sec"E<gt>>
+
+=begin original
+
+Link to a section in this manual page.  E.g.,
+C<LE<lt>/"Object Methods"E<gt>>
+
+=end original
+
+이 매뉴얼페이지의 어느 항목으로의 링크를 설정합니다.
+예제: C<LE<lt>/"Object Methods"E<gt>>
+
+=back
+
+=begin original
+
+A section is started by the named heading or item.  For
+example, C<LE<lt>perlvar/$.E<gt>> or C<LE<lt>perlvar/"$."E<gt>> both
+link to the section started by "C<=item $.>" in perlvar.  And
+C<LE<lt>perlsyn/For LoopsE<gt>> or C<LE<lt>perlsyn/"For Loops"E<gt>>
+both link to the section started by "C<=head2 For Loops>"
+in perlsyn.
+
+=end original
+
+섹션은 이름붙은 표제 혹은 item 으로 시작합니다.
+예를 들면, C<LE<lt>perlvar/$.E<gt>> 와 C<LE<lt>perlvar/"$."E<gt>> 은
+양쪽모두 perlvar 의 "C<=item $.>" 로 시작하는 섹션으로 링크합니다.
+C<LE<lt>perlsyn/For LoopsE<gt>> 와 C<LE<lt>perlsyn/"For Loops"E<gt>> 은
+양쪽 모두 perlsyn의 "C<=head2 For Loops>" 로 시작하는 섹션에 링크합니다.
+
+=begin original
+
+To control what text is used for display, you
+use "C<LE<lt>text|...E<gt>>", as in:
+
+=end original
+
+어떤 텍스트가 표시에 사용되는 가를 제어하기 위해,
+"C<LE<lt>text|...E<gt>>" 를 사용해주세요. 즉: 
+
+=over
+
+=item *
+
+=begin original
+
+C<LE<lt>text|nameE<gt>>
+
+=end original
+
+C<LE<lt>text|nameE<gt>>
+
+=begin original
+
+Link this text to that manual page.  E.g.,
+C<LE<lt>Perl Error Messages|perldiagE<gt>>
+
+=end original
+
+이 텍스트에 설정한 매뉴얼 페이지로의 링크를 설정합니다.
+예제: C<LE<lt>Perl Error Messages|perldiagE<gt>>
+
+=item *
+
+=begin original
+
+C<LE<lt>text|name/"sec"E<gt>> or C<LE<lt>text|name/secE<gt>>
+
+=end original
+
+C<LE<lt>text|name/"sec"E<gt>> または C<LE<lt>text|name/secE<gt>>
+
+=begin original
+
+Link this text to that section in that manual page.  E.g.,
+C<LE<lt>SWITCH statements|perlsyn/"Basic BLOCKs and Switch
+Statements"E<gt>>
+
+=end original
+
+이 텍스트에 지정한 매뉴얼페이지의 어느 항목으로의 링크를 설정합니다.
+예제 :  C<LE<lt>SWITCH statements|perlsyn/"Basic BLOCKs and Switch
+Statements"E<gt>>
+
+=item *
+
+=begin original
+
+C<LE<lt>text|/"sec"E<gt>> or C<LE<lt>text|/secE<gt>>
+or C<LE<lt>text|"sec"E<gt>>
+
+=end original
+
+C<LE<lt>text|/"sec"E<gt>> 또는 C<LE<lt>text|/secE<gt>>
+또는 C<LE<lt>text|"sec"E<gt>>
+
+=begin original
+
+Link this text to that section in this manual page.  E.g.,
+C<LE<lt>the various attributes|/"Member Data"E<gt>>
+
+=end original
+
+이 텍스트에다가 이 매뉴얼 페이지의 어느 항목으로 링크를 설정합니다.
+예제: C<LE<lt>the various attributes|/"Member Data"E<gt>>
+
+=back
+
+=begin original
+
+Or you can link to a web page:
+
+=end original
+
+web 페이지에 링크를 설정할 수도 있습니다.
+
+=over
+
+=item *
+
+=begin original
+
+C<LE<lt>scheme:...E<gt>>
+
+=end original
+
+C<LE<lt>scheme:...E<gt>>
+
+=begin original
+
+Links to an absolute URL.  For example,
+C<LE<lt>http://www.perl.org/E<gt>>.  But note
+that there is no corresponding C<LE<lt>text|scheme:...E<gt>> syntax, for
+various reasons.
+
+=end original
+
+절대 URL 으로의 링크입니다. 예: C<LE<lt>http://www.perl.org/E<gt>>。
+그러나, 여러가지 이유로, 대응하는 C<LE<lt>text|scheme:...E<gt>> 라는
+문법은 없다는 것에 주의해주세요.
+
+=back
+
+=item C<EE<lt>escapeE<gt>> -- a character escape
+
+=begin original
+
+Very similar to HTML/XML C<&I<foo>;> "entity references":
+
+=end original
+
+HTML/XML C<&I<foo>;> "엔티티 리퍼런스"와 매우 흡사합니다. 
+
+=over
+
+=item *
+
+=begin original
+
+C<EE<lt>ltE<gt>> -- a literal E<lt> (less than)
+
+=end original
+
+C<EE<lt>ltE<gt>> -- 리터럴의 E<lt> (less than)
+
+=item *
+
+=begin original
+
+C<EE<lt>gtE<gt>> -- a literal E<gt> (greater than)
+
+=end original
+
+C<EE<lt>gtE<gt>> -- 리터럴의 E<gt> (greater than)
+
+=item *
+
+=begin original
+
+C<EE<lt>verbarE<gt>> -- a literal | (I<ver>tical I<bar>)
+
+=end original
+
+C<EE<lt>verbarE<gt>> -- 리터럴의 | (I<ver>tical I<bar>)
+
+=item *
+
+=begin original
+
+C<EE<lt>solE<gt>> = a literal / (I<sol>idus)
+
+=end original
+
+C<EE<lt>solE<gt>> = 리터럴의 / (I<sol>idus)
+
+=begin original
+
+The above four are optional except in other formatting codes,
+notably C<LE<lt>...E<gt>>, and when preceded by a
+capital letter.
+
+=end original
+
+위의 네 개는 다른 포맷팅코드 안(특히 C<LE<lt>...E<gt>>)과,
+대문자가 엎에 붙는 경우를 제외한 옵션입니다.
+
+=item *
+
+=begin original
+
+C<EE<lt>htmlnameE<gt>>
+
+=end original
+
+C<EE<lt>htmlnameE<gt>>
+
+=begin original
+
+Some non-numeric HTML entity name, such as C<EE<lt>eacuteE<gt>>,
+meaning the same thing as C<&eacute;> in HTML -- i.e., a lowercase
+e with an acute (/-shaped) accent.
+
+=end original
+
+몇 개의 숫자값이 아닌 HTML 엔티티이름(C<EE<lt>eacuteE<gt>> のようなもの)은
+HTML 에서의 C<&eacute;> 와 같은 의미입니다. - 즉, 
+acute(/-의 형태의) 액센트가 붙은 소문자 e입니다.
+
+=item *
+
+=begin original
+
+C<EE<lt>numberE<gt>>
+
+=end original
+
+C<EE<lt>numberE<gt>>
+
+=begin original
+
+The ASCII/Latin-1/Unicode character with that number.  A
+leading "0x" means that I<number> is hex, as in
+C<EE<lt>0x201EE<gt>>.  A leading "0" means that I<number> is octal,
+as in C<EE<lt>075E<gt>>.  Otherwise I<number> is interpreted as being
+in decimal, as in C<EE<lt>181E<gt>>.
+
+=end original
+
+이 번호는 ASCII/Latin-1/Unicode 문자입니다.
+C<EE<lt>0x201EE<gt>> 같이 앞에 "0x" 가 있으면 I<number>는 16진수입니다. 
+C<EE<lt>075E<gt>> 같이 앞에 "0"가 있으면 I<number>는 8진수입니다. 
+C<EE<lt>181E<gt>> 같이 그 외에는 I<number>는 10진수로 해석됩니다.
+
+=begin original
+
+Note that older Pod formatters might not recognize octal or
+hex numeric escapes, and that many formatters cannot reliably
+render characters above 255.  (Some formatters may even have
+to use compromised renderings of Latin-1 characters, like
+rendering C<EE<lt>eacuteE<gt>> as just a plain "e".)
+
+=end original
+
+옛날 Pod 서식기는 8진수나 16진수의 이스케이프를 인식하지 않을
+가능성이 있고, 또 많은 서식기는 255 이상의 문자를 
+정확하게 렌더링할 수 있을 지 모른다는 것에 주의하세요.
+(Latin-1 문자에서도 정확히 렌더링되지 않는 서식기가 있습니다.
+예를 들면 C<EE<lt>eacuteE<gt>> 을 그냥 "e"로 렌더링합니다)
+
+=back
+
+=item C<FE<lt>filenameE<gt>> -- used for filenames
+
+=begin original
+
+Typically displayed in italics.  Example: "C<FE<lt>.cshrcE<gt>>"
+
+=end original
+
+전형적으로는 이탤릭으로 표시됩니다. 예: "C<FE<lt>.cshrcE<gt>>"
+
+=item C<SE<lt>textE<gt>> -- text contains non-breaking spaces
+
+=begin original
+
+This means that the words in I<text> should not be broken
+across lines.  Example: S<C<SE<lt>$x ? $y : $zE<gt>>>.
+
+=end original
+
+이것은 I<text> 의 내용이 줄가름이 없다는 것을 의미합니다.
+예: <C<SE<lt>$x ? $y : $zE<gt>>>
+
+=item C<XE<lt>topic nameE<gt>> -- an index entry
+
+=begin original
+
+This is ignored by most formatters, but some may use it for building
+indexes.  It always renders as empty-string.
+Example: C<XE<lt>absolutizing relative URLsE<gt>>
+
+=end original
+
+이것은 많은 서식기에서는 무시됩니다만,
+인덱스를 만드는 것에 사용하는 경우도 있습니다.
+보통은 빈 문자열로써 렌더링됩니다.
+예제: C<XE<lt>absolutizing relative URLsE<gt>>
+
+=item C<ZE<lt>E<gt>> -- a null (zero-effect) formatting code
+
+=begin original
+
+This is rarely used.  It's one way to get around using an
+EE<lt>...E<gt> code sometimes.  For example, instead of
+"C<NEE<lt>ltE<gt>3>" (for "NE<lt>3") you could write
+"C<NZE<lt>E<gt>E<lt>3>" (the "ZE<lt>E<gt>" breaks up the "N" and
+the "E<lt>" so they can't be considered
+the part of a (fictitious) "NE<lt>...E<gt>" code.
+
+=end original
+
+이것은 자주 사용됩니다.
+때때로 EE<lt>...E<gt> 코드를 사용하는 방법 중 하나입니다. 
+예를 들면, ("NE<lt>3" 때문에) "C<NEE<lt>ltE<gt>3>" 대신에
+"C<NZE<lt>E<gt>E<lt>3>" 로 쓸 수 있습니다.
+(the "ZE<lt>E<gt>" は "N" と "E<lt>" 를 분해하기 때문에,
+"NE<lt>...E<gt>" 의 일부와(달리) 해석되는 경우는 없습니다)
+
+=for comment
+ This was formerly explained as a "zero-width character".  But it in
+ most parser models, it parses to nothing at all, as opposed to parsing
+ as if it were a E<zwnj> or E<zwj>, which are REAL zero-width characters.
+ So "width" and "character" are exactly the wrong words.
+
+=back
+
+=begin original
+
+Most of the time, you will need only a single set of angle brackets to
+delimit the beginning and end of formatting codes.  However,
+sometimes you will want to put a real right angle bracket (a
+greater-than sign, '>') inside of a formatting code.  This is particularly
+common when using a formatting code to provide a different font-type for a
+snippet of code.  As with all things in Perl, there is more than
+one way to do it.  One way is to simply escape the closing bracket
+using an C<E> code:
+
+=end original
+
+대체로, 코드포맷팅의 초음과 끝의 구분자로써 한쌍의 꺾은 괄호만이 쓰입니다.
+그러나, 때때로 포맷팅코드의 안에 왼쪽 꺾은 괄호(혹은 보다 큰 기호 '>')를
+넣고 싶을 경우가 있습니다. 이것은 코드의 일부분 중에서 다른 폰트 타입을
+사용하고 싶은 때가 종종 있습니다.
+Perl 에 관한 다른 것과 같이, 하는 방법은 하나만 있는 것이 아닙니다.
+단순히 닫는 괄호를 C<E> 코드를 사용해서 이스케이프하는 방법도 있습니다.
+
+    C<$a E<lt>=E<gt> $b>
+
+=begin original
+
+This will produce: "C<$a E<lt>=E<gt> $b>"
+
+=end original
+
+이것은 "C<$a E<lt>=E<gt> $b>" 이 됩니다.
+
+=begin original
+
+A more readable, and perhaps more "plain" way is to use an alternate
+set of delimiters that doesn't require a single ">" to be escaped.  With
+the Pod formatters that are standard starting with perl5.5.660, doubled
+angle brackets ("<<" and ">>") may be used I<if and only if there is
+whitespace right after the opening delimiter and whitespace right
+before the closing delimiter!>  For example, the following will
+do the trick:
+
+=end original
+
+보다 일기 쉽게, 그리고 아마 보다"명백한" 방법은, 다른 구분자를
+사용해서, 단독의 ">"를 이스케이프하지않아도 되도록 하는 방법입니다.
+Perl 5.5.660 이후의 Pod 서식기에서는, 2개의 꺾은괄호를 사용할 수 있습니다.
+다만 I<시작 구분자의 바로 다음과 끝 구분자의 바로 앞에 공백이 있을 때만>입니다.
+아래는 그 트릭을 사용하고 있습니다.
+
+    C<< $a <=> $b >>
+
+=begin original
+
+In fact, you can use as many repeated angle-brackets as you like so
+long as you have the same number of them in the opening and closing
+delimiters, and make sure that whitespace immediately follows the last
+'<' of the opening delimiter, and immediately precedes the first '>'
+of the closing delimiter.  (The whitespace is ignored.)  So the
+following will also work:
+
+=end original
+
+사실은, 시작 구분자와 종료 구분자의 수와 맞고,
+시작 구분자의 마지막의 '<'의 바로 다음과 종료구분자의 맨 처음의 '>'의
+바로 앞에 공백이 들어 있으면, 꺾은 괄호의 수는 몇 개라도 상관없습니다.
+(공백은 무시됩니다)
+따라서, 아래도 잘 동작합니다.
+
+    C<<< $a <=> $b >>>
+    C<<<<  $a <=> $b     >>>>
+
+=begin original
+
+And they all mean exactly the same as this:
+
+=end original
+
+그리고 이런것들은 모두 아래와 완전히 같은 의미입니다.
+
+    C<$a E<lt>=E<gt> $b>
+
+=begin original
+
+As a further example, this means that if you wanted to put these bits of
+code in C<C> (code) style:
+
+=end original
+
+더 자세한 예로써, C<C> (코드) 스타일의 코드의 일부분을 쓰고싶다면:
+
+    open(X, ">>thing.dat") || die $!
+    $foo->bar();
+
+=begin original
+
+you could do it like so:
+
+=end original
+
+아래처럼 쓸 수 있습니다.
+
+    C<<< open(X, ">>thing.dat") || die $! >>>
+    C<< $foo->bar(); >>
+
+=begin original
+
+which is presumably easier to read than the old way:
+
+=end original
+
+이것은 아마도 아래처럼 낡은 쓰기 방법 보다는 훨씬 읽기 편하겠죠.
+
+    C<open(X, "E<gt>E<gt>thing.dat") || die $!>
+    C<$foo-E<gt>bar();>
+
+=begin original
+
+This is currently supported by pod2text (Pod::Text), pod2man (Pod::Man),
+and any other pod2xxx or Pod::Xxxx translators that use
+Pod::Parser 1.093 or later, or Pod::Tree 1.02 or later.
+
+=end original
+
+이것은 근래에 pod2text (Pod::Text), pod2man (Pod::Man), 및
+Pod::Parser 1.093 이후, Pod::Tree 1.02 이후를 사용하고 있는 
+그 밖의 pod2xxx 와 Pod::Xxxx 가 대응하고 있습니다.
+
+=head2 The Intent
+
+(목적)
+
+=begin original
+
+The intent is simplicity of use, not power of expression.  Paragraphs
+look like paragraphs (block format), so that they stand out
+visually, and so that I could run them through C<fmt> easily to reformat
+them (that's F7 in my version of B<vi>, or Esc Q in my version of
+B<emacs>).  I wanted the translator to always leave the C<'> and C<`> and
+C<"> quotes alone, in verbatim mode, so I could slurp in a
+working program, shift it over four spaces, and have it print out, er,
+verbatim.  And presumably in a monospace font.
+
+=end original
+
+표현력이 아닌 간단히 사용할 수 있는 것을 목표로 하고 있습니다.
+단락은 단락답게(블록형태로) 보이길 원하고, 보기에 눈에 띄고,
+C<fmt> 로 간단히 다시 고칠 수 있게 되어있습니다. (저자의 경우는 B<vi>에서
+F7에, B<emacs>에서는 Esc Q로 되어있습니다).
+저자가 원하는 것은 verbatim 모드에서는 C<'> 나 C<`> 나 C<"> 의 따옴표를
+그대로 두고싶은 것ㅣ었습니다. 그렇게 하면, 만들어 낸 프로그램을 읽어들여
+4칼럼늘려서, 그것을 그대로 인쇄하면 되기 때문이죠. 아마도 고정폭의 폰트로
+
+=begin original
+
+The Pod format is not necessarily sufficient for writing a book.  Pod
+is just meant to be an idiot-proof common source for nroff, HTML,
+TeX, and other markup languages, as used for online
+documentation.  Translators exist for B<pod2text>, B<pod2html>,
+B<pod2man> (that's for nroff(1) and troff(1)), B<pod2latex>, and
+B<pod2fm>.  Various others are available in CPAN.
+
+=end original
+
+Pod 포맷은 책을 만드는 데 충분할 필요가 없습니다. 
+Pod 는 단지, 온라인문서에 사용하는 nroff 나 TeX등의 마크업언어를 위해
+누구라도 사용할 수 있는 공통의 소스를 제공하고 있습니다.
+현재 있는 번역기로는 B<pod2text>, B<pod2html>, B<pod2man>  
+(nroff(1) 나 troff(1)용), B<pod2latex>, B<pod2fm> 이 있습니다. 
+그 외에도 여러가지가 CPAN에 있습니다.
+
+=head2 Embedding Pods in Perl Modules
+
+(Perl모듈로 pod의 삽입) 
+
+=begin original
+
+You can embed Pod documentation in your Perl modules and scripts.
+Start your documentation with an empty line, a "=head1" command at the
+beginning, and end it with a "=cut" command and an empty line.  Perl
+will ignore the Pod text.  See any of the supplied library modules for
+examples.  If you're going to put your Pod at the end of the file, and
+you're using an __END__ or __DATA__ cut mark, make sure to put an
+empty line there before the first Pod command.
+
+=end original
+
+Perl 모듈과 스크립트에 Pod 문서를 삽입할 수 있습니다. 
+문서를 빈줄 및 "=head1" 커맨드로 시작하고, "=cut"로 빈줄로 끝냅니다.
+실제로는 사용하고 있는 라이브러리 모듈에 있습니다.
+만약 Pod 텍스트를 파일의 맨 끝에 넣고 싶다면,
+__END__ 나 __DATA__ 등의 컷 마크를 쓰고,
+거기에 맨처음에 나타날 Pod 커맨드의 앞에 빈줄을 놓는 것으로 가능합니다.
+
+  __END__
+
+  =head1 NAME
+
+  Time::Local - efficiently compute time from local and GMT time
+
+=begin original
+
+Without that empty line before the "=head1", many translators wouldn't
+have recognized the "=head1" as starting a Pod block.
+
+=end original
+
+"=head1" 의 앞에 빈 줄이 없는 경우, 많은 번역기들은 "=head1"이 
+Pod 블록의 시작으로 인식하지 않습니다.
+
+=head2 Hints for Writing Pod
+
+(Pod 를 쓰기위한 힌트) 
+
+=over
+
+=item *
+
+=begin original
+
+The B<podchecker> command is provided for checking Pod syntax for errors
+and warnings.  For example, it checks for completely blank lines in
+Pod blocks and for unknown commands and formatting codes.  You should
+still also pass your document through one or more translators and proofread
+the result, or print out the result and proofread that.  Some of the
+problems found may be bugs in the translators, which you may or may not
+wish to work around.
+
+=end original
+
+B<podchecker> 커맨드는 Pod 의 문법에 관한 에러와 경고를 체크하기 위해
+제공되었습니다.
+예를 들어, Pod 분할에 완전한 빈줄이 사용되거나, 명확하지 않은 커맨드나
+포맷코드등을 체크합니다.
+그래도 하나 이상의 번역기를 통과해서 결과를 체크하거나,
+결과를 인쇄해서 그것을 체크하는 것을 추천합니다.
+발견한 문제 중에는, 회피하려고 했다가 안했다가 하는 번역기의 버그도 있을겁니다.
+
+=item *
+
+=begin original
+
+If you're more familiar with writing in HTML than with writing in Pod, you
+can try your hand at writing documentation in simple HTML, and converting
+it to Pod with the experimental L<Pod::HTML2Pod|Pod::HTML2Pod> module,
+(available in CPAN), and looking at the resulting code.  The experimental
+L<Pod::PXML|Pod::PXML> module in CPAN might also be useful.
+
+=end original
+
+만약에 Pod를 쓴다거나 HTML을 쓴다는 것에 익숙해 있다면,
+단순한 HTML로 몬서를 써서, 실험적인 L<Pod::HTML2Pod|Pod::HTML2Pod>
+모듈(CPAN에 있습니다)을 사용해서 Pod로 변환하는 것을 시험삼아 해볼 수 있습니다.
+CPAN 에 있는 실험적인 L<Pod::PXML|Pod::PXML> 도 유용합니다.
+
+=item *
+
+=begin original
+
+Many older Pod translators require the lines before every Pod
+command and after every Pod command (including "=cut"!) to be a blank
+line.  Having something like this:
+
+=end original
+
+많은 수의 낡은 Pod 번역기는 모든 Pod 커맨드("=cut"을 포함합니다)의
+앞뒤에 빈줄이 필요합니다. 아래처럼 쓰면:
+
+ # - - - - - - - - - - - -
+ =item $firecracker->boom()
+
+ This noisily detonates the firecracker object.
+ =cut
+ sub boom {
+ ...
+
+=begin original
+
+...will make such Pod translators completely fail to see the Pod block
+at all.
+
+=end original
+
+ Pod 번역기는 Pod 블록을 찾는 데 완전히 실패하겠죠.
+
+=begin original
+
+Instead, have it like this:
+
+=end original
+
+대신에 이렇게 써보세요.
+
+ # - - - - - - - - - - - -
+
+ =item $firecracker->boom()
+
+ This noisily detonates the firecracker object.
+
+ =cut
+
+ sub boom {
+ ...
+
+=item *
+
+=begin original
+
+Some older Pod translators require paragraphs (including command
+paragraphs like "=head2 Functions") to be separated by I<completely>
+empty lines.  If you have an apparently empty line with some spaces
+on it, this might not count as a separator for those translators, and
+that could cause odd formatting.
+
+=end original
+
+낡은 Pod 번역기에는 단락("=head Functions"처럼 커맨드 단락도 포함합니다)
+의 분할에 I<완전한> 빈 줄을 필요로하는 것도 있습니다.
+공백이 들어간 보기에 빈줄같은 것을 넣으면,
+분할기로써 취급되지 않고 출력이 이상하게 될지도 모르겠습니다.
+
+=item *
+
+=begin original
+
+Older translators might add wording around an LE<lt>E<gt> link, so that
+C<LE<lt>Foo::BarE<gt>> may become "the Foo::Bar manpage", for example.
+So you shouldn't write things like C<the LE<lt>fooE<gt>
+documentation>, if you want the translated document to read sensibly
+-- instead write C<the LE<lt>Foo::Bar|Foo::BarE<gt> documentation> or
+C<LE<lt>the Foo::Bar documentation|Foo::BarE<gt>>, to control how the
+link comes out.
+
+=end original
+
+낡은 번역기는 LE<lt>E<gt> 링크에 글 추가하는 경우가 있습니다. 
+이 때문에, 예를 들면 C<LE<lt>Foo::BarE<gt>> 는"the Foo::Bar manpage"이
+됩니다(자세한 내용은 B<pod2man>를 참조). 
+따라서, 변환된 문서를 읽기쉽게 하기 위해서는, 
+C<the LE<lt>fooE<gt> documentation> 라고 쓰는 것은 좀 아닙니다. 
+-- 대신에 C<the LE<lt>Foo::Bar|Foo::BarE<gt> documentation> 로
+쓰거나, 어떤 링크가 생기는 가를 제어하기 위해
+C<LE<lt>the Foo::Bar documentation|Foo::BarE<gt>> 로 해주세요.
+
+=item *
+
+=begin original
+
+Going past the 70th column in a verbatim block might be ungracefully
+wrapped by some formatters.
+
+=end original
+
+그 개로의 블록으로 70문자를 넘으면, 서식기에 따라서는
+보기어려운 래핑이 수행될지도 모르겠습니다.
+
+=back
+
+=head1 SEE ALSO
+
+L<perlpodspec>, L<perlsyn/"PODs: Embedded Documentation">,
+L<perlnewmod>, L<perldoc>, L<pod2html>, L<pod2man>, L<podchecker>.
+
+=head1 AUTHOR
+
+Larry Wall, Sean M. Burke
+
+=begin meta
+
+Translated By JEEN<aiatejin@gmail.com>
+License : BPL
+
+=end meta
+
+=cut
+

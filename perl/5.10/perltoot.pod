@@ -1,0 +1,3720 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perltoot - Tom's object-oriented tutorial for perl
+
+=end original
+
+perltoot - Tom 의 Perl 오브젝트지향 튜토리얼
+
+=head1 DESCRIPTION
+
+=begin original
+
+Object-oriented programming is a big seller these days.  Some managers
+would rather have objects than sliced bread.  Why is that?  What's so
+special about an object?  Just what I<is> an object anyway?
+
+=end original
+
+오브젝트지향 프로그램은, 요즘 인기입니다.
+매니저에게는, 얇게 잘린 빵(좋은 발명을 일컫는 말) 보다도 오히려 
+오브젝트를 가지려는 사람도 있습니다.
+어떻습니까?
+오브젝트의, 뭐가 그렇게 특별한 걸까요?
+그전에 도대체 오브젝트라는 것은 I<뭘까요?>
+
+=begin original
+
+An object is nothing but a way of tucking away complex behaviours into
+a neat little easy-to-use bundle.  (This is what professors call
+abstraction.) Smart people who have nothing to do but sit around for
+weeks on end figuring out really hard problems make these nifty
+objects that even regular people can use. (This is what professors call
+software reuse.)  Users (well, programmers) can play with this little
+bundle all they want, but they aren't to open it up and mess with the
+insides.  Just like an expensive piece of hardware, the contract says
+that you void the warranty if you muck with the cover.  So don't do that.
+
+=end original
+
+오브젝트는 제대로 된 작고 사용하기 쉬운 포장지에 포장해서,
+복잡한 행동을 멀리 날려버리는 방법 이외의 무엇도 아닙니다.
+(전문가는 이것을 추상화라고 부릅니다).
+정말로 어려운 문제를 정리려면, 몇 주씩이나 팟 하고 지나가버리고,
+똑똑한 사람들은, 보통의 사람이라도 사용할 수 있는 그런 훌륭한 오브젝트를 
+만듭니다(전문가는, 이것을 소프트웨어의 재이용이라고 부릅니다).
+오브젝트를 사용하는 사람(아마도 프로그래머)는, 자신이 원하는 작은 포장을 
+건드릴 수 있습니다.
+하지만, 그 포장을 열려고는 하지 않고, 그 안을 어지럽히려고도 하지않겠죠.
+딱, 하드웨어의 비싼 부분처럼, 계약은 다음처럼 되어있습니다. 
+"커버를 벗기면, 보증은 무효하게 됩니다. "라고...
+그래서, 그런 것은 해서는 안됩니다.
+
+=begin original
+
+The heart of objects is the class, a protected little private namespace
+full of data and functions.  A class is a set of related routines that
+addresses some problem area.  You can think of it as a user-defined type.
+The Perl package mechanism, also used for more traditional modules,
+is used for class modules as well.  Objects "live" in a class, meaning
+that they belong to some package.
+
+=end original
+
+오브젝트의 핵심은, 클래스입니다.
+클래스는, 작은 이름공간이고, 데이터와 함수로 구성됩니다.
+클래스는 관련된 루틴의 세트이고, 몇개인가의 문제영역을 취급합니다.
+클래스를 유저정의의 형태로 생각할 수도 있습니다.
+Perl 의 패키지의 구성은, 보다 전통적인 모듈처럼, 클래스모듈에도 사용됩니다.
+오브젝트는, 클래스 안에, "살고" 있습니다.
+이 것은, 오브젝트가 몇개인가의 패키지에 소속되어 있는 것을 의미합니다.
+
+=begin original
+
+More often than not, the class provides the user with little bundles.
+These bundles are objects.  They know whose class they belong to,
+and how to behave.  Users ask the class to do something, like "give
+me an object."  Or they can ask one of these objects to do something.
+Asking a class to do something for you is calling a I<class method>.
+Asking an object to do something for you is calling an I<object method>.
+Asking either a class (usually) or an object (sometimes) to give you
+back an object is calling a I<constructor>, which is just a
+kind of method.
+
+=end original
+
+클래스는, 클래스를 사용하는 사람에게 몇개인가의 작은 묶음을 제공합니다.
+그것들의 묶음이 오브젝트입니다.
+오브젝트는, 자신이 소속하고 있는 클래스를 알고 있고, 어떤 행동을 하는지도 
+알고 있습니다.
+클래스를 사용하는 사람은 클래스에 뭔가를 하도록, 예를 들어,
+"오브젝트를 줘" 라고 하는 것처럼, 받기를 원하는 지, 
+오브젝트중 하나에 뭔가를 하기를 바랄 수도 있습니다.
+클래스에 뭔가를 하도록 원하는 것은, I<클래스 메소드>를 부르는 것입니다.
+오브젝트에 뭔가를 하도록 원하는 것은, I<오브젝트메소드>를 부르는 것입니다.
+클래스(보통) 또는, 오브젝트(때때로)에, 오브젝트를 반환하기를 
+원하는 것은, I<생성자>를 호출하는 것입니다.
+생성자는 메소드의 한 종류입니다.
+
+=begin original
+
+That's all well and good, but how is an object different from any other
+Perl data type?  Just what is an object I<really>; that is, what's its
+fundamental type?  The answer to the first question is easy.  An object
+is different from any other data type in Perl in one and only one way:
+you may dereference it using not merely string or numeric subscripts
+as with simple arrays and hashes, but with named subroutine calls.
+In a word, with I<methods>.
+
+=end original
+
+그것은 그렇다치고, 오브젝트는 Perl 이외의 데이터 형태와 어떻게 
+다른 것일까요?
+I<실제로는>, 오브젝트는.. 오브젝트의 기초의 형태는 뭘까요?
+첫번째 질문에 답하는 것은 간단합니다.
+오브젝트는 하나의, 단 하나의 방법에 의해, Perl 의 다른 데이터 형태와는 
+다릅니다.
+오브젝트를 디리퍼런스하는 것에, 단순한 배열이나 해쉬처럼
+문자열이나 숫자의 첨자가 아닌, 이름이 붙은 서브루틴의 호출을 사용합니다.
+한마디로 하면, I<메소드> 로 디리퍼런스합니다.
+
+=begin original
+
+The answer to the second question is that it's a reference, and not just
+any reference, mind you, but one whose referent has been I<bless>()ed
+into a particular class (read: package).  What kind of reference?  Well,
+the answer to that one is a bit less concrete.  That's because in Perl
+the designer of the class can employ any sort of reference they'd like
+as the underlying intrinsic data type.  It could be a scalar, an array,
+or a hash reference.  It could even be a code reference.  But because
+of its inherent flexibility, an object is usually a hash reference.
+
+=end original
+
+두번째의 답은, 다음과 같습니다.
+오브젝트는 리퍼런스이지만, 단순한 리퍼런스가 아닙니다.
+주의해주세요.
+특별한 클래스(패키지)에 I<축복(bless)받은> 리퍼런스를 가지고 있는 것입니다.
+리퍼런스의 종류는?
+아마도, 그 질문의 답은, 그다지 구체적이지 않습니다.
+Perl 에서는, 기초가 되는 고유의 데이터형태로써, 리퍼런스라면 어떤 종류의
+것이라도, 클래스 설계자가 좋을대로 사용할 수 있기 때문입니다.
+리퍼런스라면, 스칼라에서도, 배열에서도, 해쉬에서라도 상관없습니다.
+코드의 리퍼런스도 가능합니다.
+하지만, 가지기 전의 유연성에 의해, 보통 오브젝트는 해쉬리퍼런스입니다.
+
+=head1 Creating a Class
+
+(클래스 만들기)
+
+=begin original
+
+Before you create a class, you need to decide what to name it.  That's
+because the class (package) name governs the name of the file used to
+house it, just as with regular modules.  Then, that class (package)
+should provide one or more ways to generate objects.  Finally, it should
+provide mechanisms to allow users of its objects to indirectly manipulate
+these objects from a distance.
+
+=end original
+
+클래스를 만들기 전에, 클래스에 어떤 이름을 붙일까를 결정해야 합니다.
+클래스(패키지)의 이름은, 보통 모듈처럼 클래스를 넣는 파일이름을 좌우합니다.
+그리고, 그 클래스(패키지)는 하나 이상의 방법으로 오브젝트를 생성하는 방법을 
+제공해야합니다.
+마지막에 클래스(패키지)는, 오브젝트를 사용하는 사람에게 떨어진 곳에서 
+간접적으로 오브젝트를 조작하는 것이 가능한 메커니즘을 제공해야 합니다.
+
+=begin original
+
+For example, let's make a simple Person class module.  It gets stored in
+the file Person.pm.  If it were called a Happy::Person class, it would
+be stored in the file Happy/Person.pm, and its package would become
+Happy::Person instead of just Person.  (On a personal computer not
+running Unix or Plan 9, but something like Mac OS or VMS, the directory
+separator may be different, but the principle is the same.)  Do not assume
+any formal relationship between modules based on their directory names.
+This is merely a grouping convenience, and has no effect on inheritance,
+variable accessibility, or anything else.
+
+=end original
+
+예를 들면, 단순한 Person 클래스모듈을 만들어봅시다.
+이 클래스 모듈은 Person.pm 으로 저장됩니다.
+만약, 이 클래스모듈이, Happy::Person 클래스로 불려지면,
+이 클래스는, Happy/Person.pm 파일에 보존됩니다.
+그리고, 이 패키지는 단순한 Person 이 아니라, Happy::Person 이 됩니다
+(Unix 나, Plan 9 가 아닌 Mac OS 나 VMS 같은 OS 에서 움직이는 
+퍼스널컴퓨터위에서는 디렉토리의 구분자는 다르겠지만, 원리는 같습니다).
+디렉토리 이름의 기본이 되는 모듈과의 사이에 어떤 공식적인 관계도 
+상정해서는 안됩니다. 
+이것은 단순히, 그룹을 나누는 것을 편리하게 하는 것는 것 뿐으로, 
+계승이나 변수의 접근성 등, 그외 여러가지에 어떤 효과도 주지 않습니다.
+
+=begin original
+
+For this module we aren't going to use Exporter, because we're
+a well-behaved class module that doesn't export anything at all.
+In order to manufacture objects, a class needs to have a I<constructor
+method>.  A constructor gives you back not just a regular data type,
+but a brand-new object in that class.  This magic is taken care of by
+the bless() function, whose sole purpose is to enable its referent to
+be used as an object.  Remember: being an object really means nothing
+more than that methods may now be called against it.
+
+=end original
+
+이 모듈에 Exporter 는 사용하지 맙시다.
+우리들은 잘 움직이는 좋은 클래스 모듈은 아무것도 export 하지 
+않기때문입니다.
+오브젝트를 만들기 위해서는, 클래에 I<생성자 메소드> 가 필요합니다. 
+생성자는, 보통 데이터 형태가 아니라, 새로운 클래스의 오브젝트를 제공합니다. 
+이 마법은, bless() 함수에 의해 취급됩니다. 
+bless() 의 유일한 목적은, 리퍼런스를 오브젝트로써 
+사용할 수 있도록 하는 것입니다.
+기억하세요! : 오브젝트인 것은 실제로는 메소드가 그 오브젝트를 대신해서
+불려진 것 이외에 아무 의미도 없습니다. 
+
+=begin original
+
+While a constructor may be named anything you'd like, most Perl
+programmers seem to like to call theirs new().  However, new() is not
+a reserved word, and a class is under no obligation to supply such.
+Some programmers have also been known to use a function with
+the same name as the class as the constructor.
+
+=end original
+
+생성자는, 좋을대로 이름붙여도 상관없지만, 대부분의 Perl 프로그래머는,
+생성자를 new() 라고 부르는 것을 좋아하는 듯 합니다.
+하지만, new() 는, 예약어가 아니고, 클래스에는 그런 것을 공급할 의무도 없습니다.
+생성자로써, 클래스와 같은 이름의 함수를 사용하는 프로그래머가 있다는 것도 
+알수 있습니다. 
+
+=head2 Object Representation
+
+(오브젝트의 표현)
+
+=begin original
+
+By far the most common mechanism used in Perl to represent a Pascal
+record, a C struct, or a C++ class is an anonymous hash.  That's because a
+hash has an arbitrary number of data fields, each conveniently accessed by
+an arbitrary name of your own devising.
+
+=end original
+
+Pascal 의 레코드나, C 의 구조체나, C++ 의 클래스를 나타내기 위해서,
+Perl 로 사용되는, 제일 일반적인 메커니즘은 이름없는 해쉬입니다.
+해쉬에는 임의의 수의 데이터영역이 있고, 자신이 붙인 임의의 이름으로 
+그것들에 접근하기 쉽기 때문입니다.
+
+=begin original
+
+If you were just doing a simple
+struct-like emulation, you would likely go about it something like this:
+
+=end original
+
+단순한 구조체같은 에뮬레이션을 하려면, 다음처럼 할 수가 있습니다.
+
+    $rec = {
+        name  => "Jason",
+        age   => 23,
+        peers => [ "Norbert", "Rhys", "Phineas"],
+    };
+
+=begin original
+
+If you felt like it, you could add a bit of visual distinction
+by up-casing the hash keys:
+
+=end original
+
+차이를 알고 싶다고 느낀다면, 대문자의 해쉬 키에 의해서,
+보는 것만으로, 조금 다른 차이를 줄 수 가 있습니다.
+
+    $rec = {
+        NAME  => "Jason",
+        AGE   => 23,
+        PEERS => [ "Norbert", "Rhys", "Phineas"],
+    };
+
+=begin original
+
+And so you could get at C<< $rec->{NAME} >> to find "Jason", or
+C<< @{ $rec->{PEERS} } >> to get at "Norbert", "Rhys", and "Phineas".
+(Have you ever noticed how many 23-year-old programmers seem to
+be named "Jason" these days? :-)
+
+=end original
+
+이것으로,  C<< $rec->{NAME} >> 으로, "Jason" 을 발견할 수가 있게 되고, 
+또, C<< @{ $rec->{PEERS} } >> 로, "Norbert" 와, "Rhys" 와 "Phineas" 를 
+얻을 수가 있습니다.
+(요즘, 얼마나 많은 23세의 프로그래머가 Jason이라는 이름을 가지고 있는 가 
+신경 쓴 적이 있나요? :-))
+
+=begin original
+
+This same model is often used for classes, although it is not considered
+the pinnacle of programming propriety for folks from outside the
+class to come waltzing into an object, brazenly accessing its data
+members directly.  Generally speaking, an object should be considered
+an opaque cookie that you use I<object methods> to access.  Visually,
+methods look like you're dereffing a reference using a function name
+instead of brackets or braces.
+
+=end original
+
+이것과 같은 모델은, 복수의 클래스로 자주 사용됩니다.
+그렇다고 해도, 클래스의 밖에서, 모두가 오브젝트에 왈츠를 추도록 하고,
+그 데이터 멤버에 어쩌구 저쩌구 해서 직접 접근하는 것은,
+프로그램의 예의바른 정점을 깊이 생각한 것이 아닙니다.
+간단하게, 오브젝트는 I<오브젝트 메소드>를 사용해서 접근하고, 
+알지 못하는 쿠키라고 생각해야 합니다.
+보기에는 메소드는 브라켓이랑 브레이스 대신에, 
+함수명을 사용하고, 리퍼런스를 디리퍼런스하고 있는 것처럼 보입니다.
+
+=head2 Class Interface
+
+(클래스의 인터페이스)
+
+=begin original
+
+Some languages provide a formal syntactic interface to a class's methods,
+but Perl does not.  It relies on you to read the documentation of each
+class.  If you try to call an undefined method on an object, Perl won't
+complain, but the program will trigger an exception while it's running.
+Likewise, if you call a method expecting a prime number as its argument
+with a non-prime one instead, you can't expect the compiler to catch this.
+(Well, you can expect it all you like, but it's not going to happen.)
+
+=end original
+
+언어에는, 클래스의 메소드를 위해 정식 종합 인터페이스를 제공하고 있는 것도
+있습니다만, Perl 은 그렇지 않습니다.
+사용하는 사람이 그 나름대로의 클래의 문서를 읽는 것을 맞게 하고 있습니다.
+정의되어 있지 않은 메소드를 오브젝트로 호출하면, Perl 은, 경고를 내려고
+하지는 않지만, 프로그램은 실행하고 있는 중간에, 예외를 발생시킬 겁니다.
+이처럼, 인수에 요소를 기대하는 메소드에게, 요소가 아닌 숫자를 인수로 해서 
+호출했다고 해도, 컴파일러가 그것을 알아차리는 것은 기대할 수 없습니다.
+(아마도, 당신은 컴파일러에 당신의 좋아하는 모든 것을 기대했을 테지만, 
+그런 것은 일어나지 않습니다.)
+
+=begin original
+
+Let's suppose you have a well-educated user of your Person class,
+someone who has read the docs that explain the prescribed
+interface.  Here's how they might use the Person class:
+
+=end original
+
+Person 클래스를 사용하는 사람이 잘 교육받은 소정의 인터페이스를 
+설명하는 문서를 읽고 있는 사람이라고 상정해봅시다.
+Person 클래스의 사용법이 여기에 있습니다.
+
+    use Person;
+
+    $him = Person->new();
+    $him->name("Jason");
+    $him->age(23);
+    $him->peers( "Norbert", "Rhys", "Phineas" );
+
+=begin original
+
+    push @All_Recs, $him;  # save object in array for later
+
+=end original
+
+    push @All_Recs, $him;  # 나중을 위해 오브젝트를 배열에 넣습니다.
+
+    printf "%s is %d years old.\n", $him->name, $him->age;
+    print "His peers are: ", join(", ", $him->peers), "\n";
+
+    printf "Last rec's name is %s\n", $All_Recs[-1]->name;
+
+=begin original
+
+As you can see, the user of the class doesn't know (or at least, has no
+business paying attention to the fact) that the object has one particular
+implementation or another.  The interface to the class and its objects
+is exclusively via methods, and that's all the user of the class should
+ever play with.
+
+=end original
+
+위처럼, 그 클래스를 사용하는 사람은, 오브젝트에 있는 특정의 구성이 있는 지,
+다른 구성이 있는 지를 알지 못합니다(적어도, 그 사실에 주의를 기울여야 하는가는
+관계 없습니다).
+클래스와 그 오브젝트의 인터페이스는 안쪽 메소드를 경유합니다.
+그리고 클래스를 사용하는 사람은 모두, 메소드를 건드려야 합니다. 
+
+=head2 Constructors and Instance Methods
+
+(생성자와 인스턴스 메소드)
+
+
+=begin original
+
+Still, I<someone> has to know what's in the object.  And that someone is
+the class.  It implements methods that the programmer uses to access
+the object.  Here's how to implement the Person class using the standard
+hash-ref-as-an-object idiom.  We'll make a class method called new() to
+act as the constructor, and three object methods called name(), age(), and
+peers() to get at per-object data hidden away in our anonymous hash.
+
+=end original
+
+아직 I<어떤 것>은, 오브젝트에 뭐가 있는 지를 알 필요가 있습니다.
+그리고 그 어떤 것은 클래스입니다. 
+클래스는 프로그래머가 오브젝트에 접근하는 것에 사용하는 메소드를 구성합니다.
+여기에 나타내는 것은 표준 오브젝트처럼 해쉬 리퍼런스를 사용하는 문법을 
+사용해, Person 클래스에 구성하는 방법입니다. 
+생성자로써 움직이는 new() 같은 클래스 메소드를 만듭시다. 
+그리고 3개의 오브젝트 메소드, name() 과 age() 와 peers() 를 만들고 
+오브젝트마다, 이름없는 해쉬에 데이터를 숨기도록 합니다.
+
+    package Person;
+    use strict;
+
+=begin original
+
+    ##################################################
+    ## the object constructor (simplistic version)  ##
+    ##################################################
+    sub new {
+        my $self  = {};
+        $self->{NAME}   = undef;
+        $self->{AGE}    = undef;
+        $self->{PEERS}  = [];
+        bless($self);           # but see below
+        return $self;
+    }
+
+=end original
+
+    #########################################################
+    ## 오브젝트의 생성자(단순화한 버젼)                    ##
+    #########################################################
+    sub new {
+        my $self  = {};
+        $self->{NAME}   = undef;
+        $self->{AGE}    = undef;
+        $self->{PEERS}  = [];
+        bless($self);           # 아래를 봐주세요.
+        return $self;
+    }
+
+=begin original
+
+    ##############################################
+    ## methods to access per-object data        ##
+    ##                                          ##
+    ## With args, they set the value.  Without  ##
+    ## any, they only retrieve it/them.         ##
+    ##############################################
+
+=end original
+
+    #####################################################
+    ## 오브젝트마다 데이터에 접근하는 메소드           ##
+    ##                                                 ##
+    ## 인수가 있다면, 값을 설정합니다. 인수가 있다면   ##
+    ## 값을 반환합니다.                                ##
+    #####################################################
+
+    sub name {
+        my $self = shift;
+        if (@_) { $self->{NAME} = shift }
+        return $self->{NAME};
+    }
+
+    sub age {
+        my $self = shift;
+        if (@_) { $self->{AGE} = shift }
+        return $self->{AGE};
+    }
+
+    sub peers {
+        my $self = shift;
+        if (@_) { @{ $self->{PEERS} } = @_ }
+        return @{ $self->{PEERS} };
+    }
+
+=begin original
+
+    1;  # so the require or use succeeds
+
+=end original
+
+    1;  # require 나 use 를 성공시키기 위해서 
+
+=begin original
+
+We've created three methods to access an object's data, name(), age(),
+and peers().  These are all substantially similar.  If called with an
+argument, they set the appropriate field; otherwise they return the
+value held by that field, meaning the value of that hash key.
+
+=end original
+
+오브젝트의 데이터에 접근하는 3가지의 메소드, name(), age(), peers() 를 
+만들었습니다.
+이것들은, 사실 모두 비슷한 것들입니다.
+인수를 붙여 호출하면, 필드에 값을 설정하고, 인수가 없으면
+그 필드에 저장된 값을 반환합니다.
+해쉬의 키는 값을 의미합니다.
+
+=head2 Planning for the Future: Better Constructors
+
+(미래를 생각하기 : 보다 좋은 생성자)
+
+=begin original
+
+Even though at this point you may not even know what it means, someday
+you're going to worry about inheritance.  (You can safely ignore this
+for now and worry about it later if you'd like.)  To ensure that this
+all works out smoothly, you must use the double-argument form of bless().
+The second argument is the class into which the referent will be blessed.
+By not assuming our own class as the default second argument and instead
+using the class passed into us, we make our constructor inheritable.
+
+=end original
+
+예를 들어, 이 시점에서 그 의미하는 바를 몰라도 있어도, 언젠가는 계승에 
+대해 고민할 것입니다.
+(바라는 게 있다면, 지금 현재 계승을 안전하게 무시하고, 나중에 계승에 
+대해 고민할 수 도 있겠습니다).
+곗으이, 모든 게 부드럽고 잘 움직이는 것은 보증하려면, bless() 에 2개의 인수를
+넘기지 않으면 안됩니다.
+2번째의 인수는 클래스이지만, 리퍼런스를 bless하는 클래스입니다.
+기본값으로는, (2번째의 인수를 생략하면) 2번째의 인수로써 자기자신의 
+클래스를 상정합니다.
+그 대신에, (생성자의 첫번째 인수에) 넘겨지는 클래스를 사용합니다.
+이렇게 하는 것으로, 생성자는 계승될 수 있습니다.
+
+    sub new {
+        my $class = shift;
+        my $self  = {};
+        $self->{NAME}   = undef;
+        $self->{AGE}    = undef;
+        $self->{PEERS}  = [];
+        bless ($self, $class);
+        return $self;
+    }
+
+=begin original
+
+That's about all there is for constructors.  These methods bring objects
+to life, returning neat little opaque bundles to the user to be used in
+subsequent method calls.
+
+=end original
+
+이것이, 생성자의 모든 것입니다.
+이런 메소드들은, 오브젝트에 생명을 가지고, 제대로 되고, 작은 
+알지 못하는 값을 유저에게 넘기고, 다음 메소드의 호출에 사용됩니다.
+
+=head2 Destructors
+
+(파괴자)
+
+=begin original
+
+Every story has a beginning and an end.  The beginning of the object's
+story is its constructor, explicitly called when the object comes into
+existence.  But the ending of its story is the I<destructor>, a method
+implicitly called when an object leaves this life.  Any per-object
+clean-up code is placed in the destructor, which must (in Perl) be called
+DESTROY.
+
+=end original
+
+모든 얘기에는 시작이 있고, 끝이 있습니다.
+오브젝트의 이야기의 시작에는 생성자가 있고, 오브젝트가 
+존재하기 시작할 때에는 명시적인 생성자가 호출됩니다.
+오브젝트의 이야기의 끝은, I<파괴자>이지만, 이 메소드는, 
+오브젝트가 그 생명을 다했을 때에 암묵적으로 호출됩니다.
+오브젝트마다 뒷정리의 코드가 파괴자 있고, 파괴자는 
+(Perl에서는) DESTROY 라고 불리지 않으면 안됩니다.
+
+=begin original
+
+If constructors can have arbitrary names, then why not destructors?
+Because while a constructor is explicitly called, a destructor is not.
+Destruction happens automatically via Perl's garbage collection (GC)
+system, which is a quick but somewhat lazy reference-based GC system.
+To know what to call, Perl insists that the destructor be named DESTROY.
+Perl's notion of the right time to call a destructor is not well-defined
+currently, which is why your destructors should not rely on when they are
+called.
+
+=end original
+
+생성자는 임의의 이름인데 왜 파괴자는 임의적이지 않은 것일까?
+그 이유는, 생성자는 명시적으로 호출되지만, 파괴자는 그렇지 않기 때문입니다.
+파괴자의 호출은, Perl 의 가비지컬렉션 시스템 경유로 자동적으로 발생합니다.
+때론 빠르지만, 어느 부분에서는 나태한 리퍼런스에 기반한 가비지컬렉션입니다.
+호출해야할 것이 무엇인지 알 수 있도록, Perl 은 파괴자가 DESTROY 라고 
+이름지어지는 것을 주장합니다.
+Perl 은 파괴자를 호출하는 적절한 시기를 생각하지만, 현재 언제 호출되는 가는
+제대로 정의되어 있지 않습니다. 
+이 때문에, 파괴자는 그것이 언제 호출되는 가를 생각해야 되는 것은 아닙니다.
+
+=begin original
+
+Why is DESTROY in all caps?  Perl on occasion uses purely uppercase
+function names as a convention to indicate that the function will
+be automatically called by Perl in some way.  Others that are called
+implicitly include BEGIN, END, AUTOLOAD, plus all methods used by
+tied objects, described in L<perltie>.
+
+=end original
+
+왜 DESTROY 는 모두 대문자일까?
+Perl 은 때때로 관례에서 모든 대문자의 함수명을 사용합니다.
+이 함수는, 어떤 방법으로 Perl 에 의해 자동적으로 호출될지도 모르는 것을 
+나타냅니다.
+DESTROY 외에, 암묵적으로 호출되는 것에는 BEGIN 이나 END 나 AUTOLOAD,
+거기에, L<perltie> 에 쓰여진, tie 된 오브젝트에 사용되는 모든 
+메소드등이 포함됩니다.
+
+=begin original
+
+In really good object-oriented programming languages, the user doesn't
+care when the destructor is called.  It just happens when it's supposed
+to.  In low-level languages without any GC at all, there's no way to
+depend on this happening at the right time, so the programmer must
+explicitly call the destructor to clean up memory and state, crossing
+their fingers that it's the right time to do so.   Unlike C++, an
+object destructor is nearly never needed in Perl, and even when it is,
+explicit invocation is uncalled for.  In the case of our Person class,
+we don't need a destructor because Perl takes care of simple matters
+like memory deallocation.
+
+=end original
+
+정말 좋은 오브젝트지향 프로그램 언어에서는, 유저는 파괴자가 
+호출되는 때를 신경쓰지 않습니다.
+발생할 때에는, 단지 발생하는 것입니다.
+어떤 가비지컬렉션도 가지지 않은, 낮은 레벨에의 언어에서는, 
+적절한 시기에 파괴자가 호출되는 것을 전혀 생각치도 않습니다.
+그 때문에 프로그래머는 명시적으로 파괴자를 호출하고, 메모리나 상태의 
+뒷정리를 할 필요가 있습니다.
+C++ 와는 달리, 오브젝트의 파괴자는 대부분, Perl 에서는 
+필요로 하지 않습니다.
+그리고, 파괴자가 있을 때에도, 명시적 호출은 없습니다.
+Person 클래스의 경우는 파괴자를 필요로 하지 않습니다.
+이것은, 메모리의 할당 해제같은 단순한 문제는 
+Perl 이 알아서 해주기 때문입니다.
+
+=begin original
+
+The only situation where Perl's reference-based GC won't work is
+when there's a circularity in the data structure, such as:
+
+=end original
+
+Perl 의 리퍼런스에 기반한, 가비지컬렉션이 움직이지 않는 유일한 상황은, 
+데이터 구조에 순환성이 있을 때입니다.
+다음같은 것입니다:
+
+    $this->{WHATEVER} = $this;
+
+=begin original
+
+In that case, you must delete the self-reference manually if you expect
+your program not to leak memory.  While admittedly error-prone, this is
+the best we can do right now.  Nonetheless, rest assured that when your
+program is finished, its objects' destructors are all duly called.
+So you are guaranteed that an object I<eventually> gets properly
+destroyed, except in the unique case of a program that never exits.
+(If you're running Perl embedded in another application, this full GC
+pass happens a bit more frequently--whenever a thread shuts down.)
+
+=end original
+
+프로그램이 메모리 릭을 하지 않는 것을 기대한다면, 이 경우에는, 자기참조를 
+수동으로 제거하지 않으면 안됩니다.
+명백하게 에러를 발생시키기 쉬운 상태에서 이것은 단지 지금 할 수 있는
+최고의 일입니다. 하지만, 프로그램이 끝날 때, 그 오브젝트의 파괴자가 
+모두 정식으로 호출되기에, 안전이 보증됩니다.
+그 때문에 다음 일이 보증됩니다.
+프로그램이 종료하지 않는 유일한 경우를 빼고는, 오브젝트가 
+I<최종적으로> 적절하게 파괴합니다.
+(다른 어플리케이션에, 심어진 Perl 을 실행하려면, 가비지컬렉션의 통과는 
+보통 보다 조금씩 빈번하게 - 스레드가 종료할 때에 - 발생합니다).
+
+=head2 Other Object Methods
+
+(다른 오브젝트 메소드)
+
+=begin original
+
+The methods we've talked about so far have either been constructors or
+else simple "data methods", interfaces to data stored in the object.
+These are a bit like an object's data members in the C++ world, except
+that strangers don't access them as data.  Instead, they should only
+access the object's data indirectly via its methods.  This is an
+important rule: in Perl, access to an object's data should I<only>
+be made through methods.
+
+=end original
+
+지금까지 이야기한 메소드는 생성자 이외는 단순한 "데이터 메소드"이고,
+오브젝트에 축적된 데이터의 인터페이스입니다.
+이 데이터들은 C++에서의 오브젝트의 데이터멤버와 조금 닮았습니다.
+뭔지 모르고 보는 사람이 데이터로써, 오브젝트의 데이터멤버에 접근ㄹ 수 없는 것을
+기대하고 있습니다.
+그 대신에, 오브젝트의 데이터멤버에 데이터메소드 경유로,
+간접적으로 접근해야합니다.
+이 것은 Perl 에서, 중요한 룰입니다.
+Perl 에서는, 오브젝트의 데이터로의 접근은, 메소드를 통해서I<만> 
+이루어져야 합니다.
+
+=begin original
+
+Perl doesn't impose restrictions on who gets to use which methods.
+The public-versus-private distinction is by convention, not syntax.
+(Well, unless you use the Alias module described below in
+L<Data Members as Variables>.)  Occasionally you'll see method names beginning or ending
+with an underscore or two.  This marking is a convention indicating
+that the methods are private to that class alone and sometimes to its
+closest acquaintances, its immediate subclasses.  But this distinction
+is not enforced by Perl itself.  It's up to the programmer to behave.
+
+=end original
+
+Perl 은, 누군가가 어느 메소드를 사용할 수 있는 가의 제한을 둘 수 없습니다.
+퍼블릭 과 프라이베이트 의 차이는 관례에 따른 는 것으로 구문에 따르지 않습니다.
+(아마도, L<Data Members as Variables>에, 아래처럼 기술하는 Alias 모듈을 
+사용하지 않는 경우는).
+메소드의 이름이 하나, 2개의 언더바로 시작되거나 끝나는 것을 본 적이 있을겁니다.
+그 메소드가 그 클래스만, 그리고, 밀접한 그 사이에, 즉 서브클래스의 
+프라이베이트한 것을 나타냅니다.
+하지만, 이 구별은 Perl 자신에 의해 강제되어 있지는 않습니다.
+그런 행동을 하는 것은, 프로그래머에 달려있습니다.
+
+=begin original
+
+There's no reason to limit methods to those that simply access data.
+Methods can do anything at all.  The key point is that they're invoked
+against an object or a class.  Let's say we'd like object methods that
+do more than fetch or set one particular field.
+
+=end original
+
+메소드를 단순한 데이터에 접근하는 것만으로 한정하는 이유는 없습니다.
+메소드는 아무것이라도 될수 있습니다.
+키 포인트는, 메소드는 오브젝트나 클래스를 배경으로 호출되는 것입니다.
+예를들어, 하나의 특별한 필드에서 값을 얻어오거나, 정의하거나 하는 
+이상의 것을 하는 오브젝트 메소드를 나타내봅시다.
+
+    sub exclaim {
+        my $self = shift;
+        return sprintf "Hi, I'm %s, age %d, working with %s",
+            $self->{NAME}, $self->{AGE}, join(", ", @{$self->{PEERS}});
+    }
+
+=begin original
+
+Or maybe even one like this:
+
+=end original
+
+또는, 다음과 같은 것:
+
+    sub happy_birthday {
+        my $self = shift;
+        return ++$self->{AGE};
+    }
+
+=begin original
+
+Some might argue that one should go at these this way:
+
+=end original
+
+다음과 같은 방법으로 한다고 하는 사람도 있을겁니다:
+
+    sub exclaim {
+        my $self = shift;
+        return sprintf "Hi, I'm %s, age %d, working with %s",
+            $self->name, $self->age, join(", ", $self->peers);
+    }
+
+    sub happy_birthday {
+        my $self = shift;
+        return $self->age( $self->age() + 1 );
+    }
+
+=begin original
+
+But since these methods are all executing in the class itself, this
+may not be critical.  There are tradeoffs to be made.  Using direct
+hash access is faster (about an order of magnitude faster, in fact), and
+it's more convenient when you want to interpolate in strings.  But using
+methods (the external interface) internally shields not just the users of
+your class but even you yourself from changes in your data representation.
+
+=end original
+
+하지만, 이 메소드들은 클래스 스스로 모두 실행할 수 있기에, 이것은 
+중요하지 않을 지도 모릅니다.
+트레이드오프가 있습니다.
+직접적인 해쉬의 접근은 그렇지 않은 경우보다도 빨리(실제로는 자릿수차이만큼
+빨리), 문자열을 수정하고 싶은 때에는 보다 편리합니다.
+하지만, 메소드(외부의 인터페이스)를 사용하면, 내부적으로
+클래스를 사용하는 사람만이 아닌, 클래스를 만든 사람스스로가 데이터 표현을 
+수정할 수도 있습니다.
+
+=head1 Class Data
+
+(클래스데이터)
+
+=begin original
+
+What about "class data", data items common to each object in a class?
+What would you want that for?  Well, in your Person class, you might
+like to keep track of the total people alive.  How do you implement that?
+
+=end original
+
+"클래스데이터" - 클래스의 각각의 오브젝트에 공통의 데이터아이템 - 이라는 것은
+뭘까요? 뭐 때문에 클래스데이터가 필요할까요?
+아마 Person 클래스에서는 살아 있는 사람들의 총수를 알아두고 싶겠죠?
+
+=begin original
+
+You I<could> make it a global variable called $Person::Census.  But about
+only reason you'd do that would be if you I<wanted> people to be able to
+get at your class data directly.  They could just say $Person::Census
+and play around with it.  Maybe this is ok in your design scheme.
+You might even conceivably want to make it an exported variable.  To be
+exportable, a variable must be a (package) global.  If this were a
+traditional module rather than an object-oriented one, you might do that.
+
+=end original
+
+$Person::Census 라고 불리는 글로벌 변수에서 그런 것이 I<가능합니다>.
+하지만, 그렇게 하는 유일한 이유는, 사람들이 직접 클래스데이터를 
+얻을 수 있도록 하고싶을 경우입니다.
+$Person::Census 라고 말하는 것만으로, 그것을 건드릴 수가 있습니다.
+당신의 생각으로는, 그런 것은 상관없을 지도 모르겠습니다.
+혹시나, 변수가 가지고 나가는 것도 바라고 있을지도 모르겠습니다.
+가지고 나간다면, (패키지의) 글로벌 변수가 아니면 안됩니다.
+이것이 오브젝트지향적인 모듈이 아닌, 전통적인 모듈이면,
+그렇게 하면 될겁니다.
+
+=begin original
+
+While this approach is expected in most traditional modules, it's
+generally considered rather poor form in most object modules.  In an
+object module, you should set up a protective veil to separate interface
+from implementation.  So provide a class method to access class data
+just as you provide object methods to access object data.
+
+=end original
+
+클래스 변수를 패키지의 글로벌 변수로 하는 방법은, 대부분의 전통적인 
+모듈에서 기대하고 있습니다.
+하지만, 이런 방법은, 일반적으로 대부분의 오브젝트 지향의 모듈에서는,
+오히려 어리석은 것이라고 생각합니다.
+오브젝트지향의 모듈에서는, 데이터를 보호하는 베일을 설치하고, 
+구성과 인터페이스를 분리합니다.
+하지만, 오브젝트 데이터에 접근하는 오브젝트 메소드를 
+제공하는 것처럼, 클래스 데이터에 접근하는 클래스메소드를 제공합니다.
+
+=begin original
+
+So, you I<could> still keep $Census as a package global and rely upon
+others to honor the contract of the module and therefore not play around
+with its implementation.  You could even be supertricky and make $Census a
+tied object as described in L<perltie>, thereby intercepting all accesses.
+
+=end original
+
+그래서, 아직 $Census 를 패키지의 글로벌 변수로 계속하는 것이,
+I<가능하고>, 다른 사람이 모듈의 계약을 지지하고, 그 때문에 
+그 구성을 건드리지 않으면 신뢰하는 것이 I<가능합니다>.
+꽤 트릭키하게, L<perltie> 에 기술되어 있듯, $Census 를 tie 된
+오브젝트로 하는 것도 가능합니다.
+
+=begin original
+
+But more often than not, you just want to make your class data a
+file-scoped lexical.  To do so, simply put this at the top of the file:
+
+=end original
+
+하지만, 대개는 클래스데이터를 파일영역의 렉시컬변수로 하고 싶죠.
+그렇게 하기위해서는, 파일 에 단순히 다음과 같은 것을 두면 됩니다:
+
+    my $Census = 0;
+
+=begin original
+
+Even though the scope of a my() normally expires when the block in which
+it was declared is done (in this case the whole file being required or
+used), Perl's deep binding of lexical variables guarantees that the
+variable will not be deallocated, remaining accessible to functions
+declared within that scope.  This doesn't work with global variables
+given temporary values via local(), though.
+
+=end original
+
+my() 의 영역은, 보통 선언된 블록이 끝날 때(이 경우에서는, 
+모든 파일이 필요하고, 사용될 때)가 기한이지만, Perl 의 
+렉시컬 변수의 깊은 동작은 그 영역 안에서 선언된 변수에 
+접근할 수 있는 사이에, 변수가 할당해제되지 않는 것을 보증합니다. 
+이 것은, local() 에서, 일시적인 값을 주어진 글로벌 변수에서는,
+움직이지 않습니다.
+
+=begin original
+
+Irrespective of whether you leave $Census a package global or make
+it instead a file-scoped lexical, you should make these
+changes to your Person::new() constructor:
+
+=end original
+
+$Census 를 패키지의 글로벌 변수로 할것인가, 대신에,
+파일 영역의 렉시컬 변수로 할 것인가에 상관없이,
+Person::new() 생성자에, 다음같은 변경을 해야합니다.
+
+    sub new {
+        my $class = shift;
+        my $self  = {};
+        $Census++;
+        $self->{NAME}   = undef;
+        $self->{AGE}    = undef;
+        $self->{PEERS}  = [];
+        bless ($self, $class);
+        return $self;
+    }
+
+    sub population {
+        return $Census;
+    }
+
+=begin original
+
+Now that we've done this, we certainly do need a destructor so that
+when Person is destroyed, the $Census goes down.  Here's how
+this could be done:
+
+=end original
+
+이렇게 해서 물론, Person 이 없어질 때에, $Census 를 없애기위해,
+파괴자가 필요합니다. 다음과 같이 합니다.
+
+    sub DESTROY { --$Census }
+
+=begin original
+
+Notice how there's no memory to deallocate in the destructor?  That's
+something that Perl takes care of for you all by itself.
+
+=end original
+
+파괴자 안에서, 할당해제하기 위한 메모리가 없는 것을 어떻게 해서 
+알수 있을 까요?
+그것은 Perl 스스로가 알아서 해줍니다.
+
+=begin original
+
+Alternatively, you could use the Class::Data::Inheritable module from
+CPAN.
+
+=end original
+
+대신에, CPAN에서 Class::Data::Inheritable 모듈을 사용할 수도 있습니다.
+
+=head2 Accessing Class Data
+
+(클래스데이터에 접근하기)
+
+=begin original
+
+It turns out that this is not really a good way to go about handling
+class data.  A good scalable rule is that I<you must never reference class
+data directly from an object method>.  Otherwise you aren't building a
+scalable, inheritable class.  The object must be the rendezvous point
+for all operations, especially from an object method.  The globals
+(class data) would in some sense be in the "wrong" package in your
+derived classes.  In Perl, methods execute in the context of the class
+they were defined in, I<not> that of the object that triggered them.
+Therefore, namespace visibility of package globals in methods is unrelated
+to inheritance.
+
+=end original
+
+클래스데이터를 항상 다루는 방법은, 정말 좋지 않은 것을 알 수 있습니다.
+충분히 확장할 수 있는 룰은, I<오브젝트 메소드에서, 직접 클래스데이터를 
+참조하지 않는다> 는 것입니다.
+그렇지 않으면, 확장할 수 있고, 계승할 수 있는 클래스는 만들 수 없습니다.
+오브젝트는, 모든 오퍼레이션을 위해, 랑데뷰 포인트에 없으면 안됩니다.
+특히, 그 중에서도 오브젝트 메소드에서는, 글로벌 변수(클래스 데이터)는, 
+어떤 의미에서, 파생 클래스 안에서, "다른" 패키지에 있습니다.
+Perl 에서는, 메소드는 메소드가 정의된 클래스 안의 컨텍스트에서
+실행하는 것이고, 메소드가 움직인 오브젝트의 컨텍스트가 I<아닙니다>.
+그 때문에, 이름공간 - 메소드안에서, 눈에 보이는 패키지의 글로벌 변수의 -
+은 계승과 관계없습니다.
+
+=begin original
+
+Got that?  Maybe not.  Ok, let's say that some other class "borrowed"
+(well, inherited) the DESTROY method as it was defined above.  When those
+objects are destroyed, the original $Census variable will be altered,
+not the one in the new class's package namespace.  Perhaps this is what
+you want, but probably it isn't.
+
+=end original
+
+그 이름공간을 얻을 수 있을까요? 아마도 무리입니다.
+그럼 예를 들어보죠. 다른 클래스가 위에서 정의되어 있는(Person 클래스) 
+DESTROY 메소드를 (아마도 계승된) "빌렸다"고 합시다.
+이 다른 클래스의 오브젝트들이 파괴된다면, 오리지널 $Census 변수는 
+변화되게 됩니다.
+새로운 클래스의 패키지의 이름공간의 $Census 가 아닙니다.
+혹여나, 이것은 당신이 바라던 바일지도 모르겠지만, 십중팔구 다를 것입니다.
+
+=begin original
+
+Here's how to fix this.  We'll store a reference to the data in the
+value accessed by the hash key "_CENSUS".  Why the underscore?  Well,
+mostly because an initial underscore already conveys strong feelings
+of magicalness to a C programmer.  It's really just a mnemonic device
+to remind ourselves that this field is special and not to be used as
+a public data member in the same way that NAME, AGE, and PEERS are.
+(Because we've been developing this code under the strict pragma, prior
+to perl version 5.004 we'll have to quote the field name.)
+
+=end original
+
+이것을 수정하는 방법이 있습니다.
+해쉬 키 "_CENSUS"로, 접근된 값의 데이터에 리퍼런스를 부여합니다.
+왜 언더바가 붙느냐면, 아마도 최초의 언더바는 항상 C 프로그래머의 
+신기한 감각을 전하기 때문입니다. 이 필드가 특수하고, NAME , AGE, PEERS 처럼 
+퍼블릭한 데이터메소드가 아니라는 것을 생각하면, 단순한 기억을 도와주는 
+궁리입니다.
+(이 코드는, strict 프라그마를 붙여서 개발하고 있기에, 
+perl 5.004 보다 낡은 버젼이라면 필드 이름을 인용하지 않으면 안될겁니다)
+
+    sub new {
+        my $class = shift;
+        my $self  = {};
+        $self->{NAME}     = undef;
+        $self->{AGE}      = undef;
+        $self->{PEERS}    = [];
+        # "private" data
+        $self->{"_CENSUS"} = \$Census;
+        bless ($self, $class);
+        ++ ${ $self->{"_CENSUS"} };
+        return $self;
+    }
+
+    sub population {
+        my $self = shift;
+        if (ref $self) {
+            return ${ $self->{"_CENSUS"} };
+        } else {
+            return $Census;
+        }
+    }
+
+    sub DESTROY {
+        my $self = shift;
+        -- ${ $self->{"_CENSUS"} };
+    }
+
+=head2 Debugging Methods
+
+(메소드 디버깅)
+
+=begin original
+
+It's common for a class to have a debugging mechanism.  For example,
+you might want to see when objects are created or destroyed.  To do that,
+add a debugging variable as a file-scoped lexical.  For this, we'll pull
+in the standard Carp module to emit our warnings and fatal messages.
+That way messages will come out with the caller's filename and
+line number instead of our own; if we wanted them to be from our own
+perspective, we'd just use die() and warn() directly instead of croak()
+and carp() respectively.
+
+=end original
+
+클래스에 디버그의 매커니즘이 있는 것은, 일반적입니다.
+예를듦녀, 오브젝트가 만들어졌는지 파괴되었을 때에 디버그 정보를 보고싶겠죠?
+그렇게 하기위해, 디버그의 값을 파일영역의 렉시컬 변수에 넣습니다.
+이 때문에, 경고과 치명적인 메시지를 내는 표준의 Carp 모듈을 호출할 겁니다.
+이 방법에 의해, 자기자신의 메시지 대신에 caller 의 파일이름과 줄 수와 함께
+경고가 나옵니다.
+만약, 자기자신의 관점에서, 경고나 치명적인 메시지를 보고 싶다면, 
+croak() 대신에 그냥 die() 나 warn() 을 직접 사용하면 됩니다.
+
+    use Carp;
+    my $Debugging = 0;
+
+=begin original
+
+Now add a new class method to access the variable.
+
+=end original
+
+그럼, 새로운 클래스메소드에 변수의 접근을 넣어봅다.
+
+    sub debug {
+        my $class = shift;
+        if (ref $class)  { confess "Class method called as object method" }
+        unless (@_ == 1) { confess "usage: CLASSNAME->debug(level)" }
+        $Debugging = shift;
+    }
+
+=begin original
+
+Now fix up DESTROY to murmur a bit as the moribund object expires:
+
+=end original
+
+그럼, DESTROY 를 만져서, 소멸하려는 오브젝트가 사라질 때에 
+조금 경고를 내도록 하겠습니다.
+
+    sub DESTROY {
+        my $self = shift;
+        if ($Debugging) { carp "Destroying $self " . $self->name }
+        -- ${ $self->{"_CENSUS"} };
+    }
+
+=begin original
+
+One could conceivably make a per-object debug state.  That
+way you could call both of these:
+
+=end original
+
+혹시나, 오브젝트마다 디버상태를 가지고 싶을 지도 모르겠습니다.
+양쪽 모두 할 수 있는 방법이 있습니다.
+
+    Person->debug(1);   # entire class
+    $him->debug(1);     # just this object
+
+=begin original
+
+To do so, we need our debugging method to be a "bimodal" one, one that
+works on both classes I<and> objects.  Therefore, adjust the debug()
+and DESTROY methods as follows:
+
+=end original
+
+이렇게 하기 위해서는, 디버그메소드는 "이항" 메소드가 아니면 안됩니다.
+클래스 I<와> 오브젝트 로 움직이는 메소드인 겁니다.
+이 때문에 debug() 와 DESTROY 메소드를 다음처럼 수정합니다.
+
+    sub debug {
+        my $self = shift;
+        confess "usage: thing->debug(level)"    unless @_ == 1;
+        my $level = shift;
+        if (ref($self))  {
+            $self->{"_DEBUG"} = $level;		# just myself
+        } else {
+            $Debugging        = $level;         # whole class
+        }
+    }
+
+    sub DESTROY {
+        my $self = shift;
+        if ($Debugging || $self->{"_DEBUG"}) {
+            carp "Destroying $self " . $self->name;
+        }
+        -- ${ $self->{"_CENSUS"} };
+    }
+
+=begin original
+
+What happens if a derived class (which we'll call Employee) inherits
+methods from this Person base class?  Then C<< Employee->debug() >>, when called
+as a class method, manipulates $Person::Debugging not $Employee::Debugging.
+
+=end original
+
+(Employee 라고 불리는) 파생클래스가 Person 기본 클래스에서 메소드를 
+계승하면, 뭐가 발생할까요?
+C<< Employee->debug() >> 는 클래스메소드로써 호출된 경우,
+$Employee::Debugging 이 아니라, $Person::Debugging 을 조작합니다.
+
+=head2 Class Destructors
+
+(클래스 파괴자)
+
+=begin original
+
+The object destructor handles the death of each distinct object.  But sometimes
+you want a bit of cleanup when the entire class is shut down, which
+currently only happens when the program exits.  To make such a
+I<class destructor>, create a function in that class's package named
+END.  This works just like the END function in traditional modules,
+meaning that it gets called whenever your program exits unless it execs
+or dies of an uncaught signal.  For example,
+
+=end original
+
+오브젝트의 파괴자는, 각각의 다른 오브젝트마다 죽음을 취급합니다.
+그러나, 클래스 전체의 셧다운 - 이것은 현재 프로그램이 종료한 때에 발생합니다 - 
+조금 삭제가 필요한 때도 있습니다. 
+그런 I<클래스 파괴자> 를 만들기 위해, 
+클래스 패키지 안에, END 라고 이름지어진 함수를 만듭니다.
+END 의 움직임은 전통적인 모듈의 END 함수와 꽤 비슷합니다.
+프로그램이 실행되지 않았는지 얻을 수 없는 신호로 죽어,
+프로그램이 종료한 때에 언제라도 호출됩니다.
+
+    sub END {
+        if ($Debugging) {
+            print "All persons are going away now.\n";
+        }
+    }
+
+=begin original
+
+When the program exits, all the class destructors (END functions) are
+be called in the opposite order that they were loaded in (LIFO order).
+
+=end original
+
+프로그램이 종료한 때, 모든 클래스 파괴자(END 함수)는 , 
+클래스가 로드되는 것과 반대의 순서(LIFO 순서)로 호출됩니다.
+
+=head2 Documenting the Interface
+
+(인터페이스를 문서화)
+
+=begin original
+
+And there you have it: we've just shown you the I<implementation> of this
+Person class.  Its I<interface> would be its documentation.  Usually this
+means putting it in pod ("plain old documentation") format right there
+in the same file.  In our Person example, we would place the following
+docs anywhere in the Person.pm file.  Even though it looks mostly like
+code, it's not.  It's embedded documentation such as would be used by
+the pod2man, pod2html, or pod2text programs.  The Perl compiler ignores
+pods entirely, just as the translators ignore code.  Here's an example of
+some pods describing the informal interface:
+
+=end original
+
+그리고, 문서가 있습니다: 지금까지, 이 Person 클래스의 I<구성> 을 
+보여주고 있습니다.
+Person 클래스의 I<인터페이스> 는, Person 클래스의 문서가 됩니다.
+보통, 이것은 같은 파일에 pod("plain old documentation") 의 
+포맷으로 문서를 두는 것을 의미합니다.
+Person 의 예제에서, Person.pm 파일의 안에, 아래에 계속할 문서를 배치합니다.
+예를들어, 이 문서가 대부분 코드로 보여도, 다른것입니다.
+이것은 문서가 심어져있는 것이고, pod2man 이나, pod2html 나, pod2text 
+프로그램에서 사용됩니다.
+Perl 의 컴파일러는 pod 를 완전 무시합니. 
+번역자가 코드를 무시하는 것과 같습니다.
+약식의 인터페이스를 기술하는 pod 의 예제입니다:
+
+    =head1 NAME
+
+    Person - class to implement people
+
+    =head1 SYNOPSIS
+
+     use Person;
+
+     #################
+     # class methods #
+     #################
+     $ob    = Person->new;
+     $count = Person->population;
+
+     #######################
+     # object data methods #
+     #######################
+
+     ### get versions ###
+         $who   = $ob->name;
+         $years = $ob->age;
+         @pals  = $ob->peers;
+
+     ### set versions ###
+         $ob->name("Jason");
+         $ob->age(23);
+         $ob->peers( "Norbert", "Rhys", "Phineas" );
+
+     ########################
+     # other object methods #
+     ########################
+
+     $phrase = $ob->exclaim;
+     $ob->happy_birthday;
+
+    =head1 DESCRIPTION
+
+    The Person class implements dah dee dah dee dah....
+
+=begin original
+
+That's all there is to the matter of interface versus implementation.
+A programmer who opens up the module and plays around with all the private
+little shiny bits that were safely locked up behind the interface contract
+has voided the warranty, and you shouldn't worry about their fate.
+
+=end original
+
+인터페페이스 대 구성의 문제가 있습니다.
+모듈을 열고, 인터페이스의 계약의 뒤에 있는, 안전하게 키를 잠군, 
+모든 프라이베이트한 것에 빛나는 작은 것을 만지는 프로그래머에게는,
+보증이 통하지 않습니다. 그들의 운명을 걱정하지 않아도 됩니다.
+
+=head1 Aggregation
+
+(집약)
+
+=begin original
+
+Suppose you later want to change the class to implement better names.
+Perhaps you'd like to support both given names (called Christian names,
+irrespective of one's religion) and family names (called surnames), plus
+nicknames and titles.  If users of your Person class have been properly
+accessing it through its documented interface, then you can easily change
+the underlying implementation.  If they haven't, then they lose and
+it's their fault for breaking the contract and voiding their warranty.
+
+=end original
+
+나중에, 보다 좋은 이름을 구성하기 위해, 클래스를 바꾸고 싶어졌다고 합시다.
+아마, 첫번째 이름(그 사람의 종교에 상관없이 크리스챤 네임이라고 부릅니다)과
+가족 이름(이름자라고 불리는) 모두 그것에 더해,
+닉네임이라는 칭호를 지원하고 싶다고 하겠습니다.
+만약 Person 클래스를 사용하는 사람이 이 문서에 쓰인 인터페이스를 
+통해서 적절히 접근하면, 단순히 그 아래에 있는 구성을 변경할 수 있습니다.
+만약 그렇지 않으면, Person 클래스를 사용하는 사람은 지게됩니다. 
+계약을 부수고, 보증을 잃어버리거나 합니다. 
+
+=begin original
+
+To do this, we'll make another class, this one called Fullname.  What's
+the Fullname class look like?  To answer that question, you have to
+first figure out how you want to use it.  How about we use it this way:
+
+=end original
+
+다음처럼 해서, 다른 클래스를 만듭니다.
+이 클래스는, Fullname 이라는 클래스입니다.
+Fullname 클래스라는 것은 어떤 것일까요?
+이 질문에 답하기위해, 맨처음에 그것을 어떻게 사용하고 싶은 가를 
+파악해야합니다.
+Fullname 클래스는 다음처럼 사용합니다.
+
+    $him = Person->new();
+    $him->fullname->title("St");
+    $him->fullname->christian("Thomas");
+    $him->fullname->surname("Aquinas");
+    $him->fullname->nickname("Tommy");
+    printf "His normal name is %s\n", $him->name;
+    printf "But his real name is %s\n", $him->fullname->as_string;
+
+=begin original
+
+Ok.  To do this, we'll change Person::new() so that it supports
+a full name field this way:
+
+=end original
+
+좋습니다. 이렇게 하기 위해 Person::new() 를 풀네임의 필드를 지원도록, 
+다음과 같이 바꾸었습니다:
+
+    sub new {
+        my $class = shift;
+        my $self  = {};
+        $self->{FULLNAME} = Fullname->new();
+        $self->{AGE}      = undef;
+        $self->{PEERS}    = [];
+        $self->{"_CENSUS"} = \$Census;
+        bless ($self, $class);
+        ++ ${ $self->{"_CENSUS"} };
+        return $self;
+    }
+
+    sub fullname {
+        my $self = shift;
+        return $self->{FULLNAME};
+    }
+
+=begin original
+
+Then to support old code, define Person::name() this way:
+
+=end original
+
+그리고, 낡은 코드를 지원하기 위해, Person::name() 을 다음처럼 
+정의합니다 : 
+
+    sub name {
+        my $self = shift;
+        return $self->{FULLNAME}->nickname(@_)
+          ||   $self->{FULLNAME}->christian(@_);
+    }
+
+=begin original
+
+Here's the Fullname class.  We'll use the same technique
+of using a hash reference to hold data fields, and methods
+by the appropriate name to access them:
+
+=end original
+
+Fullname 클래스가 있습니다.
+데이터ㄹ드를 가진 것에 해쉬리퍼런스를 사용한 것과 같은 테크닉을 사용해서,
+데이터 필드에 접근하는 것에 적절한 이름으로 메소드를 사용합니다:
+
+    package Fullname;
+    use strict;
+
+    sub new {
+        my $class = shift;
+        my $self  = {
+            TITLE       => undef,
+            CHRISTIAN   => undef,
+            SURNAME     => undef,
+            NICK        => undef,
+        };
+        bless ($self, $class);
+        return $self;
+    }
+
+    sub christian {
+        my $self = shift;
+        if (@_) { $self->{CHRISTIAN} = shift }
+        return $self->{CHRISTIAN};
+    }
+
+    sub surname {
+        my $self = shift;
+        if (@_) { $self->{SURNAME} = shift }
+        return $self->{SURNAME};
+    }
+
+    sub nickname {
+        my $self = shift;
+        if (@_) { $self->{NICK} = shift }
+        return $self->{NICK};
+    }
+
+    sub title {
+        my $self = shift;
+        if (@_) { $self->{TITLE} = shift }
+        return $self->{TITLE};
+    }
+
+    sub as_string {
+        my $self = shift;
+        my $name = join(" ", @$self{'CHRISTIAN', 'SURNAME'});
+        if ($self->{TITLE}) {
+            $name = $self->{TITLE} . " " . $name;
+        }
+        return $name;
+    }
+
+    1;
+
+=begin original
+
+Finally, here's the test program:
+
+=end original
+
+마지막으로, 테스트프로그램입니다:
+
+    #!/usr/bin/perl -w
+    use strict;
+    use Person;
+    sub END { show_census() }
+
+    sub show_census ()  {
+        printf "Current population: %d\n", Person->population;
+    }
+
+    Person->debug(1);
+
+    show_census();
+
+    my $him = Person->new();
+
+    $him->fullname->christian("Thomas");
+    $him->fullname->surname("Aquinas");
+    $him->fullname->nickname("Tommy");
+    $him->fullname->title("St");
+    $him->age(1);
+
+    printf "%s is really %s.\n", $him->name, $him->fullname->as_string;
+    printf "%s's age: %d.\n", $him->name, $him->age;
+    $him->happy_birthday;
+    printf "%s's age: %d.\n", $him->name, $him->age;
+
+    show_census();
+
+=head1 Inheritance
+
+(계승)
+
+=begin original
+
+Object-oriented programming systems all support some notion of
+inheritance.  Inheritance means allowing one class to piggy-back on
+top of another one so you don't have to write the same code again and
+again.  It's about software reuse, and therefore related to Laziness,
+the principal virtue of a programmer.  (The import/export mechanisms in
+traditional modules are also a form of code reuse, but a simpler one than
+the true inheritance that you find in object modules.)
+
+=end original
+
+오브젝트지향프로그래밍의 시스템은, 모두 계승을 지원합니다.
+계승은, 하나의 클래스가 다른 클래스의 위에 얹어진다는 것을 의미합ㄴ디ㅏ.
+그래서, 같은 코드를 반복하고, 반복해서 쓰지않아도 됩니다.
+즉, 소프트웨어의 재이용입니다.
+그리고, 부정 - 프로그램의 중요한 미덕 - 에 관련있습니다.
+(전통적인 모듈의 import/export 매커니즘도 코드의 재 이용형태입니다.
+하지만, 오브젝트모듈에서 보이는, 진정한 계승보다도 단순한 것입니다)
+
+=begin original
+
+Sometimes the syntax of inheritance is built into the core of the
+language, and sometimes it's not.  Perl has no special syntax for
+specifying the class (or classes) to inherit from.  Instead, it's all
+strictly in the semantics.  Each package can have a variable called @ISA,
+which governs (method) inheritance.  If you try to call a method on an
+object or class, and that method is not found in that object's package,
+Perl then looks to @ISA for other packages to go looking through in
+search of the missing method.
+
+=end original
+
+계승의 문법은, 때로 언어의 핵심에 포함되어 있는 것이 있다면,
+ 그렇지 않은 때도 있습니다.
+Perl 은, 하나의 클래스(또는 복수의 클래스)에서, 계승하는 것에 특별한 문법은 
+없습니다.
+그 대신에 의미론적으로 모두 엄격합니다.
+각각의 패키지에는 @ISA 라고 불리는 변수가 있고, @ISA 는 (메소드) 계승을 
+관리하는 것입니다.
+만약 오브젝트가 클래스로, 메소드를 호출하려고 해서, 그 메소드가 
+그 오브젝트의 패키지에는 보이지 않으면, Perl은 발견할 수 없는 
+메소드를 검색하는 동안에 @ISA 를 보고 다른 패키지를 찾으러 갑니다.
+
+=begin original
+
+Like the special per-package variables recognized by Exporter (such as
+@EXPORT, @EXPORT_OK, @EXPORT_FAIL, %EXPORT_TAGS, and $VERSION), the @ISA
+array I<must> be a package-scoped global and not a file-scoped lexical
+created via my().  Most classes have just one item in their @ISA array.
+In this case, we have what's called "single inheritance", or SI for short.
+
+=end original
+
+특별한 패키지마다 Exporter로 나누는 변수(@EXPORT, @EXPORT_OK,
+@EXPORT_FAIL, %EXPORT_TAGS, $VERSION)처럼 
+@ISA 배열은 패키지영역의 글로벌 변수가 I<아니면 안되고>, 
+my() 로 만들어진 파일영역의 렉시컬 변수여서는 I<안됩니다>.
+대부분의 클래스에서, @ISA 배열에는 하나밖에 없습니다.
+이 것은 "단순 계승"이라고 불리는 것입니다.
+생략해서 SI라고도 불립니다.
+
+=begin original
+
+Consider this class:
+
+=end original
+
+이 클래스에 대해서, 생각해 봅시다:
+
+    package Employee;
+    use Person;
+    @ISA = ("Person");
+    1;
+
+=begin original
+
+Not a lot to it, eh?  All it's doing so far is loading in another
+class and stating that this one will inherit methods from that
+other class if need be.  We have given it none of its own methods.
+We rely upon an Employee to behave just like a Person.
+
+=end original
+
+많지 않죠? 지금, 이 Employee 클래스가 하는 것은 다른 클래스를 로드하는 것과,
+필요하다면, 다른 클래스에서 메소드를 계승하는 것을 시작하는 것뿐입니다.
+Employee 클래스에는, 각자의 메소드를 주어서는 안됩니다.
+하지만, Employee 클래스에 Person 클래스같은 행동을 합니다.
+
+=begin original
+
+Setting up an empty class like this is called the "empty subclass test";
+that is, making a derived class that does nothing but inherit from a
+base class.  If the original base class has been designed properly,
+then the new derived class can be used as a drop-in replacement for the
+old one.  This means you should be able to write a program like this:
+
+=end original
+
+이런 빈 클래스를 만드는 것은 "빈 서브클래스테스트"라고 불립니다.
+이것은 기본 클래스에서 계승하는 것 이외에는, 아무것도 하지 않는 파생클래스를 
+만드는 것입니다. 오리지널의 기본 클래스는 적절히 설계되어 있으면, 
+새로운 파생클래스는, 낡은 것의 삽입식의 치환으로써 사용됩니다.
+이것이 의미하는 것은 다음과 같은 프로그램을 쓸 수 있다는 것입니다:
+
+    use Employee;
+    my $empl = Employee->new();
+    $empl->name("Jason");
+    $empl->age(23);
+    printf "%s is age %d.\n", $empl->name, $empl->age;
+
+=begin original
+
+By proper design, we mean always using the two-argument form of bless(),
+avoiding direct access of global data, and not exporting anything.  If you
+look back at the Person::new() function we defined above, we were careful
+to do that.  There's a bit of package data used in the constructor,
+but the reference to this is stored on the object itself and all other
+methods access package data via that reference, so we should be ok.
+
+=end original
+
+적절한 설계에 의해, 그렇게 될 수 있습니다.
+적절한 설계라는 것은 항상 bless() 에 2개의 인수를 주고, 글로벌한 데이터에
+직접 접근하는 것을 피하고, 아무것도 export 하지 않는 설계를 말합니다.
+위 처럼 정의고 있는 Person::new() 함수를 살펴보면, 이런 설계를 취하고 있습니다.
+생성자로 사용되는 패키지 데이터가 조금 있지만, 패키지 데이터로의 리퍼런스가 
+오브젝트 자신에게, 쌓여져 있고, 다른 모든 메소드는 그 리퍼런스를 통해서, 
+패키지데이터에 접근합니다. 그러면 됩니다.
+
+=begin original
+
+What do we mean by the Person::new() function -- isn't that actually
+a method?  Well, in principle, yes.  A method is just a function that
+expects as its first argument a class name (package) or object
+(blessed reference).   Person::new() is the function that both the
+C<< Person->new() >> method and the C<< Employee->new() >> method end
+up calling.  Understand that while a method call looks a lot like a
+function call, they aren't really quite the same, and if you treat them
+as the same, you'll very soon be left with nothing but broken programs.
+First, the actual underlying calling conventions are different: method
+calls get an extra argument.  Second, function calls don't do inheritance,
+but methods do.
+
+=end original
+
+Person::new() 함수로, 의도한 것 -- 실제는 메소드가 아닌가요?
+아마, 원칙적으로는 메소드입니다.
+메소드는 마침 그 첫번째 인수에 클래스 이름(패키지)이나, 
+오브젝트(bless 된 리퍼런스)를 기대하는 함수입니다.
+Person::new()는 결국 C<< Person->new() >> 메소드와 C<< Employee->new() >>
+메소드의 양쪽이 호출하고 있는 함수입니다.
+메소드호출이 함수호출과 매우 비슷하면서, 사실은 전 같은 것은 없고, 
+이 2개를 같은 것으로 취급하면, 곧 무너진 프로그램만 남지 않을 것을 
+이해해주세요.
+첫번째, 현실에 기초가 되는 호출의 관례가 다릅니다:
+메소드호출은, 특별한 인수를 얻습니다.
+두번째, 함수호출은 계승을 하지 않습니다만, 메소드 호출은 계승을 합니다.
+
+=begin original
+
+        Method Call             Resulting Function Call
+        -----------             ------------------------
+        Person->new()           Person::new("Person")
+        Employee->new()         Person::new("Employee")
+
+=end original
+
+        메소드호출              결과로써 함수호출
+        -----------             ------------------------
+        Person->new()           Person::new("Person")
+        Employee->new()         Person::new("Employee")
+
+=begin original
+
+So don't use function calls when you mean to call a method.
+
+=end original
+
+그렇기때문에, 메소드를 호출하려고 할 때에 함수호출을 사용하지 마세요.
+
+=begin original
+
+If an employee is just a Person, that's not all too very interesting.
+So let's add some other methods.  We'll give our employee
+data fields to access their salary, their employee ID, and their
+start date.
+
+=end original
+
+종업원이 단순히 Person 이라면, 그것은 별로 재미없습니다.
+그럼, 다른 메소드를 추가해볼까요?
+종업원에게 데이터필드를 설계하고, 종업원의 급여와 종업원의 ID와 입사일에 
+접근해봅시다.
+
+=begin original
+
+If you're getting a little tired of creating all these nearly identical
+methods just to get at the object's data, do not despair.  Later,
+we'll describe several different convenience mechanisms for shortening
+this up.  Meanwhile, here's the straight-forward way:
+
+=end original
+
+이 오브젝트들의 데이터를 얻도록, 대부분 같은 메소드들을 
+만드는 것에 조금 지겹다고해도, 낙담하지 마세요.
+나중에 이런 작업을 단축하기 위한 몇 개의 편리한 매커니즘에 대해 설명하겠습니다.
+반대로, 단순한 방법은 다음과 같습니다:
+
+    sub salary {
+        my $self = shift;
+        if (@_) { $self->{SALARY} = shift }
+        return $self->{SALARY};
+    }
+
+    sub id_number {
+        my $self = shift;
+        if (@_) { $self->{ID} = shift }
+        return $self->{ID};
+    }
+
+    sub start_date {
+        my $self = shift;
+        if (@_) { $self->{START_DATE} = shift }
+        return $self->{START_DATE};
+    }
+
+=head2 Overridden Methods
+
+(메소드의 오버라이드)
+
+=begin original
+
+What happens when both a derived class and its base class have the same
+method defined?  Well, then you get the derived class's version of that
+method.  For example, let's say that we want the peers() method called on
+an employee to act a bit differently.  Instead of just returning the list
+of peer names, let's return slightly different strings.  So doing this:
+
+=end original
+
+파생클래스와 그 기본 클래스의 양쪽이 같은 이름의 메소드를 정의한다면,
+뭐가 발생할까요?
+아마도, 그 메소드는 파생클래스의 것을 얻습니다.
+예를 들면, 종업원으로 peers() 메소드를 호출하면, Person 과는 조금 다른 
+동작을 하게하고 싶다고 합니다.
+동료의 이름 리스트를 반환하는 것 대신에, 조금 다른 문자열을 반환합시다.
+다음처럼 합니다:
+
+    $empl->peers("Peter", "Paul", "Mary");
+    printf "His peers are: %s\n", join(", ", $empl->peers);
+
+=begin original
+
+will produce:
+
+=end original
+
+그러면 다음처럼 됩니다:
+
+    His peers are: PEON=PETER, PEON=PAUL, PEON=MARY
+
+=begin original
+
+To do this, merely add this definition into the Employee.pm file:
+
+=end original
+
+이렇게 하기위해서는, 단순히 이 정의를 Employee.pm 파일에 덧붙일 뿐입니다.
+
+    sub peers {
+        my $self = shift;
+        if (@_) { @{ $self->{PEERS} } = @_ }
+        return map { "PEON=\U$_" } @{ $self->{PEERS} };
+    }
+
+=begin original
+
+There, we've just demonstrated the high-falutin' concept known in certain
+circles as I<polymorphism>.  We've taken on the form and behaviour of
+an existing object, and then we've altered it to suit our own purposes.
+This is a form of Laziness.  (Getting polymorphed is also what happens
+when the wizard decides you'd look better as a frog.)
+
+=end original
+
+여기에서 딱 I<다성능(polymorphism)> 으로써 널리 알려진, 커다란 
+컨셉의 데모를 하고 있습니다.
+존재하는 오브젝트의 형태와 행동을 담당하고, 우리 자신의 목적에 
+적응하도록, 존재하는 오브젝트를 변경합니다.
+이것은 부정의 형태입니다.
+(polymorph 시키는 것은 마법사가 당신을 개구리로 보이게 할 때에 발생합니다)
+
+=begin original
+
+Every now and then you'll want to have a method call trigger both its
+derived class (also known as "subclass") version as well as its base class
+(also known as "superclass") version.  In practice, constructors and
+destructors are likely to want to do this, and it probably also makes
+sense in the debug() method we showed previously.
+
+=end original
+
+매번, 파생클래스("서브클래스"라고도 알려진 클래스)와 그 기본 클래스
+("슈퍼 클래스라고 알려진 클래스)도 똑같게 양쪽을 트리거를 메소드로
+호출하고 싶지는 않나요?
+실제로, 생성자와 파괴자는 그렇게 하는 것을 기대하고 있을테고, 
+앞서 본, debug() 메소드에서는 십중팔구 그럴 겁니다.
+
+=begin original
+
+To do this, add this to Employee.pm:
+
+=end original
+
+이렇게 하기해서 Employee.pm 에 다음처럼 추가합니다:
+
+    use Carp;
+    my $Debugging = 0;
+
+    sub debug {
+        my $self = shift;
+        confess "usage: thing->debug(level)"    unless @_ == 1;
+        my $level = shift;
+        if (ref($self))  {
+            $self->{"_DEBUG"} = $level;
+        } else {
+            $Debugging = $level;            # whole class
+        }
+        Person::debug($self, $Debugging);   # don't really do this
+    }
+
+=begin original
+
+As you see, we turn around and call the Person package's debug() function.
+But this is far too fragile for good design.  What if Person doesn't
+have a debug() function, but is inheriting I<its> debug() method
+from elsewhere?  It would have been slightly better to say
+
+=end original
+
+알고 있듯이 Employee에서 방향을 바꿔, Person 패키지의 debug 함수를 호출합니다.
+하지만, 좋은 설계로는 이렇게 하는 것은 꽤 부서지기 쉽습니다.
+Person 이 debug() 함수를 가지고 있지 않으면, I<그> debug() 메소드를 
+다른 곳에서 계승하고 있다면 어떻게 될까요?
+다음처럼 하는 편이 좋을 겁니다.
+
+    Person->debug($Debugging);
+
+=begin original
+
+But even that's got too much hard-coded.  It's somewhat better to say
+
+=end original
+
+하지만, 아직 멀었습니다. 
+다음처럼 하는 편이 좋겠죠?
+
+    $self->Person::debug($Debugging);
+
+=begin original
+
+Which is a funny way to say to start looking for a debug() method up
+in Person.  This strategy is more often seen on overridden object methods
+than on overridden class methods.
+
+=end original
+
+이것은, Person 안에서 debug() 메소드를 찾기 시작하는 쉬운 방법입니다. 
+이 작전은, 오버라이드된 클래스메소드보다도 오버라이드된 오브젝트 메소드로 
+자주 봅니다.
+
+=begin original
+
+There is still something a bit off here.  We've hard-coded our
+superclass's name.  This in particular is bad if you change which classes
+you inherit from, or add others.  Fortunately, the pseudoclass SUPER
+comes to the rescue here.
+
+=end original
+
+아직 조금 더 있습니다.
+슈퍼클래스의 이름을 너무 장황하게 쓰 있습니다.
+계승하는 클래스를 바꿀 것인가, 다른 것을 추가하면 이것은 특히 나쁩니다.
+다행히도 가명 클래스의 SUPER 가 여기에서 도움이 됩니다.
+
+    $self->SUPER::debug($Debugging);
+
+=begin original
+
+This way it starts looking in my class's @ISA.  This only makes sense
+from I<within> a method call, though.  Don't try to access anything
+in SUPER:: from anywhere else, because it doesn't exist outside
+an overridden method call. Note that C<SUPER> refers to the superclass of
+the current package, I<not> to the superclass of C<$self>.
+
+=end original
+
+이렇게 하면, 자신의 클래스의 @ISA 를 빼기 시작합니다.
+이것은, 메소드 호출 I<안> 에서 의미를 없애는 것뿐입니다.
+다른 곳에서도, SUPER:: 의 무엇도, 접근하려고 하지 말아주세요.
+이런 것은 덮어쓴 메소드 호출의 바깥쪽에는 존재하지 않기 때문입니다.
+Note that C<SUPER> refers to the superclass of
+the current package, I<not> to the superclass of C<$self>.
+(TBT)
+
+=begin original
+
+Things are getting a bit complicated here.  Have we done anything
+we shouldn't?  As before, one way to test whether we're designing
+a decent class is via the empty subclass test.  Since we already have
+an Employee class that we're trying to check, we'd better get a new
+empty subclass that can derive from Employee.  Here's one:
+
+=end original
+
+사태는 조금 복잡하게 되었습니다.
+해서는 안되는 것을 아시겠죠?
+지금까지처럼 제대로 클래스인 어떤지를 테스트하는 하나의 방법은, 
+빈 서브클래스를 경유하는 테스트입니다.
+이미 체크하고 있는 Employee 클래스가 있기때문에, 
+Employee 에서 새로운 빈 서브클래스를 생성할 수 있습니다.
+다음처럼요:
+
+    package Boss;
+    use Employee;        # :-)
+    @ISA = qw(Employee);
+
+=begin original
+
+And here's the test program:
+
+=end original
+
+테스트프로그램입니다:
+
+    #!/usr/bin/perl -w
+    use strict;
+    use Boss;
+    Boss->debug(1);
+
+    my $boss = Boss->new();
+
+    $boss->fullname->title("Don");
+    $boss->fullname->surname("Pichon Alvarez");
+    $boss->fullname->christian("Federico Jesus");
+    $boss->fullname->nickname("Fred");
+
+    $boss->age(47);
+    $boss->peers("Frank", "Felipe", "Faust");
+
+    printf "%s is age %d.\n", $boss->fullname->as_string, $boss->age;
+    printf "His peers are: %s\n", join(", ", $boss->peers);
+
+=begin original
+
+Running it, we see that we're still ok.  If you'd like to dump out your
+object in a nice format, somewhat like the way the 'x' command works in
+the debugger, you could use the Data::Dumper module from CPAN this way:
+
+=end original
+
+실행하면, 아직 괜찮습니다.
+훌륭한 포맷으로, 디버거로 'x' 커맨드를 움직이는 방법처럼, 
+오브젝트를 덤프하고 싶다면, CPAN 에서 Data::Dumper 모듈을 
+다음처럼 사용할 수 있습니다.
+
+    use Data::Dumper;
+    print "Here's the boss:\n";
+    print Dumper($boss);
+
+=begin original
+
+Which shows us something like this:
+
+=end original
+
+다음과 같은 것을 볼 수 있습니다.
+
+    Here's the boss:
+    $VAR1 = bless( {
+	 _CENSUS => \1,
+	 FULLNAME => bless( {
+			      TITLE => 'Don',
+			      SURNAME => 'Pichon Alvarez',
+			      NICK => 'Fred',
+			      CHRISTIAN => 'Federico Jesus'
+			    }, 'Fullname' ),
+	 AGE => 47,
+	 PEERS => [
+		    'Frank',
+		    'Felipe',
+		    'Faust'
+		  ]
+       }, 'Boss' );
+
+=begin original
+
+Hm.... something's missing there.  What about the salary, start date,
+and ID fields?  Well, we never set them to anything, even undef, so they
+don't show up in the hash's keys.  The Employee class has no new() method
+of its own, and the new() method in Person doesn't know about Employees.
+(Nor should it: proper OO design dictates that a subclass be allowed to
+know about its immediate superclass, but never vice-versa.)  So let's
+fix up Employee::new() this way:
+
+=end original
+
+흠, 뭐가 빠져 있습빈다.
+급여, 입사일, ID 필드는 어떨까요?
+아마, 그것들에 undef 도 설정되어있지 않습니다.
+그 때문에, 해쉬의 키에, 그것들이 보이지 않는 것입니다.
+Employee 클래스는, 그것 자신의 new() 메소드가 없습니다.
+Person 의 new() 메소드는, Employee 에 대해 알지 못합니다
+(또, 그렇게 하지 않아도 됩니다: 적절한 오브젝트지향설계는 서브클래스가 
+그 바로 위의 수퍼클래스에 대해 알고 있어도 좋다고 지시하고 있습니다.
+ 하지만, 거꾸로 똑같아서는 안됩니다).
+그ㅁ, Employee::new()를 다음처럼 해봅시다:
+
+    sub new {
+        my $class = shift;
+        my $self  = $class->SUPER::new();
+        $self->{SALARY}        = undef;
+        $self->{ID}            = undef;
+        $self->{START_DATE}    = undef;
+        bless ($self, $class);          # reconsecrate
+        return $self;
+    }
+
+=begin original
+
+Now if you dump out an Employee or Boss object, you'll find
+that new fields show up there now.
+
+=end original
+
+Employee 가 Boss 오브젝트를 덤프한다면, 이번에는 새로운 필드가 
+그곳에 나타날 겁니다.
+
+=head2 Multiple Inheritance
+
+(다중상속)
+
+=begin original
+
+Ok, at the risk of confusing beginners and annoying OO gurus, it's
+time to confess that Perl's object system includes that controversial
+notion known as multiple inheritance, or MI for short.  All this means
+is that rather than having just one parent class who in turn might
+itself have a parent class, etc., that you can directly inherit from
+two or more parents.  It's true that some uses of MI can get you into
+trouble, although hopefully not quite so much trouble with Perl as with
+dubiously-OO languages like C++.
+
+=end original
+
+자, 초심자도 오브젝트 지향의 전문가도 혼란시키는 위험을 일으켜도, 괜찮을 때가 
+왔습니다.
+Perl 의 오브젝트 시스템은, 다중상속, 또는 줄여서 MI 라고 알려져 있는 
+찬반양론의 생각을 포함하고 있습니다.
+이것이 의미하고 있는 것은 다음이 전부입니다.
+단지 하나의 부모 클래스 - 지그은, 그 자신이 부모클래스나 그 외에 것을 가지고
+있습니다 - 를 가지는 것이 아니라, 2개 이상의 부모클래스를 가지는 것이 
+가능하다는 것입니다.
+다중상속을 사용하는 것으로, 문제에 직면할 수도 있지만, 
+C++ 같이 애매한 오브젝트지향 언어의 Perl 에서는, 잘만하면 큰 문제가 
+되지않을 수도 있습니다.
+
+=begin original
+
+The way it works is actually pretty simple: just put more than one package
+name in your @ISA array.  When it comes time for Perl to go finding
+methods for your object, it looks at each of these packages in order.
+Well, kinda.  It's actually a fully recursive, depth-first order by
+default (see L<mro> for alternate method resolution orders).
+Consider a bunch of @ISA arrays like this:
+
+=end original
+
+다중상속의 방법은 사실 매우 간단합니다 : @ISA 배열에 2개 이상의 
+패키지이름을 놓으면 되는 것 뿐이죠. Perl 이 오브젝트를 위해, 메소드를 
+찾으러 갈 때가 오면, 순서대로 @ISA 의 패키지를 각각 보게됩니다.
+완전히 재귀적으로 기본값에서는 깊이 우선입니다
+다음과 같은 @ISA 배열의 조합을 생각해보세요.
+
+    @First::ISA    = qw( Alpha );
+    @Second::ISA   = qw( Beta );
+    @Third::ISA    = qw( First Second );
+
+=begin original
+
+If you have an object of class Third:
+
+=end original
+
+Third 클래스의 오브젝트가 있다고 하면,
+
+    my $ob = Third->new();
+    $ob->spin();
+
+=begin original
+
+How do we find a spin() method (or a new() method for that matter)?
+Because the search is depth-first, classes will be looked up
+in the following order: Third, First, Alpha, Second, and Beta.
+
+=end original
+
+spin() 메소드(또는, 덧붙이자면 new()) 를 어떻게 발견하는 것일까요?
+검색은, 깊이 우선이므로, 클래스는 다음의 순서로 조사하게 됩니다.
+Third First Alpha Second Beta 의 순서입니다.
+
+=begin original
+
+In practice, few class modules have been seen that actually
+make use of MI.  One nearly always chooses simple containership of
+one class within another over MI.  That's why our Person
+object I<contained> a Fullname object.  That doesn't mean
+it I<was> one.
+
+=end original
+
+사실, 다중상속이 사용되는 클래스 모듈은 쉽게 볼 수 있습니다.
+언제라도 다중상속 위의 다른 것 안에 단순한 하나의 클래스를 넣은 
+컨테이너선을 고릅니다. Person 오브젝트는 Fullname 오브젝트를 I<넣은>
+오브젝트이기 때문입니다.
+그것이 하나인 것은 아닙니다.
+
+=begin original
+
+However, there is one particular area where MI in Perl is rampant:
+borrowing another class's class methods.  This is rather common,
+especially with some bundled "objectless" classes,
+like Exporter, DynaLoader, AutoLoader, and SelfLoader.  These classes
+do not provide constructors; they exist only so you may inherit their
+class methods.  (It's not entirely clear why inheritance was done
+here rather than traditional module importation.)
+
+=end original
+
+하지만, Perl 에서의 다중상속이 익숙하지 않은 하나의 특별한 영역이 있습니다:
+다른 클래스의 클래스 메소드를 빌려 오는 것입니다.
+이 것은 몇 가지로 나뉘어져 있고, 번들되어 있는 "오브젝트가 없는" 클래스에서 
+특히 그렇습니다. Exporter 나, DynaLoader 나, AutoLoader 나, SelfLoader 가 
+그렇습니다.
+이 클래스들은, 생성자를 제공하지 않습니다.
+이 클래스들은 다른 클래스에서 클래스 메소드를 계승할지도 모르기에 
+존재하고 있습니다.
+
+=begin original
+
+For example, here is the POSIX module's @ISA:
+
+=end original
+예를 들어, POSIX 모듈의 @ISA 는 다음처럼 되어 있습니다:
+
+    package POSIX;
+    @ISA = qw(Exporter DynaLoader);
+
+=begin original
+
+The POSIX module isn't really an object module, but then,
+neither are Exporter or DynaLoader.  They're just lending their
+classes' behaviours to POSIX.
+
+=end original
+
+POSIX 모듈은 실제로는 오브젝트 모듈이 아닙니다.
+하지만, Exporter 도 DynaLoader 도 그렇습니다.
+Exporter 도, DynaLoader 클래스는 클래스 메소드의 행동을 POSIX에서
+빌리고 있는 것 뿐입니다.
+
+=begin original
+
+Why don't people use MI for object methods much?  One reason is that
+it can have complicated side-effects.  For one thing, your inheritance
+graph (no longer a tree) might converge back to the same base class.
+Although Perl guards against recursive inheritance, merely having parents
+who are related to each other via a common ancestor, incestuous though
+it sounds, is not forbidden.  What if in our Third class shown above we
+wanted its new() method to also call both overridden constructors in its
+two parent classes?  The SUPER notation would only find the first one.
+Also, what about if the Alpha and Beta classes both had a common ancestor,
+like Nought?  If you kept climbing up the inheritance tree calling
+overridden methods, you'd end up calling Nought::new() twice,
+which might well be a bad idea.
+
+=end original
+
+왜, 오브젝트 메소드에 다중상속이 사용되지 않는 것일까요?
+하나의 이유는, 복잡한 부작용이 있을 수 있기 때문입니다.
+우선 하나의 예를 들면, 상속의 그래프(트리가 아닌)가 같은 기본 클래스로 
+돌아와 집중합니다.
+Perl 은 재귀적인 상속에 대해 방어하고 있지만, 단순히 공통의 선조를 통해서 
+상호간에 관련된 부모를 가지는 것은, 근친상간을 생각할수 있어도, 
+금지되어 있지는 않습니다.
+만약, 아까전에 본 Third 클래스에 new() 메소드가 Third 클래스의 2개의 
+부모클래스에서, 오버라이드된 생성자를 양쪽에서 호출하려고 하면, 
+어떻게 될까요?
+SUPER 표기는 맨처음 한번밖에 찾을 수 없습니다.
+Alpha 와 Beta 클래스 양쪽이 공통의 선조, 예를 들어 Nought 클래스를 
+가지고 있다면 어떨까요?
+오버라이드된 메소드를 불러 계승트리를 계속 올라가면, 결국 
+그것은 좋지 않을 겁니다.
+
+=head2 UNIVERSAL: The Root of All Objects
+
+(UNIVERSAL: 모든 오브젝트의 근본)
+
+=begin original
+
+Wouldn't it be convenient if all objects were rooted at some ultimate
+base class?  That way you could give every object common methods without
+having to go and add it to each and every @ISA.  Well, it turns out that
+you can.  You don't see it, but Perl tacitly and irrevocably assumes
+that there's an extra element at the end of @ISA: the class UNIVERSAL.
+In version 5.003, there were no predefined methods there, but you could put
+whatever you felt like into it.
+
+=end original
+
+모든 오브젝트가 몇 개인가ㅢ 근본적인 기본 클래스를 근본으로 하고 있다면, 
+편리하겠죠?
+모든 오브젝트에 공통의 메소드를 주는 것에, 각각의 @ISA 에 
+클래스를 추가하지 않고 할 수 있는 방법입니다.
+그래서, 그럴 수 있다는 것을 알 수 있습니다.
+그것을 볼 수는 없지만, Perl 은, 그렇지 않고, 결정적으로 
+@ISA 의 끝에 특별한 요소가 있는 것을 상정하고 있습니다: UNIVERSAL 클래스입니다.
+5.003 에서는, UNIVERSAL 클래스에 다시금 정의되는 메소드는, 
+없지만, UNIVERSAL 클래스에 넣고 싶은 것은 무엇이든 넣을 수 있습니다.
+
+=begin original
+
+However, as of version 5.004 (or some subversive releases, like 5.003_08),
+UNIVERSAL has some methods in it already.  These are builtin to your Perl
+binary, so they don't take any extra time to load.  Predefined methods
+include isa(), can(), and VERSION().  isa() tells you whether an object or
+class "is" another one without having to traverse the hierarchy yourself:
+
+=end original
+
+그러나, 5.004 (또는 5.003_08 같은 몇 개의 임시 릴리즈)에서, 
+UNIVERSAL 에는, 이미 몇 개인가의 메소드가 있습니다. 
+그 메소드들은, Perl 바이너리에 포함되어 있고, 그 때문에 그것들을 
+로드하는 것에 쓸데없는 시간이 걸립니다.
+다시금 정의된 메소드는 isa(), can(), VERSION() 입니다.
+isa() 는 오브젝트 클래스가 계층구조를 종단하지 않고, 
+다른 클래스"인 지" 어떤지를 알려줍니다.
+
+   $has_io = $fd->isa("IO::Handle");
+   $itza_handle = IO::Socket->isa("IO::Handle");
+
+=begin original
+
+The can() method, called against that object or class, reports back
+whether its string argument is a callable method name in that class.
+In fact, it gives you back a function reference to that method:
+
+=end original
+
+can() 메소드는, 오브젝트가 클래스에 대해 불려져서, 그 문자열의 인수가 
+그 클래스에서 부른 것을 가능한 메소드인지 어떤지를 돌아와서 보고합니다.
+실제, 그 메소드에 함수의 리퍼런스를 반환합니다:
+
+   $his_print_method = $obj->can('as_string');
+
+=begin original
+
+Finally, the VERSION method checks whether the class (or the object's
+class) has a package global called $VERSION that's high enough, as in:
+
+=end original
+
+마지막으로, VERSION 메소드는, 클래스(또는, 오브젝트의 클래스)가, 
+$VERSION 이러고 불ㅣ는 패키지의 글로벌 변수가 충분히 높은지 어떤지를 
+체크합니다. 다음 처럼:
+
+    Some_Module->VERSION(3.0);
+    $his_vers = $ob->VERSION();
+
+=begin original
+
+However, we don't usually call VERSION ourselves.  (Remember that an all
+uppercase function name is a Perl convention that indicates that the
+function will be automatically used by Perl in some way.)  In this case,
+it happens when you say
+
+=end original
+
+그러나, 보통, VERSION을 자기자신에게는 호출하지 않습니다.
+(다음을 기억해 주세요. 
+모든 대문자의 함수이름은, Perl 의 관례에서, 그 함수가 어떤 방법으로, 
+Perl 에 의해 자동적으로 사용되어질 것이라는 것을 나타냅니다)
+이 케이스에서는 다음처럼 하면, 같은 것이 발생합니다.
+
+    use Some_Module 3.0;
+
+=begin original
+
+If you wanted to add version checking to your Person class explained
+above, just add this to Person.pm:
+
+=end original
+
+위에서 설명한 Person 클래스에서 버젼의 체크를 추가하고 싶다면, 
+Person.pm 에 다음을 추가할 뿐입니다.
+
+    our $VERSION = '1.1';
+
+=begin original
+
+and then in Employee.pm you can say
+
+=end original
+
+그리고, Employee.pm 에서 다음처럼 할 수 있습니다:
+
+    use Person 1.1;
+
+=begin original
+
+And it would make sure that you have at least that version number or
+higher available.   This is not the same as loading in that exact version
+number.  No mechanism currently exists for concurrent installation of
+multiple versions of a module.  Lamentably.
+
+=end original
+
+이것은, 적어도 그 패키지 번호인지 그것보다 높은 것이 이용가능하다고 
+확인합니다. 
+정화한 버젼번호에서의 로드이기에 같지는 않습니다.
+현재, 공동으로 작용하는 복수의 버젼의 모듈의 
+인스톨을 위해 어떤 매커니즘도 없습니다.
+
+=head2 Deeper UNIVERSAL details
+
+(보다 자세한 UNIVERSAL 의 상세한 내용)
+
+=begin original
+
+It is also valid (though perhaps unwise in most cases) to put other
+packages' names in @UNIVERSAL::ISA.  These packages will also be
+implicitly inherited by all classes, just as UNIVERSAL itself is.
+However, neither UNIVERSAL nor any of its parents from the @ISA tree
+are explicit base classes of all objects.  To clarify, given the
+following:
+
+=end original
+
+It is also valid (though perhaps unwise in most cases) to put other
+packages' names in @UNIVERSAL::ISA.  These packages will also be
+implicitly inherited by all classes, just as UNIVERSAL itself is.
+However, neither UNIVERSAL nor any of its parents from the @ISA tree
+are explicit base classes of all objects.  To clarify, given the
+following:
+(TBT)
+
+    @UNIVERSAL::ISA = ('REALLYUNIVERSAL');
+
+    package REALLYUNIVERSAL;
+    sub special_method { return "123" }
+
+    package Foo;
+    sub normal_method { return "321" }
+
+=begin original
+
+Calling Foo->special_method() will return "123", but calling
+Foo->isa('REALLYUNIVERSAL') or Foo->isa('UNIVERSAL') will return
+false.
+
+=end original
+
+Calling Foo->special_method() will return "123", but calling
+Foo->isa('REALLYUNIVERSAL') or Foo->isa('UNIVERSAL') will return
+false.
+(TBT)
+
+=begin original
+
+If your class is using an alternate mro like C3 (see
+L<mro>), method resolution within UNIVERSAL / @UNIVERSAL::ISA will
+still occur in the default depth-first left-to-right manner,
+after the class's C3 mro is exhausted.
+
+=end original
+
+If your class is using an alternate mro like C3 (see
+L<mro>), method resolution within UNIVERSAL / @UNIVERSAL::ISA will
+still occur in the default depth-first left-to-right manner,
+after the class's C3 mro is exhausted.
+(TBT)
+
+=begin original
+
+All of the above is made more intuitive by realizing what really
+happens during method lookup, which is roughly like this
+ugly pseudo-code:
+
+=end original
+
+All of the above is made more intuitive by realizing what really
+happens during method lookup, which is roughly like this
+ugly pseudo-code:
+(TBT)
+
+    get_mro(class) {
+        # recurses down the @ISA's starting at class,
+        # builds a single linear array of all
+        # classes to search in the appropriate order.
+        # The method resolution order (mro) to use
+        # for the ordering is whichever mro "class"
+        # has set on it (either default (depth first
+        # l-to-r) or C3 ordering).
+        # The first entry in the list is the class
+        # itself.
+    }
+
+    find_method(class, methname) {
+        foreach $class (get_mro(class)) {
+            if($class->has_method(methname)) {
+                return ref_to($class->$methname);
+            }
+        }
+        foreach $class (get_mro(UNIVERSAL)) {
+            if($class->has_method(methname)) {
+                return ref_to($class->$methname);
+            }
+        }
+        return undef;
+    }
+
+=begin original
+
+However the code that implements UNIVERSAL::isa does not
+search in UNIVERSAL itself, only in the package's actual
+@ISA.
+
+=end original
+
+
+=head1 Alternate Object Representations
+
+(패키지를 대신하는 오브젝트의 표현)
+
+=begin original
+
+Nothing requires objects to be implemented as hash references.  An object
+can be any sort of reference so long as its referent has been suitably
+blessed.  That means scalar, array, and code references are also fair
+game.
+
+=end original
+
+오브젝트는 해쉬리퍼런스로써 구성될 필요는 없습니다.
+오브젝트는 잘 bless 되는 리런스가 아니라면, 어떤 
+종류의 리퍼런스라도 가능합니다.
+이것은 스칼라 리퍼런스라도, 베열 리퍼런스라도, 
+코드 리퍼런스라도 좋습니다.
+
+=begin original
+
+A scalar would work if the object has only one datum to hold.  An array
+would work for most cases, but makes inheritance a bit dodgy because
+you have to invent new indices for the derived classes.
+
+=end original
+
+스칼라는 오브젝트가 단 하나의 값만 가지지않는다면, 잘 움직입니다.
+배열은, 대부분 케이스로 잘 움직입니다.
+하지만, 상속을 조금 위험하게 하겠습니다.
+파생 클래스를 위해 새로운 색인을 만들지 않으면 안되기 때문입니다.
+
+=head2 Arrays as Objects
+
+(오브젝트로써 배열)
+
+=begin original
+
+If the user of your class honors the contract and sticks to the advertised
+interface, then you can change its underlying interface if you feel
+like it.  Here's another implementation that conforms to the same
+interface specification.  This time we'll use an array reference
+instead of a hash reference to represent the object.
+
+=end original
+
+클래스를 사용하는 사람이 계약을 지지하고 공표된 인터페이스를 인정하면,
+그 기초가 되는 인터페이스를 그렇게 하고 싶다면 바꿀 수 있습니다. 
+같은 인터페이스의 스펙에 맞는 다른 구성입니다. 
+그럼 오브젝트를 표현하는 것에 해쉬리퍼런스 대신에 
+배열리퍼런스를 사용합시다.
+
+    package Person;
+    use strict;
+
+    my($NAME, $AGE, $PEERS) = ( 0 .. 2 );
+
+=begin original
+
+    ############################################
+    ## the object constructor (array version) ##
+    ############################################
+    sub new {
+        my $self = [];
+        $self->[$NAME]   = undef;  # this is unnecessary
+        $self->[$AGE]    = undef;  # as is this
+        $self->[$PEERS]  = [];     # but this isn't, really
+        bless($self);
+        return $self;
+    }
+
+=end original
+
+    ############################################
+    ## 오브젝트생성자(배열판)                 ##
+    ############################################
+    sub new {
+        my $self = [];
+        $self->[$NAME]   = undef;  # this is unnecessary
+        $self->[$AGE]    = undef;  # as is this
+        $self->[$PEERS]  = [];     # but this isn't, really
+        bless($self);
+        return $self;
+    }
+
+    sub name {
+        my $self = shift;
+        if (@_) { $self->[$NAME] = shift }
+        return $self->[$NAME];
+    }
+
+    sub age {
+        my $self = shift;
+        if (@_) { $self->[$AGE] = shift }
+        return $self->[$AGE];
+    }
+
+    sub peers {
+        my $self = shift;
+        if (@_) { @{ $self->[$PEERS] } = @_ }
+        return @{ $self->[$PEERS] };
+    }
+
+    1;  # so the require or use succeeds
+
+=begin original
+
+You might guess that the array access would be a lot faster than the
+hash access, but they're actually comparable.  The array is a I<little>
+bit faster, but not more than ten or fifteen percent, even when you
+replace the variables above like $AGE with literal numbers, like 1.
+A bigger difference between the two approaches can be found in memory use.
+A hash representation takes up more memory than an array representation
+because you have to allocate memory for the keys as well as for the values.
+However, it really isn't that bad, especially since as of version 5.004,
+memory is only allocated once for a given hash key, no matter how many
+hashes have that key.  It's expected that sometime in the future, even
+these differences will fade into obscurity as more efficient underlying
+representations are devised.
+
+=end original
+
+배열 접근은 해쉬접근보다 상당히 빠르다고 생각할지도 모르겠습니다.
+하지만, 이 두개는 실제로는 유사한 것입니다.
+배열은 I<조금> 빠릅니다.
+하지만 10이나 50 퍼센트도 빠리즈는 않습니다.
+예를들어 위의 $AGE 같은 문자의 변수를 1같은 숫자로 바꾸어도 됩니다.
+두개의 어프로치의 큰 차이는 메모리의 사용에서 발견됩니다.
+해쉬로 표현할때는 배열로 표현할 때보다도 메모리를 많이 소비합니다.
+값과 마찬가지로 키에도 메모리를 할당하지 않으면 안되기 때문입니다.
+하지만, 그것은 정말로 그렇게 나쁜 것은 아닙니다.
+특히, 5.004부터는 해쉬에 키를 주기위해서 메모리는 한번 할당될 뿐입니다.
+몇 가지의 해쉬가 키를 가지는 것은 문제가 아닙니다.
+이후 이 두개의 차이는 보다 효율적인 기초가 되는 표현이 연결되고,
+애매하게 소멸해버리겠지 하고 기대하게 됩니다.
+
+=begin original
+
+Still, the tiny edge in speed (and somewhat larger one in memory)
+is enough to make some programmers choose an array representation
+for simple classes.  There's still a little problem with
+scalability, though, because later in life when you feel
+like creating subclasses, you'll find that hashes just work
+out better.
+
+=end original
+
+아직, 스피드(와 메모리로 몇 가지 크게되는 곳)에서 조금 
+우수한 것은 프로그래머에게 단순한 클래스를 위해 배열표현을 
+선택하는 것으로 충분합니다.
+역시, 확장성에 조금 문제가 있습니다.
+차후 서브클래스를 만들려고 했을 때에 
+해쉬가 잘 움직이는 것을 알 것 입니다.
+
+=head2 Closures as Objects
+
+(오브젝트로써 클로져)
+
+=begin original
+
+Using a code reference to represent an object offers some fascinating
+possibilities.  We can create a new anonymous function (closure) who
+alone in all the world can see the object's data.  This is because we
+put the data into an anonymous hash that's lexically visible only to
+the closure we create, bless, and return as the object.  This object's
+methods turn around and call the closure as a regular subroutine call,
+passing it the field we want to affect.  (Yes,
+the double-function call is slow, but if you wanted fast, you wouldn't
+be using objects at all, eh? :-)
+
+=end original
+
+오브젝트를 표현하는 것에 코드리퍼런스를 사용하는 것은 매력적인 장래성을 
+기대할 수 있습니다.
+세계에서 단 한사람만 오브젝트의 데이터를 보는 볼 수 있고, 
+새로운 클로져 함수를 만들 수가 있습니다. 
+이런 것은 데이터를 렉시컬에만 보이도록 이름없는 해쉬에 놓기 때문입니다.
+즉, 클로져를 만들고, bless해서, 오브젝트로써 넘기기 때문입니다.
+이 오브젝트메소드는 일변해서 보통의 서브루틴호출로써 클로져를 호출해,
+영향을 주고 싶은 필드에 그것을 넘겨줍니다.
+(물론 이중의 함수호출은 느립니다. 그렇지만 만약 속도를 원한다면 
+오브젝트를 전부 사용하지 않으면 됩니다. 그렇죠? :-))
+
+=begin original
+
+Use would be similar to before:
+
+=end original
+
+사용법은 앞의 것과 비슷합니다:
+
+    use Person;
+    $him = Person->new();
+    $him->name("Jason");
+    $him->age(23);
+    $him->peers( [ "Norbert", "Rhys", "Phineas" ] );
+    printf "%s is %d years old.\n", $him->name, $him->age;
+    print "His peers are: ", join(", ", @{$him->peers}), "\n";
+
+=begin original
+
+but the implementation would be radically, perhaps even sublimely
+different:
+
+=end original
+
+하지만 실제는 근본적으로 다릅니다.
+
+    package Person;
+
+    sub new {
+	 my $class  = shift;
+	 my $self = {
+	    NAME  => undef,
+	    AGE   => undef,
+	    PEERS => [],
+	 };
+	 my $closure = sub {
+	    my $field = shift;
+	    if (@_) { $self->{$field} = shift }
+	    return    $self->{$field};
+	};
+	bless($closure, $class);
+	return $closure;
+    }
+
+    sub name   { &{ $_[0] }("NAME",  @_[ 1 .. $#_ ] ) }
+    sub age    { &{ $_[0] }("AGE",   @_[ 1 .. $#_ ] ) }
+    sub peers  { &{ $_[0] }("PEERS", @_[ 1 .. $#_ ] ) }
+
+    1;
+
+=begin original
+
+Because this object is hidden behind a code reference, it's probably a bit
+mysterious to those whose background is more firmly rooted in standard
+procedural or object-based programming languages than in functional
+programming languages whence closures derive.  The object
+created and returned by the new() method is itself not a data reference
+as we've seen before.  It's an anonymous code reference that has within
+it access to a specific version (lexical binding and instantiation)
+of the object's data, which are stored in the private variable $self.
+Although this is the same function each time, it contains a different
+version of $self.
+
+=end original
+
+근본적으로 다르다는 것은 오브젝트가 코드리퍼런스의 뒤에 숨겨져 있기 때문입니다.
+이 것은 조금 미스테리하죠.
+함수 프로그램 언어보다도 표준적인 수속형태나 오브젝트베이스의 
+프로그래밍 언어가 그런 배경이 클로져가 유래하는 곳에서 
+보다 제대로 정착되어 있기 때문입니다.
+new() 메소드로 만들어진, 반환된 오브젝트는 지금까지 봐온 대로 
+데이터의 리퍼런스가 아닙니다.
+오브젝트는 익명의 코드리퍼런스이고, 내부적으로 특정의 버젼(렉시컬하게 
+바인드하고, 예시하고 있는 것 - 프라이베이 변수 $self 에 들어간 - 오브젝트 
+데이터에 접근하는 코드를 가지고 있습니다.
+그것은 매번 같은 함수임에 상관없이 다른 버젼의 $self 를 포함합니다. 
+
+=begin original
+
+When a method like C<$him-E<gt>name("Jason")> is called, its implicit
+zeroth argument is the invoking object--just as it is with all method
+calls.  But in this case, it's our code reference (something like a
+function pointer in C++, but with deep binding of lexical variables).
+There's not a lot to be done with a code reference beyond calling it, so
+that's just what we do when we say C<&{$_[0]}>.  This is just a regular
+function call, not a method call.  The initial argument is the string
+"NAME", and any remaining arguments are whatever had been passed to the
+method itself.
+
+=end original
+
+C<$him-E<gt>name("Jason")> 같은 메소드가 호출되면, 암묵적인 0 번째의 
+인수가 기본값으로 호출됩니다 -- 모든 메소드 호출과 함께.
+하지만 이 경우에서는 그 인수는 앞에서의 코드리퍼런스 입니다(C++ 에서의 
+포인터함수 같은 뭔가 입니다만 렉시컬한 변수에 깊게 바인드 되어 있습니다).
+코드 리퍼런스를 부르는 것이상으로 코드리퍼런스로 하는 것은 많지 않습니다.
+즉, 이 때 하는 것은 ,C<&{$_[0]}> 로 하는 것뿐입니다.
+이것은 단순한 보통의 함수 호출이고, 메소드 호출이 아닙니다. 
+최초의 인수는 문자열 "NAME" 이고, 남은 인수는 메소드에 
+넘겨진 것 전부입니다.
+
+=begin original
+
+Once we're executing inside the closure that had been created in new(),
+the $self hash reference suddenly becomes visible.  The closure grabs
+its first argument ("NAME" in this case because that's what the name()
+method passed it), and uses that string to subscript into the private
+hash hidden in its unique version of $self.
+
+=end original
+
+new() 로 만들어진 클로져의 내부에서 실행되면 $self 해쉬리퍼런스는 
+돌연 보이게 됩니다.
+클로져는 그 최초의 인수(이 케이스에서는 'NAME' 입니다. 
+name() 메소드가 그것을 넘기기에)를 잡아서, 그 문자를 유니크한 
+버젼의 $self 의 프라이베이트로 숨겨진 해쉬로의 첨자로 사용합니다.
+
+=begin original
+
+Nothing under the sun will allow anyone outside the executing method to
+be able to get at this hidden data.  Well, nearly nothing.  You I<could>
+single step through the program using the debugger and find out the
+pieces while you're in the method, but everyone else is out of luck.
+
+=end original
+
+이 세계에서 누구도 실행되는 메소드의 바깥쪽에 있는 것에는, 
+이 감춰진 데이터에 다가가는 것을 허락하지 않습니다.
+아마 거의 없을 겁니다. 
+디버거를 사용하는 프로그램을 통해 스텝을 선택하고, 그 메소드에 있는 사이에, 
+그 조각을 I<볼 수 있습니다>.
+하지만, 다른 모든 사람들에게는, 운이 없죠.
+
+=begin original
+
+There, if that doesn't excite the Scheme folks, then I just don't know
+what will.  Translation of this technique into C++, Java, or any other
+braindead-static language is left as a futile exercise for aficionados
+of those camps.
+
+=end original
+
+만약, 이것이 Scheme같은 모든 사람을 흥분시키지 않으면, 무엇이 
+흥분시키는 가 모릅니다.
+이 테크닉의, C++ 이나 Java 나, 다른 뇌사상태의 정적인 언어로의 번역이 
+열광적인 팬의 쓸데없는 과제로써 남아있습니다. 
+
+=begin original
+
+You could even add a bit of nosiness via the caller() function and
+make the closure refuse to operate unless called via its own package.
+This would no doubt satisfy certain fastidious concerns of programming
+police and related puritans.
+
+=end original
+
+caller() 함수로, 조금 제색을 추가할 수 있고, 클로져가 
+그 자신의 패키지를 부르지 않는 한, 동작을 거부할 수도 있습니다.
+이것은 틀림없이 프로그램폴리스와 그와 비슷한 엄격한 사람의 
+어떤 종류의 긴박한 관심사를 만족시킬겁니다. 
+
+=begin original
+
+If you were wondering when Hubris, the third principle virtue of a
+programmer, would come into play, here you have it. (More seriously,
+Hubris is just the pride in craftsmanship that comes from having written
+a sound bit of well-designed code.)
+
+=end original
+
+만약 언젠가 교만 - 프로그래머의 삼대미덕 - 이 개시하는 것을 의문스럽게 
+생각했다면, 여기에 교만이 있습니다.
+(더욱 제대로 하면, 교만은 조금 괭장하고 잘 설계된 코드를 쓰는 것으로 
+태어나는 프라이드입니다).
+
+=head1 AUTOLOAD: Proxy Methods
+
+(AUTOLOAD: 프록시 메소드)
+
+=begin original
+
+Autoloading is a way to intercept calls to undefined methods.  An autoload
+routine may choose to create a new function on the fly, either loaded
+from disk or perhaps just eval()ed right there.  This define-on-the-fly
+strategy is why it's called autoloading.
+
+=end original
+
+오토로드는 정의되지 않은 메소드의 호출을 인터셉트하는 방법입니다.
+오토로드루틴은 온 더 플라이에 새로운 함수 - 디스크에서 
+로드되었는지, 아마 eval 되어 있는 - 를 만드는 것을 선택할지도 모릅니다.
+이 온 더 플라이에 정의한 작전이 오토 로딩이라고 불리는 이유입니다.
+
+=begin original
+
+But that's only one possible approach.  Another one is to just
+have the autoloaded method itself directly provide the
+requested service.  When used in this way, you may think
+of autoloaded methods as "proxy" methods.
+
+=end original
+
+하지만, 이것은 단 하나의 가능한 어프로치입니다.
+다른 어프로치는 오토로드된 메소드를 그 자신에게 직접 요구한 
+서비스를 제공시키는 것입니다.
+이 방법을 사용했을 때, 오토로드된 메소드를 "프록시" 메소드처럼 
+생각할지도 모르겠습니다.
+
+=begin original
+
+When Perl tries to call an undefined function in a particular package
+and that function is not defined, it looks for a function in
+that same package called AUTOLOAD.  If one exists, it's called
+with the same arguments as the original function would have had.
+The fully-qualified name of the function is stored in that package's
+global variable $AUTOLOAD.  Once called, the function can do anything
+it would like, including defining a new function by the right name, and
+then doing a really fancy kind of C<goto> right to it, erasing itself
+from the call stack.
+
+=end original
+
+Perl 이 특정의 패키지의 정의되지 않은 함수를 호출하려고 하고, 이 함수가 
+정의되어 있지 않은 경우, 같은 패키지에 있는 AUTOLOAD 라고 불리는 함수를 
+찾습니다.
+만약 AUTOLOAD 가 있으면 원래의 함수가 가지고 있는 것과 같은 인수로, 그것이 
+호출됩니다.
+그 함수의 완전한 정규이름(패키지 이름으로 수식된 함수명)은 
+패키지ㅣ 글로벌 별수 $AUTOLOAD 에 더해집니다. 
+일단 호출되면, 함수는 좋을 대로 뭔가를 할 수 가 있습니다.
+적당한 이름으로, 새로운 함수를 정의하는 것, 실제로 장식적인 일종의, 
+C<goto> 를 그것에 대해 바르게 수행하는 것, 콜스택에서 그 자신을 삭제하는 것을
+포함하고 있습니다.
+
+=begin original
+
+What does this have to do with objects?  After all, we keep talking about
+functions, not methods.  Well, since a method is just a function with
+an extra argument and some fancier semantics about where it's found,
+we can use autoloading for methods, too.  Perl doesn't start looking
+for an AUTOLOAD method until it has exhausted the recursive hunt up
+through @ISA, though.  Some programmers have even been known to define
+a UNIVERSAL::AUTOLOAD method to trap unresolved method calls to any
+kind of object.
+
+=end original
+
+이것은 오브젝트와 뭔가 관계가 있을까요?
+결국, 함수에 대해 계속 이야기하고 있지, 메소드에 대해서가 아니죠. 
+아마 메소드는 단순히 특별한 인수와 그것이 발견되는 장소에 대해
+장식적인 기법을 따른 단순한 함수이기에 오토로딩을 메소드로써 
+사용할 수가 있습니다.
+Perl 은, @ISA 를 통해서 재귀적인 구색에 피곤해질때까지, AUTOLOAD 메소드를 
+찾기시작하지 않습니다.
+어떤 종류의 오브젝트에 대해 미해결의 메소드호출을 트랩하기 위해서 
+UNIVERSAL::AUTOLOAD 메소드를 정의하는 프로그래머가 있는 것도 알려져 있습니다.
+
+=head2 Autoloaded Data Methods
+
+(오토로드된 데이터 메소드)
+
+=begin original
+
+You probably began to get a little suspicious about the duplicated
+code way back earlier when we first showed you the Person class, and
+then later the Employee class.  Each method used to access the
+hash fields looked virtually identical.  This should have tickled
+that great programming virtue, Impatience, but for the time,
+we let Laziness win out, and so did nothing.  Proxy methods can cure
+this.
+
+=end original
+
+You probably began to get a little suspicious about the duplicated 
+code way back earlier when we first showed you the Person class, and
+then later the Employee class.  Each method used to access the
+hash fields looked virtually identical.  This should have tickled 
+that great programming virtue, Impatience, but for the time,
+we let Laziness win out, and so did nothing.  Proxy methods can cure this. 
+
+=begin original
+
+Instead of writing a new function every time we want a new data field,
+we'll use the autoload mechanism to generate (actually, mimic) methods on
+the fly.  To verify that we're accessing a valid member, we will check
+against an C<_permitted> (pronounced "under-permitted") field, which
+is a reference to a file-scoped lexical (like a C file static) hash of permitted fields in this record
+called %fields.  Why the underscore?  For the same reason as the _CENSUS
+field we once used: as a marker that means "for internal use only".
+
+=end original
+
+새로운 데이터 필드를 필요하다고 생각할 때마다 새로운 함수를 매번 쓰는 대신에
+오토로드의 매커니즘을 사용해서, (실제로는 거짓의)메소드를 온 더 플라이에 
+놓습니다. 
+적당한 멤버에 접근하는 것을 증명하기 위해 
+C<_permitted>("under-permitted" 이라고 발음) 필드에서 체크합니다. 
+이 필드는, %field 라고 불리는 레코드의 안의 허락된 필드의 
+파일 영역의 렉시컬한 (C 의 파일 static 같은) 해쉬 리퍼런스입니다.
+왜 언더바가 있는것일까요?
+이전에 사용한, _CENSUS 필드와 같은 이유이기 때문입니다: 
+"내부적으로만 사용하기 위한" 마크입니다. 
+
+=begin original
+
+Here's what the module initialization code and class
+constructor will look like when taking this approach:
+
+=end original
+
+여기에 있는, 모듈의 초기화 코드와 클래스의 생성자는
+이 어프로치를 얻는 경우에 보이는 것입니다:
+
+    package Person;
+    use Carp;
+    our $AUTOLOAD;  # it's a package global
+
+    my %fields = (
+	name        => undef,
+	age         => undef,
+	peers       => undef,
+    );
+
+    sub new {
+	my $class = shift;
+	my $self  = {
+	    _permitted => \%fields,
+	    %fields,
+	};
+	bless $self, $class;
+	return $self;
+    }
+
+=begin original
+
+If we wanted our record to have default values, we could fill those in
+where current we have C<undef> in the %fields hash.
+
+=end original
+
+만약, 레코드에 기본값을 가지게 하고 싶지 않다면, 현재 %field 해쉬에 
+C<undef> 가 있는 곳에 그것들을 넣을 수 있습니다.
+
+=begin original
+
+Notice how we saved a reference to our class data on the object itself?
+Remember that it's important to access class data through the object
+itself instead of having any method reference %fields directly, or else
+you won't have a decent inheritance.
+
+=end original
+
+오브젝트 자신에게 클래스데이터의 리퍼런스를 보존하기 위한 방법을 
+알아채셨나요?
+직접 %fields 를 참조하는 메소드를 가지는 가, 그외 예의 바른 계승을 
+가지지 않는 대신에 오브젝트를 통해서 클래스 데이터에 접근하는 것이 
+중요하다는 것을 생각해주세요.
+
+=begin original
+
+The real magic, though, is going to reside in our proxy method, which
+will handle all calls to undefined methods for objects of class Person
+(or subclasses of Person).  It has to be called AUTOLOAD.  Again, it's
+all caps because it's called for us implicitly by Perl itself, not by
+a user directly.
+
+=end original
+
+하지만, 진짜 마법은 프록시 메소드에 있습니다.
+프록시 메소드는 Person 클래스(그리고 Person 서브클래스)의 오브젝트에 
+대한 정의되지 않은 메소드를 전부 호출하는 것을 취급합니다.
+AUTOLOAD 라고 불리지 않으면 안됩니다.
+다시금, 이것은 모든 대문자가 됩니다.
+유저가 직접 호출하지 않고, Perl 이 직접 부르기 때문입니다.
+
+    sub AUTOLOAD {
+	my $self = shift;
+	my $type = ref($self)
+		    or croak "$self is not an object";
+
+	my $name = $AUTOLOAD;
+	$name =~ s/.*://;   # strip fully-qualified portion
+
+	unless (exists $self->{_permitted}->{$name} ) {
+	    croak "Can't access `$name' field in class $type";
+	}
+
+	if (@_) {
+	    return $self->{$name} = shift;
+	} else {
+	    return $self->{$name};
+	}
+    }
+
+=begin original
+
+Pretty nifty, eh?  All we have to do to add new data fields
+is modify %fields.  No new functions need be written.
+
+=end original
+
+매우 대단하죠? 새로운 데이터필드를 추가할 때에 하지 않으면 
+안되는 것은 %fields 를 변경하는 것 뿐입니다.
+새로운 함수를 쓸 필요는 없습니다.
+
+=begin original
+
+I could have avoided the C<_permitted> field entirely, but I
+wanted to demonstrate how to store a reference to class data on the
+object so you wouldn't have to access that class data
+directly from an object method.
+
+=end original
+
+C<_parmitted> 필드를 완전히 피할 수가 있습니다만, 어떻게 
+오브젝트의 클래스 데이터를 리퍼런스에 넣는 가를 실제로 증명하고 
+싶었습니다. 그래서 오브젝트 메소드에서 직접 클래스 데이터에 접근할 
+필요는 없습니다.
+
+=head2 Inherited Autoloaded Data Methods
+
+(계승되고 오토로드된 데이터 메소드)
+
+=begin original
+
+But what about inheritance?  Can we define our Employee
+class similarly?  Yes, so long as we're careful enough.
+
+=end original
+
+그러나 계승에서는 어떻게 될까요? Employee 클래스를 똑같이 
+정의할 수 있을까요? 
+물론 할 수 있습니다. 
+충분히 주의만 해준다면요.
+
+=begin original
+
+Here's how to be careful:
+
+=end original
+
+주의하는 방법입니다:
+
+    package Employee;
+    use Person;
+    use strict;
+    our @ISA = qw(Person);
+
+    my %fields = (
+	id          => undef,
+	salary      => undef,
+    );
+
+    sub new {
+	my $class = shift;
+	my $self  = $class->SUPER::new();
+	my($element);
+	foreach $element (keys %fields) {
+	    $self->{_permitted}->{$element} = $fields{$element};
+	}
+	@{$self}{keys %fields} = values %fields;
+	return $self;
+    }
+
+=begin original
+
+Once we've done this, we don't even need to have an
+AUTOLOAD function in the Employee package, because
+we'll grab Person's version of that via inheritance,
+and it will all work out just fine.
+
+=end original
+
+이것을 하면, Employee 패키지에 AUTOLOAD 함수를 가질 필요는 없습니다. 
+이것은 계승을 통해 Person 버젼을 파악하고 모두 잘 움직이니까요.
+
+=head1 Metaclassical Tools
+
+(메타클래스같은 툴)
+
+=begin original
+
+Even though proxy methods can provide a more convenient approach to making
+more struct-like classes than tediously coding up data methods as
+functions, it still leaves a bit to be desired.  For one thing, it means
+you have to handle bogus calls that you don't mean to trap via your proxy.
+It also means you have to be quite careful when dealing with inheritance,
+as detailed above.
+
+=end original
+
+프록시 메소드가 데이터 메소드를 함수로써 매번 코딩하는 것 보다도, 
+보다 구조체같은 클래스르 만드는 것에 편리한 어프로치를 제공한다고 해도, 
+아직 좋아할 만한 것이 조금 남아 있습니다. 
+첫번째는 프록시 메소드를 통해서 트랩디킬 일 없는, 사기 호출을 
+취급할 필ㅛ가 있는 것을 의미합니다. 
+위에서 상세한 내용을 말했듯이 계승을 다룰 때에 꽤 신중하지 않으면 안된다는 
+것을 의미합니다.
+
+=begin original
+
+Perl programmers have responded to this by creating several different
+class construction classes.  These metaclasses are classes
+that create other classes.  A couple worth looking at are
+Class::Struct and Alias.  These and other related metaclasses can be
+found in the modules directory on CPAN.
+
+=end original
+
+Perl 프로그래머는 여러 클래스 생성 클래스를 만드는 것으로, 
+이것에 대응하고 있습니다.
+이 메타클래스들은 다른 클래스를 만드는 클래스입니다.
+봐야할 것은 Class::Struct 와 Alias 입니다. 
+이것들과 다른 관련이 있는 메타클래스는 CPAN 의 모듈 디렉토리에서 
+볼 수 있습니다.
+
+=head2 Class::Struct
+
+=begin original
+
+One of the older ones is Class::Struct.  In fact, its syntax and
+interface were sketched out long before perl5 even solidified into a
+real thing.  What it does is provide you a way to "declare" a class
+as having objects whose fields are of a specific type.  The function
+that does this is called, not surprisingly enough, struct().  Because
+structures or records are not base types in Perl, each time you want to
+create a class to provide a record-like data object, you yourself have
+to define a new() method, plus separate data-access methods for each of
+that record's fields.  You'll quickly become bored with this process.
+The Class::Struct::struct() function alleviates this tedium.
+
+=end original
+
+옛날 것 중 하나가 Class::Struct 입니다. 
+실제 그 구문과 인터페이스는 Perl5 가 안정되기 이전에 기획되었습니다. 
+Class::Struct 는 특정의 형태의 필드가 있는 듯한 오브젝트를 가지는 클래스를
+"선언"하는 방법을 제공합니다.
+그것이 호출되는 함수는, 놀라지 않아도 될, struct() 입니다.
+구조, 혹은 레코드는 Perl 에서는 기본의 형태가 아니기에 
+레코드 풍의 오브젝트를 제공하는 클래스를 만들때에 new 메소드와 
+그것에 더해 별개로 레코드의 각 필드를 위해 
+데이터 접근 메소드를 정의하지 않으면 안됩니다.
+그 프로세스에 곧 질려버리겠죠?
+Class::Struct::struct 함수는 이 지겨운 것을 완화합니다.
+
+=begin original
+
+Here's a simple example of using it:
+
+=end original
+
+이것을 사용하는 간단한 예제입니다:
+
+    use Class::Struct qw(struct);
+    use Jobbie;  # user-defined; see below
+
+    struct 'Fred' => {
+        one        => '$',
+        many       => '@',
+        profession => 'Jobbie',  # does not call Jobbie->new()
+    };
+
+    $ob = Fred->new(profession => Jobbie->new());
+    $ob->one("hmmmm");
+
+    $ob->many(0, "here");
+    $ob->many(1, "you");
+    $ob->many(2, "go");
+    print "Just set: ", $ob->many(2), "\n";
+
+    $ob->profession->salary(10_000);
+
+=begin original
+
+You can declare types in the struct to be basic Perl types, or
+user-defined types (classes).  User types will be initialized by calling
+that class's new() method.
+
+=end original
+
+struct 의 안에서 형태를 선언할 수 있고, 그것은 기본적인 Perl 의 형태가 
+되든지, 유저정의 형태(클래스)가 됩니다. 
+유저형태는 그 클래스의 new()메소드를 호출하는 것에 의해 초기화됩니다.
+
+=begin original
+
+Take care that the C<Jobbie> object is not created automatically by the
+C<Fred> class's new() method, so you should specify a C<Jobbie> object
+when you create an instance of C<Fred>.
+
+=end original
+
+Take care that the C<Jobbie> object is not created automatically by the
+C<Fred> class's new() method, so you should specify a C<Jobbie> object
+when you create an instance of C<Fred>.
+(TBT)
+
+=begin original
+
+Here's a real-world example of using struct generation.  Let's say you
+wanted to override Perl's idea of gethostbyname() and gethostbyaddr() so
+that they would return objects that acted like C structures.  We don't
+care about high-falutin' OO gunk.  All we want is for these objects to
+act like structs in the C sense.
+
+=end original
+
+struct 의 생성을 사용한 실제의 예제가 있습니다.
+예를 들면 gethostbyname() 과 gethostbyaddr()을 C 구조체처럼 행동을 
+하는 오브젝트를 반환하도록 오버라이드 하고 싶다고 합시다.
+high-falutin' OO gunk 는 신경쓰지 않습니다.
+하고 싶은 것은 이 오브젝트들이 C 감각으로 구조체같은 행동을 하는 것입니다.
+
+    use Socket;
+    use Net::hostent;
+    $h = gethostbyname("perl.com");  # object return
+    printf "perl.com's real name is %s, address %s\n",
+	$h->name, inet_ntoa($h->addr);
+
+=begin original
+
+Here's how to do this using the Class::Struct module.
+The crux is going to be this call:
+
+=end original
+
+Class::Struct 모듈을 사용해서 하는 방법입니다.
+제일 중요한 포인트는 이 호출입니다:
+
+    struct 'Net::hostent' => [  	# note bracket
+	name       => '$',
+	aliases    => '@',
+	addrtype   => '$',
+	'length'   => '$',
+	addr_list  => '@',
+     ];
+
+=begin original
+
+Which creates object methods of those names and types.
+It even creates a new() method for us.
+
+=end original
+
+이 호출은 위의 이름과 형태의 오브젝트 메소드를 만듭니다. 
+new() 메소드마저도 만듭니다.
+
+=begin original
+
+We could also have implemented our object this way:
+
+=end original
+
+다음 방법에서도, 오브젝트를 구성할수 있습니다만, 하지 않았습니다:
+
+    struct 'Net::hostent' => {  	# note brace
+	name       => '$',
+	aliases    => '@',
+	addrtype   => '$',
+	'length'   => '$',
+	addr_list  => '@',
+     };
+
+=begin original
+
+and then Class::Struct would have used an anonymous hash as the object
+type, instead of an anonymous array.  The array is faster and smaller,
+but the hash works out better if you eventually want to do inheritance.
+Since for this struct-like object we aren't planning on inheritance,
+this time we'll opt for better speed and size over better flexibility.
+
+=end original
+
+이렇게 하면, Class::struct 는, 오브젝트 형태를 이름없는 배열 대신에 
+이름없는 해쉬를 사용합니다.
+배열은 해쉬보다 빠르고, 작지만, 해쉬는 계승을 하고 싶은 때에 
+좋습니다.
+이 구조체풍의 오브젝트에는 계승을 생각하지 않았기 때문에 
+이번에는 보다 빠른 스피트와 크기에 여유ㄹ 가지도록 했습니다.
+
+=begin original
+
+Here's the whole implementation:
+
+=end original
+
+구성은 다음과 같습니다:
+
+    package Net::hostent;
+    use strict;
+
+    BEGIN {
+	use Exporter   ();
+	our @EXPORT      = qw(gethostbyname gethostbyaddr gethost);
+	our @EXPORT_OK   = qw(
+			       $h_name         @h_aliases
+			       $h_addrtype     $h_length
+			       @h_addr_list    $h_addr
+			   );
+	our %EXPORT_TAGS = ( FIELDS => [ @EXPORT_OK, @EXPORT ] );
+    }
+    our @EXPORT_OK;
+
+=begin original
+
+    # Class::Struct forbids use of @ISA
+    sub import { goto &Exporter::import }
+
+=end original
+
+    # Class::Struct 은 @ISA 를 사용하는 것을 금지합니다. 
+    sub import { goto &Exporter::import }
+
+    use Class::Struct qw(struct);
+    struct 'Net::hostent' => [
+       name        => '$',
+       aliases     => '@',
+       addrtype    => '$',
+       'length'    => '$',
+       addr_list   => '@',
+    ];
+
+    sub addr { shift->addr_list->[0] }
+
+    sub populate (@) {
+	return unless @_;
+	my $hob = new();  # Class::Struct made this!
+	$h_name     =    $hob->[0]              = $_[0];
+	@h_aliases  = @{ $hob->[1] } = split ' ', $_[1];
+	$h_addrtype =    $hob->[2]              = $_[2];
+	$h_length   =    $hob->[3]              = $_[3];
+	$h_addr     =                             $_[4];
+	@h_addr_list = @{ $hob->[4] } =         @_[ (4 .. $#_) ];
+	return $hob;
+    }
+
+    sub gethostbyname ($)  { populate(CORE::gethostbyname(shift)) }
+
+    sub gethostbyaddr ($;$) {
+	my ($addr, $addrtype);
+	$addr = shift;
+	require Socket unless @_;
+	$addrtype = @_ ? shift : Socket::AF_INET();
+	populate(CORE::gethostbyaddr($addr, $addrtype))
+    }
+
+    sub gethost($) {
+	if ($_[0] =~ /^\d+(?:\.\d+(?:\.\d+(?:\.\d+)?)?)?$/) {
+	   require Socket;
+	   &gethostbyaddr(Socket::inet_aton(shift));
+	} else {
+	   &gethostbyname;
+	}
+    }
+
+    1;
+
+=begin original
+
+We've snuck in quite a fair bit of other concepts besides just dynamic
+class creation, like overriding core functions, import/export bits,
+function prototyping, short-cut function call via C<&whatever>, and
+function replacement with C<goto &whatever>.  These all mostly make
+sense from the perspective of a traditional module, but as you can see,
+we can also use them in an object module.
+
+=end original
+
+동적인 클래스의 작성에 더해서 코어한 함수의 오버라이드나, 
+import/export 측이나 함수의 프로토타이핑이나 C<&whatever> 를 통한 
+함수의 치환등의 다른 컨셉의 바른 구체적인 예제를 포함하고 있습니다. 
+이 모든것들은 대부분이 전통적인 모듈의 시점에서 의미 있는 것입니다. 
+하지만 알고 있듯이 오브젝트 모듈로써 그것들을 사용할 수도 있습니다.
+
+=begin original
+
+You can look at other object-based, struct-like overrides of core
+functions in the 5.004 release of Perl in File::stat, Net::hostent,
+Net::netent, Net::protoent, Net::servent, Time::gmtime, Time::localtime,
+User::grent, and User::pwent.  These modules have a final component
+that's all lowercase, by convention reserved for compiler pragmas,
+because they affect the compilation and change a builtin function.
+They also have the type names that a C programmer would most expect.
+
+=end original
+
+다른 오브젝트 베이스의 모듈이나 File::sat, Net::hostent, Net::nenent,
+Net::Protoent, Net::servent, Time::gmtime, Time::localtime, User::grent,
+User::pwent 에서 Perl 의 5.004 릴리즈의 코어한 함수의 구조체같은 
+오버라이드를 볼 수가 있습니다.
+이 모듈들은 컴파일러 프로그램을 위해 있고, 관례에 의해 
+모두 소문자의 최종적인 구성요소를 가지고 있습니다.
+이것들인 컴파일에 영향을 주고, 내장함수를 변경하기 때문입니다.
+이것들은 C 프로그래머가 기대할 만한 형태이름을 가지고 있습니다.
+
+=head2 Data Members as Variables
+
+(변수로써의 데이터멤버)
+
+=begin original
+
+If you're used to C++ objects, then you're accustomed to being able to
+get at an object's data members as simple variables from within a method.
+The Alias module provides for this, as well as a good bit more, such
+as the possibility of private methods that the object can call but folks
+outside the class cannot.
+
+=end original
+
+C++ 오브젝트를 잘 사용하면, 메소드 안에서 오브젝트의 데이터멤버를 
+단순한 변수처럼 얻을 수 있는 것에 익숙해져 있을 겁니다.
+Alias 모듈은 이것을 제공합니다.
+동시에 조금 좋은 것은, 오브젝트는 호출할 수 있지만, 
+클래스의 바깥쪽의 모든것은 호출 할 수 없는 프라이베이트한 메소드같은 것입니다.
+
+
+=begin original
+
+Here's an example of creating a Person using the Alias module.
+When you update these magical instance variables, you automatically
+update value fields in the hash.  Convenient, eh?
+
+=end original
+
+Alias 모듈을 사용해서 Person 을 만드는 예제입니다.
+이것들의 매지컬한 인스턴스 변수를 갱신하면, 자동적으로 해쉬의 값 필드를
+갱신합니다. 편리하죠?
+
+    package Person;
+
+    # this is the same as before...
+    sub new {
+	 my $class = shift;
+	 my $self = {
+	    NAME  => undef,
+	    AGE   => undef,
+	    PEERS => [],
+	};
+	bless($self, $class);
+	return $self;
+    }
+
+    use Alias qw(attr);
+    our ($NAME, $AGE, $PEERS);
+
+    sub name {
+	my $self = attr shift;
+	if (@_) { $NAME = shift; }
+	return    $NAME;
+    }
+
+    sub age {
+	my $self = attr shift;
+	if (@_) { $AGE = shift; }
+	return    $AGE;
+    }
+
+    sub peers {
+	my $self = attr shift;
+	if (@_) { @PEERS = @_; }
+	return    @PEERS;
+    }
+
+    sub exclaim {
+        my $self = attr shift;
+        return sprintf "Hi, I'm %s, age %d, working with %s",
+            $NAME, $AGE, join(", ", @PEERS);
+    }
+
+    sub happy_birthday {
+        my $self = attr shift;
+        return ++$AGE;
+    }
+
+=begin original
+
+The need for the C<our> declaration is because what Alias does
+is play with package globals with the same name as the fields.  To use
+globals while C<use strict> is in effect, you have to predeclare them.
+These package variables are localized to the block enclosing the attr()
+call just as if you'd used a local() on them.  However, that means that
+they're still considered global variables with temporary values, just
+as with any other local().
+
+=end original
+
+C<our> 를 선언하지 않으면 안되는 것은 Alias 가 하고 있는 것이, 
+필드와 같은 이름의 패키지의 글로벌 변수를 만질 수 있게 하기 때문입니다.
+즉, C<use strict> 를 하고, 글로벌 변수를 사용하기 위해, 
+이것들을 먼저 선언하지 ì으면 안됩니다.
+이 패키지 변수들은 마침 그것들에 local()을 사용했던 것처럼
+attr() 호출을 포함하고 있는 블록에 로컬라이즈되어 있습니다.
+그러나 이것은 마침 다른 local() 처럼 혹은 일시적인 값으로,
+글로벌 변수를 생각하고 있는 것을 의미합니다.
+
+=begin original
+
+It would be nice to combine Alias with
+something like Class::Struct or Class::MethodMaker.
+
+=end original
+
+Alias 와 Class::Strcut 나 Class::MethodMaker 를 섞어 쓰는 것도 좋습니다.
+
+=head1 NOTES
+
+(주의)
+
+=head2 Object Terminology
+
+(오브젝트 전문 용어)
+
+=begin original
+
+In the various OO literature, it seems that a lot of different words
+are used to describe only a few different concepts.  If you're not
+already an object programmer, then you don't need to worry about all
+these fancy words.  But if you are, then you might like to know how to
+get at the same concepts in Perl.
+
+=end original
+
+여러가지 오브젝트지향문헌에서 많은 다른 단어가 책에서 정말 조금만 
+다른 개념을 나타내는 것에 사용되고 있습니다.
+만약 당신이 아직 오브젝트 지향프로그래머가 아니면, 
+이것들의 오락가락하는 단어들에 고민할 일은 없습니다.
+하지만 이미 오브젝트지향 프로그래머라면 Perl 에서 같은 
+컨셉을 어떻게 나타내는 가 알고 싶을겁니다.
+
+=begin original
+
+For example, it's common to call an object an I<instance> of a class
+and to call those objects' methods I<instance methods>.  Data fields
+peculiar to each object are often called I<instance data> or I<object
+attributes>, and data fields common to all members of that class are
+I<class data>, I<class attributes>, or I<static data members>.
+
+=end original
+
+예를들어, 오브젝트를 클래스의 I<인스턴스>를 부르는 것이나 그 인스턴스의 
+오브젝트 메소드들을 I<인스턴스 메소드>라고 부르는 것은 일반적입니다.
+오브젝트마다 특유의 데이터필드는 때로 I<인스턴스 데이터> 라든가, 
+I<클래스 데이터> 라든가 I<클래스 속성> 이나, I<정적 데이터 멤버> 라고
+불립니다.
+
+=begin original
+
+Also, I<base class>, I<generic class>, and I<superclass> all describe
+the same notion, whereas I<derived class>, I<specific class>, and
+I<subclass> describe the other related one.
+
+=end original
+
+아직 I<기본 클래스> 나 I<일반 클래스> 나 <수퍼 클래스> 등이 
+같은 생각으로 기술했스비다.
+그래서 I<파생 클래스>난 I<특정 클래스> 나 I<서브 클래스> 는 
+다른 관련하는 것을 기술합니다.
+
+=begin original
+
+C++ programmers have I<static methods> and I<virtual methods>,
+but Perl only has I<class methods> and I<object methods>.
+Actually, Perl only has methods.  Whether a method gets used
+as a class or object method is by usage only.  You could accidentally
+call a class method (one expecting a string argument) on an
+object (one expecting a reference), or vice versa.
+
+=end original
+
+C++ 프로그래머에게는 I<정적 메소드> 나 I<가상 메소드>가 있습니다만, 
+Perl 프로그래머에게는 I<클래스 메소드>와, 
+I<오브젝트 메소드> 밖에 없습니다.
+메소드는 클래스/오브젝트 메소드로써 사용되는지 어떤지는 
+사용법에만 따릅니다.
+오브젝트(리퍼런스를 기대하는 것) 에서 클래스 메소드(문자열의 인수를 
+기대하는 것)를 부르는 것도 할 수 있고, 그 반대도 가능합니다.
+
+=begin original
+
+From the C++ perspective, all methods in Perl are virtual.
+This, by the way, is why they are never checked for function
+prototypes in the argument list as regular builtin and user-defined
+functions can be.
+
+=end original
+
+C++ 의 관점에서는 Perl 의 모든 메소드는 가상적입니다.
+그런데 이것은 메소드가 보통의 내장 함수나 유저정의 함수가 
+가능하도록 인수리스트에서 함수의 프로토타입을 체크하지 않는 이유입니다.
+
+=begin original
+
+Because a class is itself something of an object, Perl's classes can be
+taken as describing both a "class as meta-object" (also called I<object
+factory>) philosophy and the "class as type definition" (I<declaring>
+behaviour, not I<defining> mechanism) idea.  C++ supports the latter
+notion, but not the former.
+
+=end original
+
+클래스는 그 자신, 오브젝트의 뭔가 이기에, Perl 의 클래스는 
+"메타오브젝트로써의 클래스"(또는, I<오브젝트 공장> 이라고도 
+불립니다) 철학과 "형태 정의로써의 클래스"(행동을 I<선언> 하고, 
+매커니즘을 I<정의하지 않은>) 생각의 양쪽을 나타내는 것으로 보입니다.
+C++ 은 후자를 지원하지만, 전자는 지원하지 않습니다.
+
+=head1 SEE ALSO
+
+=begin original
+
+The following manpages will doubtless provide more
+background for this one:
+L<perlmod>,
+L<perlref>,
+L<perlobj>,
+L<perlbot>,
+L<perltie>,
+and
+L<overload>.
+
+=end original
+
+아래ㅣ 매뉴얼 페이지는 틀림없이 이 매뉴얼 페이지에 많은 배경을 제공합니다:
+L<perlmod>,
+L<perlref>,
+L<perlobj>,
+L<perlbot>,
+L<perltie>,
+L<overload>.
+
+=begin original
+
+L<perlboot> is a kinder, gentler introduction to object-oriented
+programming.
+
+=end original
+
+L<perlboot> 는 보다 쉬운 오브젝트 지향 프로그래밍의 소개입니다.
+
+=begin original
+
+L<perltooc> provides more detail on class data.
+
+=end original
+
+L<perltooc> 은 클래스 데이터에 관한 상세한 내용을 제공합니다.
+
+=begin original
+
+Some modules which might prove interesting are Class::Accessor,
+Class::Class, Class::Contract, Class::Data::Inheritable,
+Class::MethodMaker and Tie::SecureHash
+
+=end original
+
+아래의 모듈에 관심을 가져보세요: Class::Accessor,
+Class::Class, Class::Contract, Class::Data::Inheritable,
+Class::MethodMaker, Tie::SecureHash
+
+=head1 AUTHOR AND COPYRIGHT
+
+Copyright (c) 1997, 1998 Tom Christiansen 
+All rights reserved.
+
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
+
+=head1 COPYRIGHT
+
+=head2 Acknowledgments
+
+Thanks to
+Larry Wall,
+Roderick Schertler,
+Gurusamy Sarathy,
+Dean Roehrich,
+Raphael Manfredi,
+Brent Halsey,
+Greg Bacon,
+Brad Appleton,
+and many others for their helpful comments.
+

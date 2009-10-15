@@ -1,0 +1,1860 @@
+=head1 NAME
+X<syntax>
+
+=begin original
+
+perlsyn - Perl syntax
+
+=end original
+
+perlsyn - Perl 의 문법
+
+=head1 DESCRIPTION
+
+=begin original
+
+A Perl program consists of a sequence of declarations and statements
+which run from the top to the bottom.  Loops, subroutines and other
+control structures allow you to jump around within the code.
+
+=end original
+
+Perl 프로그램은, 선언과 문장으로 구성되며, 위에서 아래로 실행됩니다.
+루프, 서브루틴, 그외의 제어기구로 코드의 여러곳으로 점프할 수 있습니다.
+
+=begin original
+
+Perl is a B<free-form> language, you can format and indent it however
+you like.  Whitespace mostly serves to separate tokens, unlike
+languages like Python where it is an important part of the syntax.
+
+=end original
+
+Perl 은 B<자유서식> 언어이지만, 좋을 대로 고치거나, 인덴트하거나 할 수 있습니다.
+공백이 문법의 중요한 요소이며 Python 같은 언어와 달리, 
+공백은 대부분 토큰의 분할이 목적입니다.
+
+=begin original
+
+Many of Perl's syntactic elements are B<optional>.  Rather than
+requiring you to put parentheses around every function call and
+declare every variable, you can often leave such explicit elements off
+and Perl will figure out what you meant.  This is known as B<Do What I
+Mean>, abbreviated B<DWIM>.  It allows programmers to be B<lazy> and to
+code in a style with which they are comfortable.
+
+=end original
+
+Perl 의 다양한 문법요소는 B<생략가능> 입니다.
+모든 함수를 괄호로 감싸거나, 모든 변수를 선한하거나 하는 것을
+요구하지 않고, 그때그때 그런 명시적인 요소를 넣어두고,
+Perl 에게 저자가 의미하고 있는 부분을 발견하게 하는 것이 가능합니다.
+이것은 B<Do What I Mean> 이라고 알려져 있고, 이니셜을 따서 B<DWIM>이라고 불리웁니다.
+이것에 의해, 프로그래머를 B<게으르게> 만들고, 그들이 편안하다고 생각하는 스타일로
+코딩이 가능하게 합니다.
+
+=begin original
+
+Perl B<borrows syntax> and concepts from many languages: awk, sed, C,
+Bourne Shell, Smalltalk, Lisp and even English.  Other
+languages have borrowed syntax from Perl, particularly its regular
+expression extensions.  So if you have programmed in another language
+you will see familiar pieces in Perl.  They often work the same, but
+see L<perltrap> for information about how they differ.
+
+=end original
+
+Perl 은 awk, sed, C, Bourne Shell, Smalltalk, Lisp, 果ては英語といった
+많은 언어에서 컨셉과 문법을 B<차용> 하고 있습니다.
+다른 언어도 Perl 에서 문법을 차용하고 있습니다 ; 특히 정규표현확장을 말이죠.
+따라서, 다른 언어로 프로그래밍하고 있었다면, Perl 에서도 본적이 있는 듯한
+것이 있을 것입니다. 때때로 같은 동작을 하기도 하지만 다른 점에 대한 정보는
+L<perltrap>을 참조해주세요.
+
+=head2 Declarations
+X<declaration> X<undef> X<undefined> X<uninitialized>
+
+(선언)
+
+=begin original
+
+The only things you need to declare in Perl are report formats and
+subroutines (and sometimes not even subroutines).  A variable holds
+the undefined value (C<undef>) until it has been assigned a defined
+value, which is anything other than C<undef>.  When used as a number,
+C<undef> is treated as C<0>; when used as a string, it is treated as
+the empty string, C<"">; and when used as a reference that isn't being
+assigned to, it is treated as an error.  If you enable warnings,
+you'll be notified of an uninitialized value whenever you treat
+C<undef> as a string or a number.  Well, usually.  Boolean contexts,
+such as:
+
+=end original
+
+Perl 에서 선언이 필요한 것은 리포트 포맷과 서브루틴 뿐입니다.
+(서브루틴도 선언이 필요없는 경우도 있습니다)
+변수는 C<undef> 이외의 정의된 값을 대입하기까지는 미정의값(C<undef>)이 됩니다.
+숫자값으로써 사용될 경우, C<undef> 는 C<0>로 취급됩니다;
+문자열로써 사용될 경우, 이것은 빈문자열 C<"">로 취급됩니다;
+리퍼런스로써 사용될 경우, 이ㅅ은 아무것도 대입되어있지 않으므로, 에러로써
+취급됩니다.
+경고를 유효하게 하고 있다면, C<undef>를 문자열이나 숫자값으로써 취급하려고 하면
+미초기값을 지적합니다.
+네, 보통은,
+다음같은 참거짓값 컨텍스트라면 : 
+
+    my $a;
+    if ($a) {}
+
+=begin original
+
+are exempt from warnings (because they care about truth rather than
+definedness).  Operators such as C<++>, C<-->, C<+=>,
+C<-=>, and C<.=>, that operate on undefined left values such as:
+
+=end original
+
+(정의되었는지 어떤지가 아닌 참인가 어떤ㅏ를 고려하므로) 경고를 피할 수 있습니다.
+미정의의 좌변치를 조작하는 C<++>, C<-->, C<+=>, C<-=>, C<.=> 같은 연산자에서도 :
+
+    my $a;
+    $a++;
+
+=begin original
+
+are also always exempt from such warnings.
+
+=end original
+
+라고하는 것으로도 경고를 피할 수 있습니다.
+
+=begin original
+
+A declaration can be put anywhere a statement can, but has no effect on
+the execution of the primary sequence of statements--declarations all
+take effect at compile time.  Typically all the declarations are put at
+the beginning or the end of the script.  However, if you're using
+lexically-scoped private variables created with C<my()>, you'll
+have to make sure
+your format or subroutine definition is within the same block scope
+as the my if you expect to be able to access those private variables.
+
+=end original
+
+선언은, 문장을 놓을 수 있는 곳이면 어디에도 놓을 수 있습니다.
+기본적인 문장의 나열은 실행 시에는 어떤 효과도 없습니다 - 선언은 컴파일 시에
+모든 것이 효과가 나타납니다.
+전형적인 모든 선은은, 스크립트의 맨앞혹은 맨끝에 놓여집니다.
+하지만, 지역변수를 C<my()> 를 사용해서 작성하고 렉시컬한 스코프를
+사용하고 있다면, 포맷이나 서브루틴의 정의를 같은 블록의 스코프 안에서
+그 지역변수에 접근하는 것이 가능하게 할 필요가 있습니다.
+
+=begin original
+
+Declaring a subroutine allows a subroutine name to be used as if it were a
+list operator from that point forward in the program.  You can declare a
+subroutine without defining it by saying C<sub name>, thus:
+X<subroutine, declaration>
+
+=end original
+
+서브루틴의 선언은, 프로그램의 뒷쪽에 있는 서브루틴이름을
+리스트연산자처럼 사용하는 것을 허락합니다.
+정의되어있지 않은 서브루틴의 선언을, C<sub name> 으로 기술하는 것으로
+선언할수 있으므로, 아래처럼 됩니다.
+
+X<subroutine, declaration>
+
+    sub myname;
+    $me = myname $0 		or die "can't get myname";
+
+=begin original
+
+Note that myname() functions as a list operator, not as a unary operator;
+so be careful to use C<or> instead of C<||> in this case.  However, if
+you were to declare the subroutine as C<sub myname ($)>, then
+C<myname> would function as a unary operator, so either C<or> or
+C<||> would work.
+
+=end original
+
+myname() 함수는, 리스트연산자처럼 움직이며, 단항연산자로써가 아닌 것에
+주의해 주세요.
+즉, 이런 경우는 C<||> 대신에 C<or> 를 사용하는 것에 주의해 주세요.
+그러나, 서브루틴을 C<sub myname($)> 처럼 선언하고 있는 것이라면,
+C<or> 에서도, C<||>에서도 잘 움직입니다.
+
+=begin original
+
+Subroutines declarations can also be loaded up with the C<require> statement
+or both loaded and imported into your namespace with a C<use> statement.
+See L<perlmod> for details on this.
+
+=end original
+
+서브루틴의 선언은 C<require> 문을 사용해 불러 올수 있고,
+C<use> 문을 사용해 자신의 이름공간에 로드하거나 임포트하거나 할 수 있습니다.
+이것에 관한 자세한 내용은 L<perlmod> 를 참조해주세요.
+
+=begin original
+
+A statement sequence may contain declarations of lexically-scoped
+variables, but apart from declaring a variable name, the declaration acts
+like an ordinary statement, and is elaborated within the sequence of
+statements as if it were an ordinary statement.  That means it actually
+has both compile-time and run-time effects.
+
+=end original
+
+구문의 나열은 렉시컬 스코프를 가진 변수의 선언을 포함하는 것이 가능하지만,
+변수이름의 선언은 떨어져, 그 선언은 일반적인 구문처럼 움직이고,
+그것이 일반적인 구분인지 어떤지... <PASS>
+文の並びはレキシカルスコープを持った変数の宣言を含むことができますが、
+変数名の宣言とは切り離され、その宣言は通常の文のように振る舞い、
+それが通常の文であるかのように文の並びに組みこまれます。
+이것은 그런 선언이 컴파일 시의 효과와 실행시의 효과 양쪽을
+가지고 있는 것입니다.
+
+=head2 Comments
+X<comment> X<#>
+
+(커멘트)
+
+=begin original
+
+Text from a C<"#"> character until the end of the line is a comment,
+and is ignored.  Exceptions include C<"#"> inside a string or regular
+expression.
+
+=end original
+
+커멘트는 C<"#"> 문자에서 줄의 끝까지 계속해서 그 부분은 무시됩니다. 
+예외는 문자열이나 정규표현의 안에 있는 C<"#"> 입니다.
+
+=head2 Simple Statements
+X<statement> X<semicolon> X<expression> X<;>
+
+(단순 구문)
+
+=begin original
+
+The only kind of simple statement is an expression evaluated for its
+side effects.  Every simple statement must be terminated with a
+semicolon, unless it is the final statement in a block, in which case
+the semicolon is optional.  (A semicolon is still encouraged if the
+block takes up more than one line, because you may eventually add
+another line.)  Note that there are some operators like C<eval {}> and
+C<do {}> that look like compound statements, but aren't (they're just
+TERMs in an expression), and thus need an explicit termination if used
+as the last item in a statement.
+
+=end original
+
+단순구문이 되는 유일한 종류는 그 부작용을 위해 평가되는 식입니다.
+모든 단순구문은 그것이 세미콜론을 생략하는 것이 가능한 블록의
+마지막에 없는 한은 구문을 끝내기 위한 세미콜론이 없으면 안됩니다.
+(블록이 2줄이상 넘어가는 경우는 세미콜론을 붙이는 것을 권장합니다.
+왜냐면, 다른 줄을 추가하는 가능성이 있기때문입니다)
+C<eval {}> 나 C<do {}> 처럼, 복합문처럼 보여도,
+그렇지 않은(이것들은 단순한 식을 기반으로 한 TERM 입니다) 것도 있고,
+그런 것을 구문의 마지막의 아이템으로써 사용한 경우에는 명시적으로 
+끝을 낼 필요가 있다는 것에도 주의해주세요.
+
+=head2 Truth and Falsehood
+X<truth> X<falsehood> X<true> X<false> X<!> X<not> X<negation> X<0>
+
+(참/거짓값)
+
+=begin original
+
+The number 0, the strings C<'0'> and C<''>, the empty list C<()>, and
+C<undef> are all false in a boolean context. All other values are true.
+Negation of a true value by C<!> or C<not> returns a special false value.
+When evaluated as a string it is treated as C<''>, but as a number, it
+is treated as 0.
+
+=end original
+
+숫자값 0, 문자열 C<'0'> 와 C<''>, 빈리스트 C<()>, C<undef> 는 모두
+참거짓값 컨텍스트에서는 거짓이 됩니다.
+그외의 모든 값은 참입니다.
+참의 값을 C<!> 나 C<not> 으로 부정하면 특수한 거짓값을 반환합니다.
+이것을 문자열로써 평가하면 C<''> 로써 취급되지만, 숫자값으로써 평가하면
+0 로 취급됩니다.
+
+=head2 Statement Modifiers
+X<statement modifier> X<modifier> X<if> X<unless> X<while>
+X<until> X<foreach> X<for>
+
+(구문 수식자)
+
+=begin original
+
+Any simple statement may optionally be followed by a I<SINGLE> modifier,
+just before the terminating semicolon (or block ending).  The possible
+modifiers are:
+
+=end original
+
+임의의 단순구문에는 B<하나의> 수식자를 끝단의 세미콜론의 바로 앞(혹은
+블록의 끝단의 바로 앞)에 붙일 수 있습니다.
+사용하는 것이 가능한 수식자는 아래와 같습니다.
+
+    if EXPR
+    unless EXPR
+    while EXPR
+    until EXPR
+    foreach LIST
+
+=begin original
+
+The C<EXPR> following the modifier is referred to as the "condition".
+Its truth or falsehood determines how the modifier will behave.
+
+=end original
+
+수식자는 계속해서 C<EXPR> 은 "조건" 으로 참조됩니다.
+그 참거짓값이 수식자의 행동을 결정합니다.
+
+=begin original
+
+C<if> executes the statement once I<if> and only if the condition is
+true.  C<unless> is the opposite, it executes the statement I<unless>
+the condition is true (i.e., if the condition is false).
+
+=end original
+
+C<if> 는 I<만약> 조건이 참일 경우에만 구문을 실행합니다. 
+C<unless> 는 거꾸로, 조건이 참 I<이 아닌 한> (즉, 조건이 거짓이면)
+구문을 실행합니다.
+
+    print "Basset hounds got long ears" if length $ear >= 10;
+    go_outside() and play() unless $is_raining;
+
+=begin original
+
+The C<foreach> modifier is an iterator: it executes the statement once
+for each item in the LIST (with C<$_> aliased to each item in turn).
+
+=end original
+
+C<foreach> 수식자는 반복자입니다 : 
+LIST 의 값마다 구문을 실행합니다(실행중은 C<$_> 가 각각의 값의
+대행을 하게 됩니다)
+
+    print "Hello $_!\n" foreach qw(world Dolly nurse);
+
+=begin original
+
+C<while> repeats the statement I<while> the condition is true.
+C<until> does the opposite, it repeats the statement I<until> the
+condition is true (or while the condition is false):
+
+=end original
+
+C<while> 은 조건이 참 I<일 때의> 구문을 반복합니다.
+C<until> 은 거꾸로, 조건이 참<이 될때까지>(즉 조건이 거짓일 경우)
+구문을 반복합니다.
+
+    # Both of these count from 0 to 10.
+    print $i++ while $i <= 10;
+    print $j++ until $j >  10;
+
+=begin original
+
+The C<while> and C<until> modifiers have the usual "C<while> loop"
+semantics (conditional evaluated first), except when applied to a
+C<do>-BLOCK (or to the deprecated C<do>-SUBROUTINE statement), in
+which case the block executes once before the conditional is
+evaluated.  This is so that you can write loops like:
+
+=end original
+
+수식자 C<while> 과 C<until> 은, 일반적인 "C<while> loop" 의의미를
+가지고 있습니다(조건이 맨처음에 평가되는)만, C<do> 블록(혹은 현재
+사용을 권하지 않는 C<do> 서브루틴 구문)에 적용될 때는 예외로
+이 때는 조건이 평가되기 전에 한번 블록이 실행됩니다.
+이 때문애, 다음같은 루프를 쓸 수 있습니다.
+
+    do {
+	$line = <STDIN>;
+	...
+    } until $line  eq ".\n";
+
+=begin original
+
+See L<perlfunc/do>.  Note also that the loop control statements described
+later will I<NOT> work in this construct, because modifiers don't take
+loop labels.  Sorry.  You can always put another block inside of it
+(for C<next>) or around it (for C<last>) to do that sort of thing.
+For C<next>, just double the braces:
+X<next> X<last> X<redo>
+
+=end original
+
+L<perlfunc/do> 를 참조해주세요. 
+뒤에 쓰인 루프의 제어문은 수식자 푸르라벨을 가지고 있지 않아서
+이 구조문에서는 I<동작하지 않는> 다는 것에 주의해 주세요.
+죄송합니다.
+이런 경우에 대처하는 것에 별도의 블록을 안쪽에 넣거나 (C<next> 의 경우),
+별도의 블록에서 포함되게(C<last> 의 경우) 하는 방법이 일반적으로 사용됩니다.
+C<next> 에서는 간단히 중괄호를 이중으로 사용합니다.
+
+X<next> X<last> X<redo>
+
+    do {{
+	next if $x == $y;
+	# do something here
+    }} until $x++ > $z;
+
+=begin original
+
+For C<last>, you have to be more elaborate:
+X<last>
+
+=end original
+
+C<last> 의 경우는, 더욱 주의할 필요가 있습니다. 
+
+    LOOP: { 
+	    do {
+		last if $x = $y**2;
+		# do something here
+	    } while $x++ <= $z;
+    }
+
+=begin original
+
+B<NOTE:> The behaviour of a C<my> statement modified with a statement
+modifier conditional or loop construct (e.g. C<my $x if ...>) is
+B<undefined>.  The value of the C<my> variable may be C<undef>, any
+previously assigned value, or possibly anything else.  Don't rely on
+it.  Future versions of perl might do something different from the
+version of perl you try it out on.  Here be dragons.
+X<my>
+
+=end original
+
+B<주의:> (C<my $x if ...> 같은) 조건구조나 루프구조에서 수식된
+C<my> 문의 행동은 B<미정의>입니다. 
+C<my> 변수의 값은 C<undef> 일지도 모르고, 이전에 대입된 값일지도 모르며,
+그 외의 여하에 따라 값의 가능성이 있습니다.
+이 값에 의존해서는 안됩니다.
+perl 의 장래의 버젼에서는 현재의 버젼과는 뭔가 다를지도 모르겠습니다.
+여기에는 좀 이상한 것이 있습니다.
+X<my>
+
+=head2 Compound Statements
+X<statement, compound> X<block> X<bracket, curly> X<curly bracket> X<brace>
+X<{> X<}> X<if> X<unless> X<while> X<until> X<foreach> X<for> X<continue>
+
+(복합문)
+
+=begin original
+
+In Perl, a sequence of statements that defines a scope is called a block.
+Sometimes a block is delimited by the file containing it (in the case
+of a required file, or the program as a whole), and sometimes a block
+is delimited by the extent of a string (in the case of an eval).
+
+=end original
+
+Perl 에서는 스코프를 정의하는 듯한 구문을 블록이라고 부릅니다.
+블록은 그것을 포함한 파일에 의해 범위가 정해지는 경우가 있으며,
+(파일이 require 된 때나, 프로그램전체인 경우)
+문자열의 전개에 따라 범위가 정해지는(eval 의 경우) 경우도 있습니다.
+
+=begin original
+
+But generally, a block is delimited by curly brackets, also known as braces.
+We will call this syntactic construct a BLOCK.
+
+=end original
+
+그러나 일반적으로는 블록은 중괄호에 의해 범위가 정해집니다.
+이 구문적인 구조를 블록이라고 부릅니다.
+
+=begin original
+
+The following compound statements may be used to control flow:
+
+=end original
+
+아래에 있는 복합문을 제어흐름으로써 사용할 수 있습니다.
+
+    if (EXPR) BLOCK
+    if (EXPR) BLOCK else BLOCK
+    if (EXPR) BLOCK elsif (EXPR) BLOCK ... else BLOCK
+    LABEL while (EXPR) BLOCK
+    LABEL while (EXPR) BLOCK continue BLOCK
+    LABEL until (EXPR) BLOCK
+    LABEL until (EXPR) BLOCK continue BLOCK
+    LABEL for (EXPR; EXPR; EXPR) BLOCK
+    LABEL foreach VAR (LIST) BLOCK
+    LABEL foreach VAR (LIST) BLOCK continue BLOCK
+    LABEL BLOCK continue BLOCK
+
+=begin original
+
+Note that, unlike C and Pascal, these are defined in terms of BLOCKs,
+not statements.  This means that the curly brackets are I<required>--no
+dangling statements allowed.  If you want to write conditionals without
+curly brackets there are several other ways to do it.  The following
+all do the same thing:
+
+=end original
+
+그러나 주의해줬으면 하는 것은 C 나 Pascal 과는 달리, 블록을 얻는 것처럼
+정의되어 있는 구문을 얻는 것은 아니라는 것입니다.
+즉, 중괄호는 I<필요한 것>입니다. -- 어줍잖은 구문은 용납하지 않습니다!<PASS>
+중괄호없는 조건문을 사용하고 싶다면, 몇 가지 방법이 있습니다.
+아래는 전부 같은 것 입니다.
+
+    if (!open(FOO)) { die "Can't open $FOO: $!"; }
+    die "Can't open $FOO: $!" unless open(FOO);
+    open(FOO) or die "Can't open $FOO: $!";	# FOO or bust!
+    open(FOO) ? 'hi mom' : die "Can't open $FOO: $!";
+			# a bit exotic, that last one
+
+=begin original
+
+The C<if> statement is straightforward.  Because BLOCKs are always
+bounded by curly brackets, there is never any ambiguity about which
+C<if> an C<else> goes with.  If you use C<unless> in place of C<if>,
+the sense of the test is reversed.
+
+=end original
+
+C<if> 구문은 명해입니다. 
+블록은 항상 중괄호로 구분지어지기에, C<if> 와 C<else> 에서 빼먹는 경우는
+결코 없습니다.
+C<unless> 를 C 의 C<if> 처럼 사용하고 싶다면 검사를 반전합니다.
+
+=begin original
+
+The C<while> statement executes the block as long as the expression is
+L<true|/"Truth and Falsehood">.
+The C<until> statement executes the block as long as the expression is
+false.
+The LABEL is optional, and if present, consists of an identifier followed
+by a colon.  The LABEL identifies the loop for the loop control
+statements C<next>, C<last>, and C<redo>.
+If the LABEL is omitted, the loop control statement
+refers to the innermost enclosing loop.  This may include dynamically
+looking back your call-stack at run time to find the LABEL.  Such
+desperate behavior triggers a warning if you use the C<use warnings>
+pragma or the B<-w> flag.
+
+=end original
+
+C<while> 문은, 식이 L<참|/"Truth and Faslehood">인 경우, 블록을
+실행합니다.
+C<until> 문은, 식이 거짓일 경우, 블록을 실행합니다.
+LABEL 은 생략할 수 있지만, 어떤 경우에는 콜론을 붙인 식별자로 쓰이기도 합니다.
+LABEL 은 C<next>、C<last>、C<redo> 같은 루프제어문의 루프를 규정합니다.
+LABEL 이 생략된 경우, 루프제어문은 그것을 포함한 루프의 안에서 가장 안쪽의
+루프를 참조합니다.
+이것은 실행 시에 LABEL 을 검출하기위한 호출 스택의 동적인 후방검색을
+포함하는 것이 가능합니다.
+그런 권장하지 않는 행위는, C<use warnings> 프라그마나 B<-w> 플래그를
+사용한 경우에는 경고의 원인이 됩니다.
+
+=begin original
+
+If there is a C<continue> BLOCK, it is always executed just before the
+conditional is about to be evaluated again.  Thus it can be used to
+increment a loop variable, even when the loop has been continued via
+the C<next> statement.
+
+=end original
+
+C<continue> 블록이 존재하는 경우,
+항상 조건이 재평가되기 직전에 실행됩니다.
+따라서, 이 블록을 루프변수의 가산을 위해서 사용할 수 있습니다.
+이것은 루프가 C<next> 문을 통해서 계속될 때에도 실행됩니다.
+
+=head2 Loop Control
+X<loop control> X<loop, control> X<next> X<last> X<redo> X<continue>
+
+(루프제어)
+
+=begin original
+
+The C<next> command starts the next iteration of the loop:
+
+=end original
+
+C<next> 커맨드는 루프의 다음 반복을 시작합니다.
+
+    LINE: while (<STDIN>) {
+	next LINE if /^#/;	# discard comments
+	...
+    }
+
+=begin original
+
+The C<last> command immediately exits the loop in question.  The
+C<continue> block, if any, is not executed:
+
+=end original
+
+C<last> 커맨드는 루프에서 즉시 탈출합니다.
+C<continue> 블록이 있어도 그것은 실행되지 않습니다.
+
+    LINE: while (<STDIN>) {
+	last LINE if /^$/;	# exit when done with header
+	...
+    }
+
+=begin original
+
+The C<redo> command restarts the loop block without evaluating the
+conditional again.  The C<continue> block, if any, is I<not> executed.
+This command is normally used by programs that want to lie to themselves
+about what was just input.
+
+=end original
+
+C<redo> 커맨드는 조건의 재평가 없이 루프 블록을 재실행합니다.
+C<continue> 블록이 있어도, 그것은 I<실행되지 않습니다>.
+이 커맨드는 일반적으로, 프로그램에 대한 입력에 관해서 프로그램 스스로에게
+거짓말을 하고 싶을 때에 사용됩니다.
+
+=begin original
+
+For example, when processing a file like F</etc/termcap>.
+If your input lines might end in backslashes to indicate continuation, you
+want to skip ahead and get the next record.
+
+=end original
+
+예를 들면, F</etc/termap> 같은 파일을 처리한다고 생각해보죠.
+만약 입력된 줄의 끝이 계속을 나타내는 백슬래쉬인 경우, 
+다음의 레코드를 얻어내고 싶다고 생각할 겁니다.
+
+    while (<>) {
+	chomp;
+	if (s/\\$//) {
+	    $_ .= <>;
+	    redo unless eof();
+	}
+	# now process $_
+    }
+
+=begin original
+
+which is Perl short-hand for the more explicitly written version:
+
+=end original
+
+이것은 Perl 의 생략표기로, 더욱 명확하게 쓴다면 다음과 같이 됩니다.
+
+    LINE: while (defined($line = <ARGV>)) {
+	chomp($line);
+	if ($line =~ s/\\$//) {
+	    $line .= <ARGV>;
+	    redo LINE unless eof(); # not eof(ARGV)!
+	}
+	# now process $line
+    }
+
+=begin original
+
+Note that if there were a C<continue> block on the above code, it would
+get executed only on lines discarded by the regex (since redo skips the
+continue block). A continue block is often used to reset line counters
+or C<?pat?> one-time matches:
+
+=end original
+
+위의 예제에서 C<continue> 블록이 있다고 하면, 그것은
+(redo 는 continue 블록을 스킵하기때문에) 정규표현에 의해
+비려진 줄만이 실행되는 것에 주의해주세요
+continue 블록은 행카운터를 리셋하거나,
+한번만 매치하ㅡㄴㄴ C<?pat?> 를 리셋하는 것에 사용됩니다.
+
+    # inspired by :1,$g/fred/s//WILMA/
+    while (<>) {
+	?(fred)?    && s//WILMA $1 WILMA/;
+	?(barney)?  && s//BETTY $1 BETTY/;
+	?(homer)?   && s//MARGE $1 MARGE/;
+    } continue {
+	print "$ARGV $.: $_";
+	close ARGV  if eof();		# reset $.
+	reset	    if eof();		# reset ?pat?
+    }
+
+=begin original
+
+If the word C<while> is replaced by the word C<until>, the sense of the
+test is reversed, but the conditional is still tested before the first
+iteration.
+
+=end original
+
+C<while> 을 C<until> 로 치환할 경우 검사의 의미는 반대가되지만,
+반복이 실행되는 것보다 앞에 조건이 검사되는 것은 변하지 않습니다.
+
+=begin original
+
+The loop control statements don't work in an C<if> or C<unless>, since
+they aren't loops.  You can double the braces to make them such, though.
+
+=end original
+
+루프제어문은 C<if> 나 C<unless> 안에서는 동작하지 않습니다.
+왜냐면 그곳은 루프가 아니기때문입니다.
+그러나 중괄호를 이중으로해서 이것에 대처할 수도 있습니다.
+
+    if (/pattern/) {{
+	last if /fred/;
+	next if /barney/; # same effect as "last", but doesn't document as well
+	# do something here
+    }}
+
+=begin original
+
+This is caused by the fact that a block by itself acts as a loop that
+executes once, see L<"Basic BLOCKs">.
+
+=end original
+
+이것은 블록 자신은 한번만 실행되는 루프로써 동작하기 때문입니다.
+L<"Basic BLOCKs"> 를 참조해주세요.
+
+=begin original
+
+The form C<while/if BLOCK BLOCK>, available in Perl 4, is no longer
+available.   Replace any occurrence of C<if BLOCK> by C<if (do BLOCK)>.
+
+=end original
+
+Perl 4 에서는 사용할 수 있었던 C<while/if BLOCK BLOCK> 같은 형태는
+이제는 사용할 수 없습니다.
+C<if BLOCK> 부분을 C<if (do BLOCK)> 으로 바꿔주세요.
+
+=head2 For Loops
+X<for> X<foreach>
+
+(for 루프)
+
+=begin original
+
+Perl's C-style C<for> loop works like the corresponding C<while> loop;
+that means that this:
+
+=end original
+
+Perl 의 C 형식의 C<for> 루프는, 대응하는 C<while> 루프처럼
+동작합니다.
+즉 이것은
+
+    for ($i = 1; $i < 10; $i++) {
+	...
+    }
+
+=begin original
+
+is the same as this:
+
+=end original
+
+이것과 같습니다.
+
+    $i = 1;
+    while ($i < 10) {
+	...
+    } continue {
+	$i++;
+    }
+
+=begin original
+
+There is one minor difference: if variables are declared with C<my>
+in the initialization section of the C<for>, the lexical scope of
+those variables is exactly the C<for> loop (the body of the loop
+and the control sections).
+X<my>
+
+=end original
+
+작은 차이가 하나 있습니다: C<for> 의 초기부분ㅔ서 C<my> 를 사용해서 변수가
+선언된 경우, 이 변수의 렉시컬스코프는 C<for> 루프
+(루프 전체와 제어부) 와 완전히 같습니다.
+
+X<my>
+
+=begin original
+
+Besides the normal array index looping, C<for> can lend itself
+to many other interesting applications.  Here's one that avoids the
+problem you get into if you explicitly test for end-of-file on
+an interactive file descriptor causing your program to appear to
+hang.
+X<eof> X<end-of-file> X<end of file>
+
+=end original
+
+일반적인 배열에 대한 첨자의 루프 이외에도, C<for> 는 다른
+많은 흥미있는 어플리케이션을 위해 차용할 수 있습니다.
+아래의 예는 대화적인 파일기술자의 끝단을 명시적으로 검사해버리면
+프로그램을 백업한것처럼 보이게 하는 문제를 회피하는 것입니다.
+X<eof> X<end-of-file> X<end of file>
+
+    $on_a_tty = -t STDIN && -t STDOUT;
+    sub prompt { print "yes? " if $on_a_tty }
+    for ( prompt(); <STDIN>; prompt() ) {
+	# do something
+    }
+
+=begin original
+
+Using C<readline> (or the operator form, C<< <EXPR> >>) as the
+conditional of a C<for> loop is shorthand for the following.  This
+behaviour is the same as a C<while> loop conditional.
+X<readline> X<< <> >>
+
+=end original
+
+C<for> 루프의 조건으로써 C<readline> (또는 연산자형식의 C<< EXPR> >>) 를
+사용하는 경우 아래처럼 생략형태를 사용할 수 있습니다.
+이것은 C<while> 루프 조건과 같습니다.
+
+X<readline> X<< <> >>
+
+    for ( prompt(); defined( $_ = <STDIN> ); prompt() ) {
+        # do something
+    }
+
+=head2 Foreach Loops
+X<for> X<foreach>
+
+(foreach 루프)
+
+=begin original
+
+The C<foreach> loop iterates over a normal list value and sets the
+variable VAR to be each element of the list in turn.  If the variable
+is preceded with the keyword C<my>, then it is lexically scoped, and
+is therefore visible only within the loop.  Otherwise, the variable is
+implicitly local to the loop and regains its former value upon exiting
+the loop.  If the variable was previously declared with C<my>, it uses
+that variable instead of the global one, but it's still localized to
+the loop.  This implicit localisation occurs I<only> in a C<foreach>
+loop.
+X<my> X<local>
+
+=end original
+
+C<foreach> 루프는 일반적인 리스트값에 대한 반복을 행하고, 변수 VAR 에
+리스트의 요소를 반복해 한번에 하나씩 설정합니다.
+변수의 앞에 C<my> 라는 키워드가 있는 경우, 그 변수는
+렉시컬스코프를 가지고, 따라서 그것은 루프의 안에서만 볼수 있게 됩니다.
+이 키워드가 없으면, 변수는 루프에 대해서 로컬이 되고, 루프ㄹ
+빠져나온 뒤에 앞의 값이 다시 얻어지게 됩니다.
+변수가 사전에 C<my> 를 사용해 선언되었다면, 글로벌한 것 대신에
+그 변수를 사용하지만, 그것도 루프에 로컬한 것이 됩니다.
+이 암묵적인 로컬화는 C<foreach> 안에서I<만> 일어납니다.
+
+X<my> X<local>
+
+=begin original
+
+The C<foreach> keyword is actually a synonym for the C<for> keyword, so
+you can use C<foreach> for readability or C<for> for brevity.  (Or because
+the Bourne shell is more familiar to you than I<csh>, so writing C<for>
+comes more naturally.)  If VAR is omitted, C<$_> is set to each value.
+X<$_>
+
+=end original
+
+읽기 쉽게하기 위해 C<foreach> 를, 간단함을 위해 C<for> 를 사용할 수 있습니다.
+(혹은 C 셸보다도 Bourne 셸에 익숙해 있다면 C<for> 쪽이 자연스럽겠죠)
+VAR 가 생략된 경우에는, C<$_> 에 값이 설정됩니다.
+
+X<$_>
+
+=begin original
+
+If any element of LIST is an lvalue, you can modify it by modifying
+VAR inside the loop.  Conversely, if any element of LIST is NOT an
+lvalue, any attempt to modify that element will fail.  In other words,
+the C<foreach> loop index variable is an implicit alias for each item
+in the list that you're looping over.
+X<alias>
+
+=end original
+
+LIST 의 요소가 좌변치인 경우, 루프의 안에서 VAR 를 변경하는 것에 의해
+대응하는 값을 변경하는 것이 가능합니다.
+거꾸로, LIST 의 요소가 좌변치가 아닌 경우, 이 요소를 수정하려고 해도 
+실패하게 됩니다.
+바꿔 말하면, C<foreach> 루프의 귀납변수가 루프의 대상이 된
+리스트 안의 각각의 아이템에 대한 별명이 되어 있기 때문입니다.
+
+X<alias>
+
+=begin original
+
+If any part of LIST is an array, C<foreach> will get very confused if
+you add or remove elements within the loop body, for example with
+C<splice>.   So don't do that.
+X<splice>
+
+=end original
+
+LIST 의 어떤 부분이 배열인 경우에, 예를 들면 C<splice> 를 사용해
+루프의 본체에서 그 요소를 삭제하거나 혹은 추가하거나 하면
+C<foreach> 는 꽤 혼란해버립니다.
+그래서 그런 것을 해서는 안됩니다.
+X<splice>
+
+=begin original
+
+C<foreach> probably won't do what you expect if VAR is a tied or other
+special variable.   Don't do that either.
+
+=end original
+
+VAR 가 tie 되거나 혹은 다른 특수변수인 경우에는
+C<foreach> 는 계획대로 움직이지 않을 겁니다.
+이런 것도 해서는 안됩니다.
+
+=begin original
+
+Examples:
+
+=end original
+
+例:
+
+    for (@ary) { s/foo/bar/ }
+
+    for my $elem (@elements) {
+	$elem *= 2;
+    }
+
+    for $count (10,9,8,7,6,5,4,3,2,1,'BOOM') {
+	print $count, "\n"; sleep(1);
+    }
+
+    for (1..15) { print "Merry Christmas\n"; }
+
+    foreach $item (split(/:[\\\n:]*/, $ENV{TERMCAP})) {
+	print "Item: $item\n";
+    }
+
+=begin original
+
+Here's how a C programmer might code up a particular algorithm in Perl:
+
+=end original
+
+아래의 예제는, C 프로그래머가 Perl 에서의 알고리즘을 기술할 때에
+사용할 것 같은 방법입니다.
+
+    for (my $i = 0; $i < @ary1; $i++) {
+	for (my $j = 0; $j < @ary2; $j++) {
+	    if ($ary1[$i] > $ary2[$j]) {
+		last; # can't go to outer :-(
+	    }
+	    $ary1[$i] += $ary2[$j];
+	}
+	# this is where that last takes me
+    }
+
+=begin original
+
+Whereas here's how a Perl programmer more comfortable with the idiom might
+do it:
+
+=end original
+
+이것에 대해, 아래의 예제는 Perl 프로그래머가 같은 것을 보다 여유있게
+하는 방법입니다.
+
+    OUTER: for my $wid (@ary1) {
+    INNER:   for my $jet (@ary2) {
+		next OUTER if $wid > $jet;
+		$wid += $jet;
+	     }
+	  }
+
+=begin original
+
+See how much easier this is?  It's cleaner, safer, and faster.  It's
+cleaner because it's less noisy.  It's safer because if code gets added
+between the inner and outer loops later on, the new code won't be
+accidentally executed.  The C<next> explicitly iterates the other loop
+rather than merely terminating the inner one.  And it's faster because
+Perl executes a C<foreach> statement more rapidly than it would the
+equivalent C<for> loop.
+
+=end original
+
+얼마나 이것이 간단해진 것 같나요? 이것은 "명확"하고, "안전"하고, "빠릅"니다.
+이것은 쓸데없는 것이 적기때문에 명확한 것입니다.
+이것은 뒤에 안쪽의 루프와 바깥 쪽의 루프의 사이에 코드를 추가하는 경우에도
+그것을 착각해서 실행하는 경우가 없기때문에 안전합니다.
+C<next> 는 안쪽의 루프를 종료하는 것이 아닌, 바깥쪽의 루프의 반복을 수행합니다.
+그리고 이것은, Perl 은 C<foreach> 문을 그것과 같은 C<for> 루프보다도
+빠르게 실행하기 때문에 빠른 것이죠.
+
+=head2 Basic BLOCKs
+X<block>
+
+(기본 블록)
+
+=begin original
+
+A BLOCK by itself (labeled or not) is semantically equivalent to a
+loop that executes once.  Thus you can use any of the loop control
+statements in it to leave or restart the block.  (Note that this is
+I<NOT> true in C<eval{}>, C<sub{}>, or contrary to popular belief
+C<do{}> blocks, which do I<NOT> count as loops.)  The C<continue>
+block is optional.
+
+=end original
+
+블록 그 자신은 (라벨이 붙어있든 말든) 한번만
+힐행되는 루프와 문법적으로는 같은 것입니다.
+이 때문에, 블록에서 탈출하기위해서나 블록의 재 시작을 위해
+임의의 루프제어문을 사용할 수 있습니다(이것은 C<eval{}>, C<sub {}>,
+거기에 일반적인 인식과는 달리 I<루프가 아닌> C<do{}> 블록에 대해서는
+C<continue> 블록은 생략할 수 있습니다.
+
+=begin original
+
+The BLOCK construct can be used to emulate case structures.
+
+=end original
+
+블록 구조는 case 구조를 수행할 때에도 사용할 수 있습니다.
+
+    SWITCH: {
+	if (/^abc/) { $abc = 1; last SWITCH; }
+	if (/^def/) { $def = 1; last SWITCH; }
+	if (/^xyz/) { $xyz = 1; last SWITCH; }
+	$nothing = 1;
+    }
+
+=begin original
+
+Such constructs are quite frequently used, because older versions
+of Perl had no official C<switch> statement.
+
+=end original
+
+옛 버젼의 Perl 에는 공식적인 C<switch> 문이 없었기때문에, 이런
+구문은 자주 사용되고 있습니다.
+
+=head2 Switch statements
+X<switch> X<case> X<given> X<when> X<default>
+
+(swtich 문)
+
+=begin original
+
+Starting from Perl 5.10, you can say
+
+=end original
+
+Perl 5.10 부터 아래처럼 쓰면 : 
+
+    use feature "switch";
+
+=begin original
+
+which enables a switch feature that is closely based on the
+Perl 6 proposal.
+
+=end original
+
+Perl 6 에서 제안된 것을 기초로한 switch 기능을 쓸 수 있습니다.
+
+=begin original
+
+The keywords C<given> and C<when> are analogous
+to C<switch> and C<case> in other languages, so the code
+above could be written as
+
+=end original
+
+키워드 C<given> 과 C<when> 은 다른 언어에서는 C<switch> 및 C<case> 와
+같은 것이어서, 위의 코드는 아래처럼 쓸 수 있습니다 : 
+
+    given($_) {
+	when (/^abc/) { $abc = 1; }
+	when (/^def/) { $def = 1; }
+	when (/^xyz/) { $xyz = 1; }
+	default { $nothing = 1; }
+    }
+
+=begin original
+
+This construct is very flexible and powerful. For example:
+
+=end original
+
+이 구조는 매우 유연하고 강력합니다.
+예를 들면:
+
+    use feature ":5.10";
+    given($foo) {
+	when (undef) {
+	    say '$foo is undefined';
+	}
+	
+	when ("foo") {
+	    say '$foo is the string "foo"';
+	}
+	
+	when ([1,3,5,7,9]) {
+	    say '$foo is an odd digit';
+	    continue; # Fall through
+	}
+	
+	when ($_ < 100) {
+	    say '$foo is numerically less than 100';
+	}
+	
+	when (\&complicated_check) {
+	    say 'complicated_check($foo) is true';
+	}
+	
+	default {
+	    die q(I don't know what to do with $foo);
+	}
+    }
+
+=begin original
+
+C<given(EXPR)> will assign the value of EXPR to C<$_>
+within the lexical scope of the block, so it's similar to
+
+=end original
+
+C<given(EXPR)> 은 블록의 렉시컬스코프안에서 EXPR 을 C<$_>에
+대입하기때문에, 이것인 아래와 비슷합니다.
+
+	do { my $_ = EXPR; ... }
+
+=begin original
+
+except that the block is automatically broken out of by a
+successful C<when> or an explicit C<break>.
+
+=end original
+
+그러나, 블록은 C<when> 이 성공하든 가, 명시적인 C<break> 에 의해서
+자동적으로 파괴된 것이 다릅니다.
+
+=begin original
+
+Most of the power comes from implicit smart matching:
+
+=end original
+
+진정한 강력함은 암묵적인 스마트매칭에 의한 것입니다.
+
+	when($foo)
+
+=begin original
+
+is exactly equivalent to
+
+=end original
+
+은 정확하게 아래와 같습니다.
+
+	when($_ ~~ $foo)
+
+=begin original
+
+In fact C<when(EXPR)> is treated as an implicit smart match most of the
+time. The exceptions are that when EXPR is:
+
+=end original
+
+실제로, C<when(EXPR)> 은 대부분의 경우에서 암묵적인 스마트매칭으로써
+취급됩니다.
+예외는 EXPR 이 아래의 경우입니다.
+
+=over 4
+
+=item o
+
+=begin original
+
+a subroutine or method call
+
+=end original
+
+서브루틴 또는 메소드 호출
+
+=item o
+
+=begin original
+
+a regular expression match, i.e. C</REGEX/> or C<$foo =~ /REGEX/>,
+or a negated regular expression match C<$foo !~ /REGEX/>.
+
+=end original
+
+정규표현매칭: 즉, C</REGEX/> 나 C<$foo =~ /REGEX/> 나
+정규표현매칭의 부정 C<$foo !~ /REGEX/>.
+
+=item o
+
+=begin original
+
+a comparison such as C<$_ E<lt> 10> or C<$x eq "abc">
+(or of course C<$_ ~~ $c>)
+
+=end original
+
+C<$_ E<lt> 10> 나 C<$x eq "abc"> (라든가 물론 C<$_ ~~ $c>) 같은 비교 
+
+=item o
+
+=begin original
+
+C<defined(...)>, C<exists(...)>, or C<eof(...)>
+
+=end original
+
+C<defined(...)>, C<exists(...)>, C<eof(...)> 중 어느 것
+
+=item o
+
+=begin original
+
+A negated expression C<!(...)> or C<not (...)>, or a logical
+exclusive-or C<(...) xor (...)>.
+
+=end original
+
+부정표현 C<!(...)>, C<not (...)>, 배타적 논리합 C<(...) xor (...)>
+
+=back
+
+=begin original
+
+then the value of EXPR is used directly as a boolean.
+Furthermore:
+
+=end original
+
+이런 경우, EXPR 의 값ㅡㄴ 직접 참/거짓값으로써 사용됩니다.
+
+=over 4
+
+=item o
+
+=begin original
+
+If EXPR is C<... && ...> or C<... and ...>, the test
+is applied recursively to both arguments. If I<both>
+arguments pass the test, then the argument is treated
+as boolean.
+
+=end original
+
+EXPR 이 C<... && ...> 또는 C<... and ...> 의 경우, 테스트는 양쪽의 
+인수에 대해서 재귀적으로 적용됩니다.
+I<양쪽의> 인수가 테스트에 성공한 경우, 이 인수는 참/거짓값으로써 취급됩니다.
+
+=item o
+
+=begin original
+
+If EXPR is C<... || ...> or C<... or ...>, the test
+is applied recursively to the first argument.
+
+=end original
+
+EXPR 이 C<... || ...> 또는 C<... or ...> 의 경우 테스트는 맨처음의 인수에
+대해서 재귀적으로 적용됩니다. 
+
+=back
+
+=begin original
+
+These rules look complicated, but usually they will do what
+you want. For example you could write:
+
+=end original
+
+이런 규칙은 복잡하게 모이지만, 보통은 실행하고픈 대로 실행됩니다.
+예를 들면, 아래처럼 쓸 수 있습니다.
+
+    when (/^\d+$/ && $_ < 75) { ... }
+
+=begin original
+
+Another useful shortcut is that, if you use a literal array
+or hash as the argument to C<when>, it is turned into a
+reference. So C<given(@foo)> is the same as C<given(\@foo)>,
+for example.
+
+=end original
+
+그 외의 편리한 생략기법으로써는 C<when> 의 인수로써 리터럴한 배열이나
+해쉬를 쓰면, 이것은 리퍼런스로 변화합니다.
+그리고, 예를들면 C<given(@foo)> 은 C<given(\@foo)>와 같습니다.
+
+=begin original
+
+C<default> behaves exactly like C<when(1 == 1)>, which is
+to say that it always matches.
+
+=end original
+
+C<default> 는 정확하게 C<when(1 == 1)> 처럼 행동하고, 항상
+매칭합니다.
+
+=begin original
+
+See L</"Smart matching in detail"> for more information
+on smart matching.
+
+=end original
+
+스마트매칭에 관해 더 자세한 정보는
+L</"Smart matching in detail"> 를 참조해주세요.
+
+=head3 Breaking out
+
+(탈출)
+
+=begin original
+
+You can use the C<break> keyword to break out of the enclosing
+C<given> block.  Every C<when> block is implicitly ended with
+a C<break>.
+
+=end original
+
+둘러싸인 C<given> 블록에서 탈출하기위해서는 C<break> 키워드를 
+사용할 수 있습니다.
+모든 C<when> 블록의 끝단에는 암묵적으로 C<break> 가 있습니다.
+
+=head3 Fall-through
+
+(다음 조건으로의 이동(Fall-through))
+
+=begin original
+
+You can use the C<continue> keyword to fall through from one
+case to the next:
+
+=end original
+
+하나의 조건에서 다음으로 이동하기위해 C<continue> 키워드를 쓸 수 있습니다.
+
+    given($foo) {
+	when (/x/) { say '$foo contains an x'; continue }
+	when (/y/) { say '$foo contains a y' }
+	default    { say '$foo contains neither an x nor a y' }
+    }
+
+=head3 Switching in a loop
+
+(루프안의 switch)
+
+=begin original
+
+Instead of using C<given()>, you can use a C<foreach()> loop.
+For example, here's one way to count how many times a particular
+string occurs in an array:
+
+=end original
+
+C<given()> 을 사용하는 대신에, C<foreach()> 루프를 사용할 수 있습니다.
+예를 들면, 아래는 배열안에 특정 문자열이 몇번 나타나는 가를 세기위한
+하나의 방법입니다.
+
+    my $count = 0;
+    for (@array) {
+	when ("foo") { ++$count }
+    }
+    print "\@array contains $count copies of 'foo'\n";
+
+=begin original
+
+On exit from the C<when> block, there is an implicit C<next>.
+You can override that with an explicit C<last> if you're only
+interested in the first match.
+
+=end original
+
+C<when> 블록에서의 종료 시에, 암묵적인 C<next> 가 있습니다.
+만약 맨처음의 매칭에만 흥미가 있다면, 명시적인 C<last> 로
+이것을 덮어쓸 수 있습니다.
+
+=begin original
+
+This doesn't work if you explicitly specify a loop variable,
+as in C<for $item (@array)>. You have to use the default
+variable C<$_>. (You can use C<for my $_ (@array)>.)
+
+=end original
+
+이것은, C<for $item (@array)> 같이 명시적인 루프 변수를 지정한 경우는
+동작하지 않습니다.
+기본변수 C<$_> 를 사용할 필요가 있습니다.
+(C<for my $_ (@array)> 는 사용할 수 있습니다.)
+
+=head3 Smart matching in detail
+
+(스마트매칭의 상세내용)
+
+=begin original
+
+The behaviour of a smart match depends on what type of thing
+its arguments are. It is always commutative, i.e. C<$a ~~ $b>
+behaves the same as C<$b ~~ $a>. The behaviour is determined
+by the following table: the first row that applies, in either
+order, determines the match behaviour.
+
+=end original
+
+스마트매칭의 행동은 인수에 어떤 형태가 사용되는 가에 의존합니다.
+이것은 항상 가변성이 있습니다; 즉, C<$a ~~ $b> 는 C<$b ~~ $a> 처럼
+행동합니다.
+행동은 다음의 표에 의해 결정됩니다.
+적용된 최초의 줄(어떤 순서라도)이 매칭을 결정합니다.
+
+=begin original
+
+    $a      $b        Type of Match Implied    Matching Code
+    ======  =====     =====================    =============
+    (overloading trumps everything)
+
+=end original
+
+    $a      $b        암묵적으로 수행되는 매칭  매칭코드
+    ======  =====     ======================== =============
+    (모든것은 오버로드가능합니다.)
+
+    Code[+] Code[+]   referential equality     $a == $b
+    Any     Code[+]   scalar sub truth         $b->($a)
+
+    Hash    Hash      hash keys identical      [sort keys %$a]~~[sort keys %$b]
+    Hash    Array     hash slice existence     grep {exists $a->{$_}} @$b
+    Hash    Regex     hash key grep            grep /$b/, keys %$a
+    Hash    Any       hash entry existence     exists $a->{$b}
+
+    Array   Array     arrays are identical[*]
+    Array   Regex     array grep               grep /$b/, @$a
+    Array   Num       array contains number    grep $_ == $b, @$a
+    Array   Any       array contains string    grep $_ eq $b, @$a
+
+    Any     undef     undefined                !defined $a
+    Any     Regex     pattern match            $a =~ /$b/
+    Code()  Code()    results are equal        $a->() eq $b->()
+    Any     Code()    simple closure truth     $b->() # ignoring $a
+    Num     numish[!] numeric equality         $a == $b
+    Any     Str       string equality          $a eq $b
+    Any     Num       numeric equality         $a == $b
+
+=begin original
+
+    Any     Any       string equality          $a eq $b
+
+=end original
+
+    Any     Any       문자열비교               $a eq $b
+
+=begin original
+
+ + - this must be a code reference whose prototype (if present) is not ""
+     (subs with a "" prototype are dealt with by the 'Code()' entry lower down)
+ * - that is, each element matches the element of same index in the other
+     array. If a circular reference is found, we fall back to referential
+     equality.
+ ! - either a real number, or a string that looks like a number
+
+=end original
+
+ + - 이것은 프로토타입이(있다면) ""가 아닌 코드리퍼런스가 아니면 안됩니다.
+    (프로토타입이 ""의 서브루틴은 더욱 아래에 써있는 'Code()'로 취급됩니다)
+ * -  각 요소를 다른 하나의 배열의 같은 인덱스의 요소와 매칭합니다.
+    순환리퍼런스가 발견되면, 참조의 등가성에 폴백입니다.
+ ! - 실수나 숫자값처럼 보이는 문자열 
+
+=begin original
+
+The "matching code" doesn't represent the I<real> matching code,
+of course: it's just there to explain the intended meaning. Unlike
+C<grep>, the smart match operator will short-circuit whenever it can.
+
+=end original
+
+"매칭코드"는 사실 I<실제의> 매칭코드를 표현하지 않습니다.
+이것은 단순히 의도를 설명하고 있을 뿐입니다.
+C<grep> 과는 달리, 스마트매칭 연산자는 뭔가의 생략형태입니다.
+
+=head3 Custom matching via overloading
+
+(오버로드를 사용한 매칭의 커스터마이즈)
+
+=begin original
+
+You can change the way that an object is matched by overloading
+the C<~~> operator. This trumps the usual smart match semantics.
+See L<overload>.
+
+=end original
+
+C<~~> 연산자를 오버로드하는 것으로 오브젝트가 매칭하는 방법을 바꿀 수 있습니다.
+이것은 일반적인 스마트매칭의 <PASS>
+L<overload> 를 참조해주세요.
+
+=head3 Differences from Perl 6
+
+(Perl 6 와의 차이)
+
+=begin original
+
+The Perl 5 smart match and C<given>/C<when> constructs are not
+absolutely identical to their Perl 6 analogues. The most visible
+difference is that, in Perl 5, parentheses are required around
+the argument to C<given()> and C<when()>. Parentheses in Perl 6
+are always optional in a control construct such as C<if()>,
+C<while()>, or C<when()>; they can't be made optional in Perl
+5 without a great deal of potential confusion, because Perl 5
+would parse the expression
+
+=end original
+
+Perl 5 의 스마트매칭과 C<given>/C<when> 구문은 Perl 6의 것과는 
+완전히 같은 것이 아닙니다.
+가장 눈에 보이는 차이는 Perl 5에서는 C<given()> 과 C<when()> 의
+인수는 괄호로 강쌀 필요가 있습니다.
+Perl 6 에서는, C<if()>, C<while()>, C<when()> 같은 제어구문에서의
+괄호는 항상 생략가능합니다.
+Perl 5에서는 잠재적인 대혼란과 바꾸지 않으면 이것을 생략할 수 없습니다.
+왜냐면 Perl 5는 아래와 같은 표현에서는
+
+  given $foo {
+    ...
+  }
+
+=begin original
+
+as though the argument to C<given> were an element of the hash
+C<%foo>, interpreting the braces as hash-element syntax.
+
+=end original
+
+C<given> 의 인수는 해쉬 C<%foo> 의 요소인것 처럼 패스해서,
+중괄호를 해쉬요소문법으로써 해석하기때문입니다.
+
+=begin original
+
+The table of smart matches is not identical to that proposed by the
+Perl 6 specification, mainly due to the differences between Perl 6's
+and Perl 5's data models.
+
+=end original
+
+스마트매칭의 표는 Perl 6 스펙에서 제안된 것과
+동일한 것이 아닙니다; 주로 Perl 6 와 Perl 5 의 데이터모델의 차이입니.
+
+=begin original
+
+In Perl 6, C<when()> will always do an implicit smart match
+with its argument, whilst it is convenient in Perl 5 to
+suppress this implicit smart match in certain situations,
+as documented above. (The difference is largely because Perl 5
+does not, even internally, have a boolean type.)
+
+=end original
+
+Perl 6 에서는 C<when()> 은 항상 그 인수에 대한 암묵적인 스마트매칭을
+행하지만, Perl 5 에서는 위에 기술한 대로, 상황에 따라서는 암묵적인
+스마트매칭을 <PASS> 하는편이 편리합니다.
+(주요한 차이는 Perl 5 는 내부적으로만 참/거짓형태를 가지지 않는 것입니다)
+
+=head2 Goto
+X<goto>
+
+(goto 문)
+
+=begin original
+
+Although not for the faint of heart, Perl does support a C<goto>
+statement.  There are three forms: C<goto>-LABEL, C<goto>-EXPR, and
+C<goto>-&NAME.  A loop's LABEL is not actually a valid target for
+a C<goto>; it's just the name of the loop.
+
+=end original
+
+허약한 사람을 위해서가 아닌 것에도 상관없이, Perl 은 C<goto> 문을 
+지원하고 있습니다.
+C<goto>-LABEL, C<goto>-EXPR, C<goto>-&NAME 의 세가지 형태가 있습니다.
+루프의 라벨은 실제로는 C<goto> 의 정당한 타겟이 아닌,
+루프의 이름에 지나지 않습니다.
+
+=begin original
+
+The C<goto>-LABEL form finds the statement labeled with LABEL and resumes
+execution there.  It may not be used to go into any construct that
+requires initialization, such as a subroutine or a C<foreach> loop.  It
+also can't be used to go into a construct that is optimized away.  It
+can be used to go almost anywhere else within the dynamic scope,
+including out of subroutines, but it's usually better to use some other
+construct such as C<last> or C<die>.  The author of Perl has never felt the
+need to use this form of C<goto> (in Perl, that is--C is another matter).
+
+=end original
+
+C<goto>-LABEL 형식은 LABEL 에서 라벨이 붙어있는 구문을 발견해내,
+거기에서 실행을 다시 시작합니다.
+이것은 서브루틴이거나 C<foreach> 루프처럼 초기화를 필요로 하는 구조로
+날아가기위해 사용할 수는 없습니다.
+또, 최적화 되어 있지 않은 구조로 이동할 수 도 없습니다.
+동적 스코프의 안쪽 이외의 대부분의 장소로는, 서브루틴의 밖도 포함해서
+이동할 수 있습니다.
+하지만, 일반적으로는 C<last> 나 C<die> 처럼 별도의 방법을 사용하는 편이
+좋습니다.
+Perl 의 저자는 이런 형식의 C<goto> 를 사용할 필요가 있다라고
+생각하지는 않습니다(Perl 의 경우에 한정합니다, C는 별개)
+
+=begin original
+
+The C<goto>-EXPR form expects a label name, whose scope will be resolved
+dynamically.  This allows for computed C<goto>s per FORTRAN, but isn't
+necessarily recommended if you're optimizing for maintainability:
+
+=end original
+
+C<goto>-EXPR 형식은 동적으로 해결되는 스코프를 가지고 있는 라벨이름을
+기대하고 있습니다.
+이것에 의해 FORTRAN 의 계산형 C<goto> 가 실현될 수 있지만,
+이것은 보수성에 무게를 둔것이라면 사용하지 않는 것이 좋습니다.
+
+    goto(("FOO", "BAR", "GLARCH")[$i]);
+
+=begin original
+
+The C<goto>-&NAME form is highly magical, and substitutes a call to the
+named subroutine for the currently running subroutine.  This is used by
+C<AUTOLOAD()> subroutines that wish to load another subroutine and then
+pretend that the other subroutine had been called in the first place
+(except that any modifications to C<@_> in the current subroutine are
+propagated to the other subroutine.)  After the C<goto>, not even C<caller()>
+will be able to tell that this routine was called first.
+
+=end original
+
+C<goto>-&NAME 은 매우 매지컬하며, 이름붙은 서브루틴의 호출을
+최근 실행된 서브루틴으로 바꿉니다.
+이것은 별도의 서브루틴을 로드해서 최초의 장소로 호출된
+별도의 서브루튼을 요구하는 것을 하려고 하는 C<AUTOLOAD()> 서브루틴에서
+사용됩니다.
+(최근 서브루틴에 C<@_> 에 대한 것 이외의 변경은,
+별도의 서브루틴으로 전달합니다)
+C<goto> 의 뒤에서, C<caller()> 가 아니라도 이 서브루틴이
+최초에 호출된 것이라는 것을 전달해주는 것도 가능할 것입니다.
+
+=begin original
+
+In almost all cases like this, it's usually a far, far better idea to use the
+structured control flow mechanisms of C<next>, C<last>, or C<redo> instead of
+resorting to a C<goto>.  For certain applications, the catch and throw pair of
+C<eval{}> and die() for exception processing can also be a prudent approach.
+
+=end original
+
+이런 케이스의 거의 모든 경우, C<goto> 에 의존하는 것이 아닌
+C<next>, C<last>, C<redo> 같은 제어흐름 을 사용하는 것이
+더더욱 좋은 생각일 겁니다.
+일부의 어플리케이션에 대해서는 C<eval{}>과 die()를
+catch 와 throw의 쌍으로써 예외처리를 행하기위해 현명한 어프로치로써
+사용할 수 있을 겁니다.
+
+=head2 PODs: Embedded Documentation
+X<POD> X<documentation>
+
+(POD: 내장 도큐멘트)
+
+=begin original
+
+Perl has a mechanism for intermixing documentation with source code.
+While it's expecting the beginning of a new statement, if the compiler
+encounters a line that begins with an equal sign and a word, like this
+
+=end original
+
+Perl 은, 소스코드와 도큐멘트을 섞어쓰기 위한 방법을 가지고 있습니다.
+새로운 구문의 시작이 기대될 때는, 컴파일러는 
+아래의 예제처럼 = 기호로 시작된 언어를 발견하면:
+
+    =head1 Here There Be Pods!
+
+=begin original
+
+Then that text and all remaining text up through and including a line
+beginning with C<=cut> will be ignored.  The format of the intervening
+text is described in L<perlpod>.
+
+=end original
+
+그 텍스트와, C<=cut> 으로 시작된 줄까지의 내용을 무시합니다.
+사이에 들어가는 텍스트의 서식은 L<perlpod>에서 설명하고 있습니다.
+
+=begin original
+
+This allows you to intermix your source code
+and your documentation text freely, as in
+
+=end original
+
+이에 의해, 소스코드와 도큐멘트를 아래에 나타나는 예제처럼
+자유롭게 섞는 것는 가능하게 됩니다.
+
+    =item snazzle($)
+
+    The snazzle() function will behave in the most spectacular
+    form that you can possibly imagine, not even excepting
+    cybernetic pyrotechnics.
+
+    =cut back to the compiler, nuff of this pod stuff!
+
+    sub snazzle($) {
+	my $thingie = shift;
+	.........
+    }
+
+=begin original
+
+Note that pod translators should look at only paragraphs beginning
+with a pod directive (it makes parsing easier), whereas the compiler
+actually knows to look for pod escapes even in the middle of a
+paragraph.  This means that the following secret stuff will be
+ignored by both the compiler and the translators.
+
+=end original
+
+컴파일러는 파라그래프의 도중에 pod 이스케이프가 있다고 해도 그것을
+인식할 수 있는 것에, pod 번역기는 pod 지시자로 시작되는 파라그래프만
+주의(이것은 구문해석을 간단히 하기위해서 입니다)하시면 됩니다.
+즉, 아래의 예에 있는 "secret stuff"는 컴파일러에서도,
+번역기에서도 무시되는 겁니다.
+
+    $a=3;
+    =secret stuff
+     warn "Neither POD nor CODE!?"
+    =cut back
+    print "got $a\n";
+
+=begin original
+
+You probably shouldn't rely upon the C<warn()> being podded out forever.
+Not all pod translators are well-behaved in this regard, and perhaps
+the compiler will become pickier.
+
+=end original
+
+이 예제의 C<warn()> 같은 것이, 장래에 넘겨져 무시되는 것에
+의존해야한다는 것은 아닙니다.
+모든 pod 번역기가 그런 행동을 하는 것은 아니지만,
+컴파일러는 나중에 이것을 무시하지 않을지도 모릅니다.
+
+=begin original
+
+One may also use pod directives to quickly comment out a section
+of code.
+
+=end original
+
+pod 지시자를 코드의 일부를 가지고 빨리 주석처리하기 위해
+사용할 수도 있습니다.
+使うこともできます。
+
+=head2 Plain Old Comments (Not!)
+X<comment> X<line> X<#> X<preprocessor> X<eval>
+
+=begin original
+
+Perl can process line directives, much like the C preprocessor.  Using
+this, one can control Perl's idea of filenames and line numbers in
+error or warning messages (especially for strings that are processed
+with C<eval()>).  The syntax for this mechanism is the same as for most
+C preprocessors: it matches the regular expression
+
+=end original
+
+C 전처리기처럼, Perl 은 행지시자를 처리할 수 있습니다.
+이것을 사용하는 것에 의해, 에러메시지나 경고메시지에 있는
+파일명이나 행번호를 제어할 수 있습니다.
+(특히, C<eval()> 로 처리되는 문자열을 위해)
+이런 내용의 구문은 C 의 전처리기와 거의 같아서, 정규표현:
+
+    # example: '# line 42 "new_filename.plx"'
+    /^\#   \s*
+      line \s+ (\d+)   \s*
+      (?:\s("?)([^"]+)\2)? \s*
+     $/x
+
+=begin original
+
+with C<$1> being the line number for the next line, and C<$3> being
+the optional filename (specified with or without quotes).
+
+=end original
+
+에 매치한 C<$1> 이 다음 줄의 행번호가 되고, 생략할 수 있는
+C<$3> 는 (따옴표유무로 지정된) 파일명이 됩니다.
+
+=begin original
+
+There is a fairly obvious gotcha included with the line directive:
+Debuggers and profilers will only show the last source line to appear
+at a particular line number in a given file.  Care should be taken not
+to cause line number collisions in code you'd like to debug later.
+
+=end original
+
+행지시자에는 꽤 명확한 기술이 있습니다.
+디버거나 프로파일러는 주어진 파일의 특정 행번호에 대해서 나타난
+최신의 소스 줄만을 표시합니다.
+나중에 디버그하고 싶은 코드로는 행번호의 충돌이 일어나지 않도록 
+주의해야 합니다.
+
+=begin original
+
+Here are some examples that you should be able to type into your command
+shell:
+
+=end original
+
+커맨드셸에서 타이프하는 것이 가능한 예를 몇개 들어보겠습니다.
+
+    % perl
+    # line 200 "bzzzt"
+    # the `#' on the previous line must be the first char on line
+    die 'foo';
+    __END__
+    foo at bzzzt line 201.
+
+    % perl
+    # line 200 "bzzzt"
+    eval qq[\n#line 2001 ""\ndie 'foo']; print $@;
+    __END__
+    foo at - line 2001.
+
+    % perl
+    eval qq[\n#line 200 "foo bar"\ndie 'foo']; print $@;
+    __END__
+    foo at foo bar line 200.
+
+    % perl
+    # line 345 "goop"
+    eval "\n#line " . __LINE__ . ' "' . __FILE__ ."\"\ndie 'foo'";
+    print $@;
+    __END__
+    foo at goop line 345.
+

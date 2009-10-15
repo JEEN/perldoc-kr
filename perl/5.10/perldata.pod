@@ -1,0 +1,1930 @@
+
+=encoding utf8
+
+=head1 NAME
+
+=begin original
+
+perldata - Perl data types
+
+=end original
+
+perldata - Perl 의 데이터 타입
+
+=head1 DESCRIPTION
+
+=head2 Variable names
+X<variable, name> X<variable name> X<data type> X<type>
+
+(変数名)
+
+=begin original
+
+Perl has three built-in data types: scalars, arrays of scalars, and
+associative arrays of scalars, known as "hashes".  A scalar is a 
+single string (of any size, limited only by the available memory),
+number, or a reference to something (which will be discussed
+in L<perlref>).  Normal arrays are ordered lists of scalars indexed
+by number, starting with 0.  Hashes are unordered collections of scalar 
+values indexed by their associated string key.
+
+=end original
+
+Perl 에는 스칼라, 스칼라의 배열, "해쉬" 라고도 불리는 스칼라의 연상배열이라는 
+3가지의 내장 데이터 타입이 있습니다.
+스칼라는 단일의 (임의의 길이의) 문자열(이용가능한 메모리에 의해서만 제한됩니다)이나 
+수치나, 어딘가로의 리퍼런스(이것은 L<perlref> 에서 의논합니다) 중 하나입니다.
+보통의 배열은 0 을 기점으로 하는 수치에서 첨자가 붙은 스칼라의 순서붙은 리스트입니다.
+해쉬배열은 문자열의 키의 인덱스와 그에 연결된 스칼라값, 순서가 없는 집합니다.
+
+=begin original
+
+Values are usually referred to by name, or through a named reference.
+The first character of the name tells you to what sort of data
+structure it refers.  The rest of the name tells you the particular
+value to which it refers.  Usually this name is a single I<identifier>,
+that is, a string beginning with a letter or underscore, and
+containing letters, underscores, and digits.  In some cases, it may
+be a chain of identifiers, separated by C<::> (or by the slightly
+archaic C<'>); all but the last are interpreted as names of packages,
+to locate the namespace in which to look up the final identifier
+(see L<perlmod/Packages> for details).  It's possible to substitute
+for a simple identifier, an expression that produces a reference
+to the value at runtime.   This is described in more detail below
+and in L<perlref>.
+X<identifier>
+
+=end original
+
+값은 보통, 이름 또는 이름붙은 리퍼런스를 통해서 참조됩니다.
+이름의 최초에 있는 문자는, 그 이름이 어떤 구조의 데이터를 참조하는 가를 구별합니다.
+이름의 남은 부분은, 참조하는 값을 특정하는 것입니다.
+보통 이 이름은 하나의 I<식별자>, 즉, 알파벳이 밑줄로 시작되고, 
+그에 영자, 밑줄, 숫자가 이어지는 문자열을 말합니다.
+일부의 케이스에 있어서는 C<::>(혹은 매우 고전풍의 C<'>) 으로 나눠진 
+식별자의 나열이어도 상관없습니다.
+그 최후의 것 이외의 이름은 최후의 부분에 있는 식별자를 그 이름공간에 
+두기위한 패키지의 이름으로 해석됩니다.
+(자세한 내용은 L<perlmod/Packages> 를 참조해주세요).
+리퍼런스를 생성하는 식의 단순한 식별자를, 실행 시에 값을 바꾸는 것도 가능합니다.
+이것은 문서의 뒷부분과 L<perlref> 에 상세한 설명이 있습니다.
+X<identifier>
+
+=begin original
+
+Perl also has its own built-in variables whose names don't follow
+these rules.  They have strange names so they don't accidentally
+collide with one of your normal variables.  Strings that match
+parenthesized parts of a regular expression are saved under names
+containing only digits after the C<$> (see L<perlop> and L<perlre>).
+In addition, several special variables that provide windows into
+the inner working of Perl have names containing punctuation characters
+and control characters.  These are documented in L<perlvar>.
+X<variable, built-in>
+
+=end original
+
+Perl 은 이런 규칙들에 따르지 않은 이름을 가지는 내장 변수도 가지고 있습니다.
+이것은 좀 특이한 이름을 가지고 있기 때문에, 당신이 사용한 보통의 변수와 
+착각해서 충돌해서 사용할 일이 업슷ㅂ니다.
+정규표현의 괄호 붙은 부분(parenthesized parts) 문자열은 C<$> 의 뒤에 
+숫자만이 이어지는 이름으로 보존됩니다( L<perlop> 와 L<perlre> 를 참조해주세요).
+그에 더해서, Perl 의 내부적인 동작에 대한 창을 열고 있는 몇가지의 특수변수가 
+구독점문자와 제어문자를 포함한 이름을 가지고 있습니다.
+이것들은 L<perlvar> 로 문서화되어 있습니다.
+X<variable, built-in>
+
+=begin original
+
+Scalar values are always named with '$', even when referring to a
+scalar that is part of an array or a hash.  The '$' symbol works
+semantically like the English word "the" in that it indicates a
+single value is expected.
+X<scalar>
+
+=end original
+
+스칼라값의 참조는 배열이나 해쉬의 한 요소인 스칼라를 참조하는 경우에도, 
+항상 이름에 '$' 를 붙입니다.
+심볼 '$'은 문법적으로 영단어 "the" 처럼 움직이고, 단일한 값이 
+상정되어 있는 것을 나타냅니다.
+X<scalar>
+
+    $days		# the simple scalar value "days"
+    $days[28]		# the 29th element of array @days
+    $days{'Feb'}	# the 'Feb' value from hash %days
+    $#days		# the last index of array @days
+
+=begin original
+
+Entire arrays (and slices of arrays and hashes) are denoted by '@',
+which works much like the word "these" or "those" does in English,
+in that it indicates multiple values are expected.
+X<array>
+
+=end original
+
+배열전체(및 배열이나 해쉬의 슬라이스)는 '@' 로 표시합니다;
+이것은 영단어에서의 "these"나 "those" 처럼 움직이고, 복수의 값이 
+상정되는 것을 나타냅니다.
+X<array>
+
+    @days		# ($days[0], $days[1],... $days[n])
+    @days[3,4,5]	# same as ($days[3],$days[4],$days[5])
+    @days{'a','c'}	# same as ($days{'a'},$days{'c'})
+
+=begin original
+
+Entire hashes are denoted by '%':
+X<hash>
+
+=end original
+
+해쉬 전체는 '%' 로 나타냅니다:
+X<hash>
+
+    %days		# (key1, val1, key2, val2 ...)
+
+=begin original
+
+In addition, subroutines are named with an initial '&', though this
+is optional when unambiguous, just as the word "do" is often redundant
+in English.  Symbol table entries can be named with an initial '*',
+but you don't really care about that yet (if ever :-).
+
+=end original
+
+거기에 서브루틴은 이름의 앞에 '&' 를 붙여서 나타내지만, 영어에서도 대부분 
+사용되지 않게 된 "do" 처럼, 애매하다면 생략할 수 있습니다.
+심볼 테이블의 엔트리는 이름에 '*' 를 붙여서 나타낼 수 있지만, 
+(신경써봐도) 아직은 신경 쓸 필요는 없습니다.
+
+=begin original
+
+Every variable type has its own namespace, as do several
+non-variable identifiers.  This means that you can, without fear
+of conflict, use the same name for a scalar variable, an array, or
+a hash--or, for that matter, for a filehandle, a directory handle, a
+subroutine name, a format name, or a label.  This means that $foo
+and @foo are two different variables.  It also means that C<$foo[1]>
+is a part of @foo, not a part of $foo.  This may seem a bit weird,
+but that's okay, because it is weird.
+X<namespace>
+
+=end original
+
+변수의 모든 형태에는 몇가지 변수가 아닌 식별자와 마찬가지로,
+각각의 이름공간이 있습니다.
+이것은 충돌을 걱정하지 않고, 스칼라변수, 배열, 해쉬 -- 거기에 
+파일핸들, 디렉토리 핸들, 서브루틴이름, 포맷이름, 라벨, 같은 이름을 
+붙일 수 있다는 것을 의미합니다.
+즉, C<$foo> 와 C<@foo> 는 두가지 다른 변수라는 것입니다.
+또, C<$foo[1]>은 C<@foo> 의 일부분이고 C<$foo> 의 일부는 아닙니다.
+조금 이상하게 생각할 수 있을지도 모르지만, 그것으로 좋은 것입니다. 이상하기 때문에요.
+X<namespace>
+
+=begin original
+
+Because variable references always start with '$', '@', or '%', the
+"reserved" words aren't in fact reserved with respect to variable
+names.  They I<are> reserved with respect to labels and filehandles,
+however, which don't have an initial special character.  You can't
+have a filehandle named "log", for instance.  Hint: you could say
+C<open(LOG,'logfile')> rather than C<open(log,'logfile')>.  Using
+uppercase filehandles also improves readability and protects you
+from conflict with future reserved words.  Case I<is> significant--"FOO",
+"Foo", and "foo" are all different names.  Names that start with a
+letter or underscore may also contain digits and underscores.
+X<identifier, case sensitivity>
+X<case>
+
+=end original
+
+변수의 참조는 항상 '$', '@', '%' 로 시작하기 때문에, "예약어"는 
+변수이름으로써는 진짜 의미로 예약되어 있는 것은 아닙니다.
+그러나, 앞에 특별한 문자를 붙이지 않고, 라벨이나 파일핸들로써는 
+I<예약된> 것이 됩니다.
+예를들어, "log" 같은 이름의 파일핸들을 사용할 수는 없습니다.
+힌트: C<open(log, 'logfile')> 등이 아니라
+C<open(LOG, 'logfile')> 로 해주세요.
+대문자의 파일핸들을 사용하면 읽기 쉬워지고, 
+장래에 건네지는 예약어와의 충돌도 피할 수 있습니다.
+대문자와 소문자는 B<구별됩니다>, 그래서 "FOO", "Foo", "foo" 는 
+모드 다른 이름입니다.
+영어와 밑줄로 시작하는 이름은 이름의 일부에 숫자나 밑줄을 포함할 수 있습니다.
+X<identifier, case sensitivity>
+X<case>
+
+=begin original
+
+It is possible to replace such an alphanumeric name with an expression
+that returns a reference to the appropriate type.  For a description
+of this, see L<perlref>.
+
+=end original
+
+그런 영숫자의 이름을 적절한 형태로 리퍼런스를 건내는 식으로 바꿀 수도 있습니다.
+자세한 내용은 L<perlref> 를 참조해주세요.
+
+=begin original
+
+Names that start with a digit may contain only more digits.  Names
+that do not start with a letter, underscore, digit or a caret (i.e.
+a control character) are limited to one character, e.g.,  C<$%> or
+C<$$>.  (Most of these one character names have a predefined
+significance to Perl.  For instance, C<$$> is the current process
+id.)
+
+=end original
+
+숫자로 시작하는 이름에는 숫자만 포함할 수 있습니다.
+알파벳, 밑줄, 숫자, 캐럿(제어문자) 이외의 문자로 시작하는 이름은 
+C<$%>나 ,C<$$> 처럼 한 문자에 한정됩니다(이런 1문자 이름의 대부분은,
+Perl 에서 이미 의미를 정하고 있습니다.
+예를들어 C<$$> 는 현재 프로세스의 프로세스 ID 를 나타냅니다).
+
+=head2 Context
+X<context> X<scalar context> X<list context>
+
+(컨텍스트)
+
+=begin original
+
+The interpretation of operations and values in Perl sometimes depends
+on the requirements of the context around the operation or value.
+There are two major contexts: list and scalar.  Certain operations
+return list values in contexts wanting a list, and scalar values
+otherwise.  If this is true of an operation it will be mentioned in
+the documentation for that operation.  In other words, Perl overloads
+certain operations based on whether the expected return value is
+singular or plural.  Some words in English work this way, like "fish"
+and "sheep".
+
+=end original
+
+Perl 에 있어서 연산이나 값의 해석은 그 연산자나 값이 놓여진 컨텍스트에서
+요구에 의존하는 경우가 있습니다.
+이 컨텍스트라는 것에는 크게 두가지가 있는데, 리스트 컨텍스트와 
+스칼라 컨텍스트라고 부릅니다.
+리스트가 요구되는 컨텍스트에서는 리스트 값을 반환하고,
+그렇지 않으면 스칼라 값을 반환하는 연산도 존재합니다.
+그런 연산에 대해서는 문서에서 그 연산에 접근한 때에 부기하고 있습니다.
+바꿔말하면, Perl 에서는 어떤 종류의 연산이 하나의 값을 반환하고 싶어하는 지,
+복수의 값을 반환하고 싶어하는 지에 따라서 다중정의된다는 것입니다.
+"fish" 나 "sheep" 같은 단일 복수형태의 영어단어와 비슷하겠네요.
+
+=begin original
+
+In a reciprocal fashion, an operation provides either a scalar or a
+list context to each of its arguments.  For example, if you say
+
+=end original
+
+거꾸로 연산자는 그 인수가 스칼라 컨텍스트나 리스트 컨텍스트 중 어느 것으로 해석되는 지를 
+결정해버립니다.
+예를들면, 아래처럼 하면:
+
+    int( <STDIN> )
+
+=begin original
+
+the integer operation provides scalar context for the <>
+operator, which responds by reading one line from STDIN and passing it
+back to the integer operation, which will then find the integer value
+of that line and return that.  If, on the other hand, you say
+
+=end original
+
+int 연산자는 자신의 인수인 <> 연산자가 스칼라 컨텍스트로 평가되는 것을 기대하기 때문에,
+STDIN 에서 한줄을 읽어내서 int 연산자에 건넵니다.
+int 연산자는 그 줄에서 정수값을 뽑아내서 반환하게 됩니다.
+그에 대해서 아래처럼 하면:
+
+   sort( <STDIN> )
+
+=begin original
+
+then the sort operation provides list context for <>, which
+will proceed to read every line available up to the end of file, and
+pass that list of lines back to the sort routine, which will then
+sort those lines and return them as a list to whatever the context
+of the sort was.
+
+=end original
+
+sort 연산자는 <> 연산자가 리스트 컨텍스트에서 평가되기 때문에,
+<> 는 STDIN 에서 읽을 수 있는 한 마지막 줄까지 읽어내고,
+그 리스트를 sort 의 루틴으로 건넵니다.
+sort 루틴은 받아들인 줄의 리스트를 소트해서, 그 결과의 리스트가 반환값이 됩니다.
+
+=begin original
+
+Assignment is a little bit special in that it uses its left argument
+to determine the context for the right argument.  Assignment to a
+scalar evaluates the right-hand side in scalar context, while
+assignment to an array or hash evaluates the righthand side in list
+context.  Assignment to a list (or slice, which is just a list
+anyway) also evaluates the righthand side in list context.
+
+=end original
+
+대입연산자는 조금 특수합니다.
+대입에서는 오른쪽 인수의 컨텍스트를 결정하기 위해 왼쪽 인수가 사용됩니다.
+스칼라로의 대입에서는 왼쪽을 스칼라 컨텍스트로 평가하지만,
+배열이나 해쉬에 대한 대입에서는 왼쪽을 리스트 컨텍스트로 평가하게 됩니다.
+리스트(혹은 슬라이스; 어쨌든 리스트이지만) 로의 대입도,
+왼쪽을 리스트 컨텍스트로 평가하게 됩니다.
+
+=begin original
+
+When you use the C<use warnings> pragma or Perl's B<-w> command-line 
+option, you may see warnings
+about useless uses of constants or functions in "void context".
+Void context just means the value has been discarded, such as a
+statement containing only C<"fred";> or C<getpwuid(0);>.  It still
+counts as scalar context for functions that care whether or not
+they're being called in list context.
+
+=end original
+
+C<use warnings> 프라그마나 Perl 의 B<-w> 커맨드라인 옵션을 사용하면,
+"무효 컨텍스트" 로의 정수나 함수의 무의미한 사용에 대한 경고가 나옵니다.
+무효 컨텍스트는, C<"fred";> 나 C<getpwuid(0);> 만을 포함한 문장처럼,
+단수히 값이 버려질 수 있는 것을 의미합니다.
+리스트 컨텍스트에서 호출되었는지 어떤지를 고려하는 함수에 있어서는,
+이것은 역시 스칼라 컨텍스트로 취급됩니다.
+
+=begin original
+
+User-defined subroutines may choose to care whether they are being
+called in a void, scalar, or list context.  Most subroutines do not
+need to bother, though.  That's because both scalars and lists are
+automatically interpolated into lists.  See L<perlfunc/wantarray>
+for how you would dynamically discern your function's calling
+context.
+
+=end original
+
+유저가 정의하는 서브루틴은 자신의 무효, 스칼라, 리스트의 어느 컨텍스트에서 
+호출되었는지를 의식할 수 있습니다.
+그러나, 많은 서브루틴에서는 의식할 필요도 없겠죠.
+스칼라 값과 리스트는 자동적으로 리스트에 전개되기 때문입니다.
+함수가 호출된 컨텍스트를 동적으로 식별할 방법에 대해서는
+L<perlfunc/wantarray> 를 참조해주세요.
+
+=head2 Scalar values
+X<scalar> X<number> X<string> X<reference>
+
+(스칼라값)
+
+=begin original
+
+All data in Perl is a scalar, an array of scalars, or a hash of
+scalars.  A scalar may contain one single value in any of three
+different flavors: a number, a string, or a reference.  In general,
+conversion from one form to another is transparent.  Although a
+scalar may not directly hold multiple values, it may contain a
+reference to an array or hash which in turn contains multiple values.
+
+=end original
+
+Perl에서의 모든 데이터는 스칼라나 스칼라의 배열이나, 스칼라의 해쉬가 됩니다.
+스칼라는 수치, 문자열, 리퍼런스 중 하나의 값을 가집니다.
+일반적으로는 어떤 종류에서 다른 졸유로의 변환은 투과적입니다.
+스칼라는 직접 복수의 값을 가질 수는 없지만, 복수의 값을 가지는 배열이나 
+해쉬에 대한 리퍼런스를 가질 수 있습니다.
+
+=begin original
+
+Scalars aren't necessarily one thing or another.  There's no place
+to declare a scalar variable to be of type "string", type "number",
+type "reference", or anything else.  Because of the automatic
+conversion of scalars, operations that return scalars don't need
+to care (and in fact, cannot care) whether their caller is looking
+for a string, a number, or a reference.  Perl is a contextually
+polymorphic language whose scalars can be strings, numbers, or
+references (which includes objects).  Although strings and numbers
+are considered pretty much the same thing for nearly all purposes,
+references are strongly-typed, uncastable pointers with builtin
+reference-counting and destructor invocation.
+
+=end original
+
+스칼라는 뭔가인 것을 선언할 필요는 없습니다.
+어떤 스칼라 변수가 "문자열" 형, "수치" 형, "리퍼런스" 형, 
+혹은 그 외 다른 형태인 것을 선언하는 방법은 없습니다.
+이것은 스칼라, 스칼라를 반환하는 조작의 자동변환은 그 호출한 곳이 
+문자열, 수치, 리퍼런스 중 어느 것을 대상으로 하고 있는 가를 
+걱정할 필요가 없기 때문입니다(실제로는 걱정할 수 없습니다).
+Perl 은 스칼라가 문자열, 수치, 리퍼런스(오브젝트를 포함합니다)를 
+가질 수 있는 문맥적 다형태언어(contextually polymorphic language) 입니다.
+문자열과 수치는 대부분 모든 목적에 대해서 적당하게 생각되지만, 
+리퍼런스는 내장 리퍼런스 카운트와 디스크립터를 가지고, 캐스트할 수 없는 
+강력하게 형태가 결정된 포인터입니다.
+
+=begin original
+
+A scalar value is interpreted as TRUE in the Boolean sense if it is not
+the null string or the number 0 (or its string equivalent, "0").  The
+Boolean context is just a special kind of scalar context where no 
+conversion to a string or a number is ever performed.
+X<boolean> X<bool> X<true> X<false> X<truth>
+
+=end original
+
+스칼라값은 그 값이 빈문자열이나 수치의 0 (혹은 같은 값인 문자열 "0") 이외의 경우에는 
+불 값의 참을 취급됩니다.
+불 값ㅂ이 필요한 컨텍스트는, 단순히 문자열이나 수치로의 변환이 수행되지 않은 
+특별한 스칼라 컨텍스트로 취급됩니다.
+X<boolean> X<bool> X<true> X<false> X<truth>
+
+=begin original
+
+There are actually two varieties of null strings (sometimes referred
+to as "empty" strings), a defined one and an undefined one.  The
+defined version is just a string of length zero, such as C<"">.
+The undefined version is the value that indicates that there is
+no real value for something, such as when there was an error, or
+at end of file, or when you refer to an uninitialized variable or
+element of an array or hash.  Although in early versions of Perl,
+an undefined scalar could become defined when first used in a
+place expecting a defined value, this no longer happens except for
+rare cases of autovivification as explained in L<perlref>.  You can
+use the defined() operator to determine whether a scalar value is
+defined (this has no meaning on arrays or hashes), and the undef()
+operator to produce an undefined value.
+X<defined> X<undefined> X<undef> X<null> X<string, null>
+
+=end original
+
+빈문자열에는 실은 정의된 것과 미정의의 2종류가 있습니다.
+정의된 값은 C<""> 같은 단순히 길이 0의 문자열입니다.
+미정의 빈문자열은 에러가 있었을 때나, 파일의 끝에 도달했을 때,
+초기화하지 않은 변수나 배열이나 해쉬의 요소를 참조할 때 등,
+뭔가에 대한 실제의 값이 존재하지 않는 것을 나타냅니다.
+초기의 버젼의 Perl 에서는, 미정의의 스칼라는 최초에 정의된 것처럼 
+사용한 때에 정의된 것이라고 할 수 있지만, 이것은 이미, L<perlref> 에서 
+설명하는 자동유효화가 발생한 경우를 빼고 일어나지 않습니다.
+값이 정의되었는 지 어떤지를 조사하기 위해서 defined() 연산자를 
+사용할 수 있고(이것은 배열이나 해쉬에 대해서는 무의미합니다),
+미정의값을 생성하기 위해서 undef() 를 연산자로 사용할 수 있습니다.
+X<defined> X<undefined> X<undef> X<null> X<string, null>
+
+=begin original
+
+To find out whether a given string is a valid non-zero number, it's
+sometimes enough to test it against both numeric 0 and also lexical
+"0" (although this will cause noises if warnings are on).  That's 
+because strings that aren't numbers count as 0, just as they do in B<awk>:
+
+=end original
+
+주어진 문자열이 정당한 0의 수치가 아닌지 어떤지를 확인하기 위해서는 
+수치의 0인지 lexical한 "0" 에 대해서 테스트하면 충분한 경우도 있습니다.
+(이것은 경고가 유효하다면 노이즈를 일으킵니다).
+수치가 아닌 문자열은 B<awk> 처럼 0 이라고는 간주되지 않기 때문입니다;
+
+    if ($str == 0 && $str ne "0")  {
+	warn "That doesn't look like a number";
+    }
+
+=begin original
+
+That method may be best because otherwise you won't treat IEEE
+notations like C<NaN> or C<Infinity> properly.  At other times, you
+might prefer to determine whether string data can be used numerically
+by calling the POSIX::strtod() function or by inspecting your string
+with a regular expression (as documented in L<perlre>).
+
+=end original
+
+이 메소드는 최고입니다; 왜냐면, 그렇지 않으면 C<NaN> 이나 
+C<Infinity> 같은 IEEE 기법의 속성을 다룰 수 없기 때문입니다.
+그 외의 경우, 데이터가 수치인지 어떤지를 검사하기 위해서는 ,
+POSIX::strtod() 함수를 호출하거나, (L<perlre> 에 기술되었듯)
+정규표현을 사용해서 문자열을 조사하면 좋겠죠.
+
+    warn "has nondigits"	if     /\D/;
+    warn "not a natural number" unless /^\d+$/;             # rejects -3
+    warn "not an integer"       unless /^-?\d+$/;           # rejects +3
+    warn "not an integer"       unless /^[+-]?\d+$/;
+    warn "not a decimal number" unless /^-?\d+\.?\d*$/;     # rejects .2
+    warn "not a decimal number" unless /^-?(?:\d+(?:\.\d*)?|\.\d+)$/;
+    warn "not a C float"
+	unless /^([+-]?)(?=\d|\.\d)\d*(\.\d*)?([Ee]([+-]?\d+))?$/;
+
+=begin original
+
+The length of an array is a scalar value.  You may find the length
+of array @days by evaluating C<$#days>, as in B<csh>.  However, this
+isn't the length of the array; it's the subscript of the last element,
+which is a different value since there is ordinarily a 0th element.
+Assigning to C<$#days> actually changes the length of the array.
+Shortening an array this way destroys intervening values.  Lengthening
+an array that was previously shortened does not recover values
+that were in those elements.  (It used to do so in Perl 4, but we
+had to break this to make sure destructors were called when expected.)
+X<$#> X<array, length>
+
+=end original
+
+배열의 크기는 스칼라 값입니다.
+배열 @days 의 크기는 csh 처럼 $#days 를 평가하면 알 수 있습니다.
+그러나, 이것은 크기가 아닙니다;
+마지막 요소에 대한 첨자이지, 보통은 0번째의 요소가 있기때문에 다른 값이 됩니다.
+$#days 에 대입을 수행하면 실제의 배열의 크기도 변화합니다.
+이 방법으로 배열을 작게 하면, 보이지 않게 된 부분의 값은 파괴됩니다.
+작게 한 배열을 다시 크게 해도, 이전 존재한 요소에 대한 앞의 값이 회복할 수는 없습니다.
+(Perl 4 에서는 회복가능했지만, 디스트럭터가 기대한 시점에서 호출되는 것을 
+보증하기 때문에 이것을 멈췄습니다)
+X<$#> X<array, length>
+
+=begin original
+
+You can also gain some minuscule measure of efficiency by pre-extending
+an array that is going to get big.  You can also extend an array
+by assigning to an element that is off the end of the array.  You
+can truncate an array down to nothing by assigning the null list
+() to it.  The following are equivalent:
+
+=end original
+
+크게 될 배열을 미리 크게 해두는 것으로,
+정말 조금만의 효율을 향상시킬 수도 있습니다.
+마지막 요소보다도 뒤로 떨어진 위치에 대입을 수행하는 것으로도,
+배열을 크게할 수 있습니다.
+배열에 빈리스트 () 를 대입하면, 아무것도 없는 상태에 까지 연결됩니다.
+아래의 두가지는 같은 값입니다:
+
+    @whatever = ();
+    $#whatever = -1;
+
+=begin original
+
+If you evaluate an array in scalar context, it returns the length
+of the array.  (Note that this is not true of lists, which return
+the last value, like the C comma operator, nor of built-in functions,
+which return whatever they feel like returning.)  The following is
+always true:
+X<array, length>
+
+=end original
+
+배열을 스칼라컨텍스트로 평가하면, 배열의 크기는 반환됩니다.
+(이것은 리스트에 대해서는 성립되지 않는 것에 주의해주세요.
+이 경우에는 C 의 컴마 연산자와 마찬가지로 마지막의 값이 반환되고, 
+내장 함수처럼 값을 반환할 수는 없습니다.)
+아래의 식은 항상 참이 됩니다:
+X<array, length>
+
+    scalar(@whatever) == $#whatever - $[ + 1;
+
+=begin original
+
+Version 5 of Perl changed the semantics of C<$[>: files that don't set
+the value of C<$[> no longer need to worry about whether another
+file changed its value.  (In other words, use of C<$[> is deprecated.)
+So in general you can assume that
+X<$[>
+
+=end original
+
+Perl 5 에서는 C<$[> 의 의미를 변경했습니다:
+C<$[> 를 설정하지 않은 파일에 있어서, 다른 파일이 이 변수를 
+변경했는지 어떤지를 걱정할 필요는 없어졌습니다.
+(바꿔 말하면, C<$[> 는 사용하지 않는 것이 좋다는 것입니다)
+그렇기에, 보통은 아래처럼 됩니다.
+X<$[>
+
+    scalar(@whatever) == $#whatever + 1;
+
+=begin original
+
+Some programmers choose to use an explicit conversion so as to 
+leave nothing to doubt:
+
+=end original
+
+일부의 프로그래머는 애매함을 없애기 위해서 명시적으로 변환하는 것을 선택하겠죠:
+
+    $element_count = scalar(@whatever);
+
+=begin original
+
+If you evaluate a hash in scalar context, it returns false if the
+hash is empty.  If there are any key/value pairs, it returns true;
+more precisely, the value returned is a string consisting of the
+number of used buckets and the number of allocated buckets, separated
+by a slash.  This is pretty much useful only to find out whether
+Perl's internal hashing algorithm is performing poorly on your data
+set.  For example, you stick 10,000 things in a hash, but evaluating
+%HASH in scalar context reveals C<"1/16">, which means only one out
+of sixteen buckets has been touched, and presumably contains all
+10,000 of your items.  This isn't supposed to happen.  If a tied hash
+is evaluated in scalar context, a fatal error will result, since this
+bucket usage information is currently not available for tied hashes.
+X<hash, scalar context> X<hash, bucket> X<bucket>
+
+=end original
+
+해쉬를 스칼라 컨텍스트로 평가한 경우, 해쉬가 비어있을 때에만 거짓이 반환됩니다.
+키/값의 쌍이 등록되어 있으면 참을 반환합니다.
+보다 정확하게는 반환된 값은 사용할 수 있는 엔트리의 수와 
+할당된 엔트리의 수를 슬래쉬로 나눈 문자열입니다.
+이것은 주어진 데이터에 대해서 Perl 의 내부 해쉬의 알고리즘이 
+잘 동작하지 않는 것을 확인할 때 정도에만 사용할 수 없지만, 
+예를들어, 해쉬에 10,000 개를 넣어, %HASH 를 스칼라 컨텍스트로 평가했을 때에
+C<1/16> 을 얻었다면, 16 중 하나의 엔트리만이 사용되고, 
+아마도 거기에 10,000 개의 ㅁ모든 것이 들어 있다는 것을 의미합니다.
+이것은 거의 발생하지도 않을 일입니다.
+tie 한 해쉬가 스칼라 컨텍스트에서 평가되면, 이 사용 버킷 정보는 
+현재 tie 한 해쉬에서는 이용할 수 없기 때문에 치명적인 에러가 됩니다.
+X<hash, scalar context> X<hash, bucket> X<bucket>
+
+=begin original
+
+You can preallocate space for a hash by assigning to the keys() function.
+This rounds up the allocated buckets to the next power of two:
+
+=end original
+
+keys() 함수에 대입을 함에 의해, 해쉬를 위해 미리 스페이스를 할당할 수 있습니다.
+그 때에, 할당된 요소의 수는 그 값 이상으로 최소 2의 멱등으로 돌아갑니다:
+
+=begin original
+
+    keys(%users) = 1000;		# allocate 1024 buckets
+
+=end original
+
+    keys(%users) = 1000;		# 1024要素割り付ける
+
+=head2 Scalar value constructors
+X<scalar, literal> X<scalar, constant>
+
+(스칼라 값의 생성자)
+
+=begin original
+
+Numeric literals are specified in any of the following floating point or
+integer formats:
+
+=end original
+
+값의 리터럴은 아래의 부동소수점 수와 정수의 형식으로 나타납니다:
+
+    12345
+    12345.67
+    .23E-10             # a very small number
+    3.14_15_92          # a very important number
+    4_294_967_296       # underscore for legibility
+    0xff                # hex
+    0xdead_beef         # more hex   
+    0377                # octal (only numbers, begins with 0)
+    0b011011            # binary
+
+=begin original
+
+You are allowed to use underscores (underbars) in numeric literals
+between digits for legibility.  You could, for example, group binary
+digits by threes (as for a Unix-style mode argument such as 0b110_100_100)
+or by fours (to represent nibbles, as in 0b1010_0110) or in other groups.
+X<number, literal>
+
+=end original
+
+수치 리터럴을 읽기 쉽게 하기 위해, 숫자 사이에 밑줄을 사용할 수있습니다.
+예를들어, (Unix 식의 모드 인수를 위해서 0b110_100_100 처럼) 2 진수를 
+3자마다 그룹으로 나누거나, (니블을 표현하기 위해서 0b100_0110 처럼)
+4자마다 그룹으로 나누거나, 혹은 그 밖의 방법으로 그룹을 나눌 수 있습니다.
+X<number, literal>
+
+=begin original
+
+String literals are usually delimited by either single or double
+quotes.  They work much like quotes in the standard Unix shells:
+double-quoted string literals are subject to backslash and variable
+substitution; single-quoted strings are not (except for C<\'> and
+C<\\>).  The usual C-style backslash rules apply for making
+characters such as newline, tab, etc., as well as some more exotic
+forms.  See L<perlop/"Quote and Quote-like Operators"> for a list.
+X<string, literal>
+
+=end original
+
+문자열 리터럴은 따옴표나 쌍따옴표로 구분됩니다.
+이것들은 표준 Unix 셸의 인용부호와 마찬가지로 다뤄집니다:
+쌍따옴표의 문자열 리터럴에서는 백슬래쉬의 치환과 변수의 치환이 이루어져,
+따옴표의 문자열에서는
+(C<¥'> 와 C<¥¥> 를 빼고) 이것들의 치환은 일어나지 않습니다.
+보통의 C 형식에서의 백 슬래쉬의 치환규칙은 개행이나 탭을 시작해, 어떤 종류의 
+색다른 형식에도 사용됩니다.
+자세한 내용은 L<perlop/"Quote and Quote-like Operators"> 를 참조해주세요.
+X<string, literal>
+
+=begin original
+
+Hexadecimal, octal, or binary, representations in string literals
+(e.g. '0xff') are not automatically converted to their integer
+representation.  The hex() and oct() functions make these conversions
+for you.  See L<perlfunc/hex> and L<perlfunc/oct> for more details.
+
+=end original
+
+문자열 리터럴 안에서 ('0xff' 처럼) 16진, 8진, 2진으로 표현되는 것은,
+그 값이 표현하는 것에 자동적으로 변환되는 것은 아닙니다.
+hex() 나 oct() 같은 함수가 그를 위한 변환을 수행합니다.
+자세한 내용은 L<perlfunc/hex> 와 L<perlfunc/oct> 를 참조해주세요.
+
+=begin original
+
+You can also embed newlines directly in your strings, i.e., they can end
+on a different line than they begin.  This is nice, but if you forget
+your trailing quote, the error will not be reported until Perl finds
+another line containing the quote character, which may be much further
+on in the script.  Variable substitution inside strings is limited to
+scalar variables, arrays, and array or hash slices.  (In other words,
+names beginning with $ or @, followed by an optional bracketed
+expression as a subscript.)  The following code segment prints out "The
+price is $Z<>100."
+X<interpolation>
+
+=end original
+
+또, 문자열에 직접, 개행을 집어넣을 수도 있습니다.
+즉, 문자열은 개시한 줄에서 종료할 필요는 없다는 것입니다.
+이것은 굉장한 것이지만, 종료 인용부호문을 잊어버린 경우에는 
+다음에 인용문자가 발견될때까지 Perl 은 에러를 발견할 수 없게 됩니다.
+그것은 ,스크립트 상에서 계속 앞에 있을 지도 모릅니다.
+문자열 안에서 변수의 치환은 스칼라 변수, 배열, 배열이나 해쉬의 슬라이스로 
+한정되어 있습니다(바꿔 말하면, $ 나 @ 로 시작되는 시벽자나, 그것에 
+대괄호로 감싸진 첨자를 붙인 것입니다).
+다음 프로그램은 "The price is $Z<>100." 이라고 찍힙니다.
+X<interpolation>
+
+    $Price = '$100';	# not interpolated
+    print "The price is $Price.\n";	# interpolated
+
+=begin original
+
+There is no double interpolation in Perl, so the C<$100> is left as is.
+
+=end original
+
+Perl 에서는 이중전개는 수행되지 않기 때문에 C<$100> 은 그대로 됩니다.
+
+=begin original
+
+By default floating point numbers substituted inside strings use the
+dot (".")  as the decimal separator.  If C<use locale> is in effect,
+and POSIX::setlocale() has been called, the character used for the
+decimal separator is affected by the LC_NUMERIC locale.
+See L<perllocale> and L<POSIX>.
+
+=end original
+
+기본적으로는 문자열에 치환된 부동소수점은 소수점으로 점(".") 을 사용할 수 있습니다.
+C<use locale> 이 유효하고, POSIX::setlocale() 이 호출된 경우, 
+소수점으로 사용된 문자는 LC_NUMERIC 로케일에 의해 영향을 받습니다.
+L<perllocale> 과 L<POSIX> 를 참조해주세요.
+
+=begin original
+
+As in some shells, you can enclose the variable name in braces to
+disambiguate it from following alphanumerics (and underscores).
+You must also do
+this when interpolating a variable into a string to separate the
+variable name from a following double-colon or an apostrophe, since
+these would be otherwise treated as a package separator:
+X<interpolation>
+
+=end original
+
+몇가지의 셸과 마찬가지로, 변수 이름의 앞뒤에 중괄호를 넣어서,
+열결된 영숫자(그리고 밑줄)에서 잘라낼 수 있습니다.
+변수를 문자열에 전개할 때에, 뒤에 이어지는 콜론 2개나 따옴표와 
+변수이름을 분할하는 경우에도 그렇게 하지 않으면 안됩니다:
+그렇지 않으면 패키지의 구분자로 취급되기 때문입니다:
+
+    $who = "Larry";
+    print PASSWD "${who}::0:0:Superuser:/:/bin/perl\n";
+    print "We use ${who}speak when ${who}'s here.\n";
+
+=begin original
+
+Without the braces, Perl would have looked for a $whospeak, a
+C<$who::0>, and a C<$who's> variable.  The last two would be the
+$0 and the $s variables in the (presumably) non-existent package
+C<who>.
+
+=end original
+
+중괄호 없이, Perl 은 변수 $whospeak, C<$who::0>, C<$who's> 를 찾습니다.
+뒤의 두개는 (아마도) 존재하지 않는 패키지 C<who> 의 변수 $0 와 $s 가 됩니다.
+
+=begin original
+
+In fact, an identifier within such curlies is forced to be a string,
+as is any simple identifier within a hash subscript.  Neither need
+quoting.  Our earlier example, C<$days{'Feb'}> can be written as
+C<$days{Feb}> and the quotes will be assumed automatically.  But
+anything more complicated in the subscript will be interpreted as an
+expression.  This means for example that C<$version{2.0}++> is
+equivalent to C<$version{2}++>, not to C<$version{'2.0'}++>.
+
+=end original
+
+실제로는 그런 중괄호의 안쪽에 있는 식별자는 해쉬의 첨자에 어떤 식별자와 함께, 강제적으로 
+문자열이 됩니다.
+어느 쪽도 인용부호는 필요 없습니다.
+앞의 예에 있었던 C<$days{'Feb'}> 는  C<$days{Feb}> 처럼 쓸 수 있고,
+자동적으로 인용부호가 가정됩니다.
+그러나, 첨자에 의해 복잡한 무엇인가를 사용하는 경우에는 식으로 해석됩니다.
+이것은 예를들어  C<$version{2.0}++> 는 C<$version{2}++> 와 같고,
+C<$version{'2.0'}++> 가 아닌 것을 의미합니다.
+
+=head3 Version Strings
+X<version string> X<vstring> X<v-string>
+
+(버젼 문자열)
+
+=begin original
+
+B<Note:> Version Strings (v-strings) have been deprecated.  They will
+be removed in some future release after Perl 5.8.1.  The marginal
+benefits of v-strings were greatly outweighed by the potential for
+Surprise and Confusion.
+
+=end original
+
+B<주의:> 버젼 문자열 (v-문자열) 은 비추천입니다.
+이것은 Perl 5.8.1 이후의 몇가지 장래 릴리즈에서 삭제됩니다.
+v-문자열의 적은 이점보다, 잠재적은 혼란이 크게 상회하기 때문입니다.
+
+=begin original
+
+A literal of the form C<v1.20.300.4000> is parsed as a string composed
+of characters with the specified ordinals.  This form, known as
+v-strings, provides an alternative, more readable way to construct
+strings, rather than use the somewhat less readable interpolation form
+C<"\x{1}\x{14}\x{12c}\x{fa0}">.  This is useful for representing
+Unicode strings, and for comparing version "numbers" using the string
+comparison operators, C<cmp>, C<gt>, C<lt> etc.  If there are two or
+more dots in the literal, the leading C<v> may be omitted.
+
+=end original
+
+C<v1.20.300.4000> 의 형태의 리터럴은 가정된 서수를 가진 문자열로부터 문자열로 파싱됩니다.
+이 형태는 v-문자열이라고 부르고, 보다 일긱어려운 문자변환형식
+C<"\x{1}\x{14}\x{12c}\x{fa0}"> 보다도 읽기 쉬운 문자열을 구성하는 방법을 제공합니다.
+이것은 Unicde 문자열을 표현하기 위해서나, 버젼 "번호" 를 문자열 비교 연산자
+C<cmp>, C<gt>, C<lt> 등을 사용해서 비교할 때에 편리합니다.
+만약 리터럴에 2가지 이상의 점이 있는 경우, 앞의 C<v> 는 생략할 수 있습니다.
+
+    print v9786;              # prints SMILEY, "\x{263a}"
+    print v102.111.111;       # prints "foo"
+    print 102.111.111;        # same
+
+=begin original
+
+Such literals are accepted by both C<require> and C<use> for
+doing a version check.  Note that using the v-strings for IPv4
+addresses is not portable unless you also use the
+inet_aton()/inet_ntoa() routines of the Socket package.
+
+=end original
+
+이같은 리터럴은 C<require> 와 C<use> 로 버젼체크를 수행하는 경우에 
+받아들일 수 있습니다.
+v-문자열을 IPv4 주소로 사용하면, Socket 패키지의 
+inet_aton()/inet_ntoa() 루틴도 사용하지 않는 한, 이식성이 없다는 것에 
+주의해주세요.
+
+=begin original
+
+Note that since Perl 5.8.1 the single-number v-strings (like C<v65>)
+are not v-strings before the C<< => >> operator (which is usually used
+to separate a hash key from a hash value), instead they are interpreted
+as literal strings ('v65').  They were v-strings from Perl 5.6.0 to
+Perl 5.8.0, but that caused more confusion and breakage than good.
+Multi-number v-strings like C<v65.66> and C<65.66.67> continue to
+be v-strings always.
+
+=end original
+
+Perl 5.8.1 에서 (C<v65> 같은) 단일 수치의 v-문자열은 C<< => >> 연산자
+(해쉬키와 해쉬의 값을 나누기 위해 보통 사용도비니다) 의 앞에서는 
+v-문자열이 아니라 리터럴 문자열 ('v65') 로 취급되는 것에 주의해주세요.
+이것은 Perl 5.6.0 에서 Perl 5.8.0 에서는 v-문자열이었지만, 이것은 좋은 것보다
+큰 혼란과 파괴를 불러일으켰습니다.
+C<v65.66> 나 C<65.66.67> 같은 복수의 쉬의 v-문자열은 보통 v-문자열인채로 갑니다.
+
+=head3 Special Literals
+X<special literal> X<__END__> X<__DATA__> X<END> X<DATA>
+X<end> X<data> X<^D> X<^Z>
+
+(특수한 리터럴)
+
+=begin original
+
+The special literals __FILE__, __LINE__, and __PACKAGE__
+represent the current filename, line number, and package name at that
+point in your program.  They may be used only as separate tokens; they
+will not be interpolated into strings.  If there is no current package
+(due to an empty C<package;> directive), __PACKAGE__ is the undefined
+value.
+X<__FILE__> X<__LINE__> X<__PACKAGE__> X<line> X<file> X<package>
+
+=end original
+
+__FILE__, __LINE__, __PACKAGE__ 같은 특수한 리터럴은 각각, 
+현재 파일명, 줄번호, 패키지이름을 나타냅니다.
+이것들은 독립한 토큰으로써만 사용될 수 있습니다;
+문자열 안에 전개되는 일은 없습니다.
+(빈 C<package;> 지시자에 의해) 현재 패키지가 존재하지 않는 경우, 
+__PAKCAGE__ 는 미정의 값이 됩니다.
+X<__FILE__> X<__LINE__> X<__PACKAGE__> X<line> X<file> X<package>
+
+=begin original
+
+The two control characters ^D and ^Z, and the tokens __END__ and __DATA__
+may be used to indicate the logical end of the script before the actual
+end of file.  Any following text is ignored.
+
+=end original
+
+두가지 제어문자 ^D 와 ^Z 및 토큰 __END__ 와 __DATA__ 는 
+실제의 파일의 끝단보다 앞에 있는 논리적인 스크립트의 끝을 나타내기 위해 사용할 수 있습니다.
+이것들의 뒤에 있는 텍스트는 무시됩니다.
+
+=begin original
+
+Text after __DATA__ but may be read via the filehandle C<PACKNAME::DATA>,
+where C<PACKNAME> is the package that was current when the __DATA__
+token was encountered.  The filehandle is left open pointing to the
+contents after __DATA__.  It is the program's responsibility to
+C<close DATA> when it is done reading from it.  For compatibility with
+older scripts written before __DATA__ was introduced, __END__ behaves
+like __DATA__ in the toplevel script (but not in files loaded with
+C<require> or C<do>) and leaves the remaining contents of the
+file accessible via C<main::DATA>.
+
+=end original
+
+그러나, __DATA__ 이후의 텍스트는 파일핸들 C<PACKAGE::DATA> 를 통해서 
+읽어낼 수 있습니다; 여기에서 PACKNAME 은 __DATA__ 토큰에 
+조우한 시점에서 현재의 패키지이름입니다.
+파일 핸들은 __DATA__ 의 뒤의 내용을 가리킵니다.
+여기에서 데이터를 다 읽으면 C<close DATA> 하는 것은 프로그램의 책임입니다.
+__DATA__ 가 도입되기 전에 쓰여진 옛 스크립트와의 호환성을 위해서
+__END__ 는, 스크립트(단 C<require> 나 C<do> 에서 읽혀진 파일이 아닌 것) 의 톱 레벨에서의 
+__DATA__ 처럼 행동하고, 파일의 남은 내용은 C<main::DATA> 로 접근할 수 있게 됩니다.
+
+=begin original
+
+See L<SelfLoader> for more description of __DATA__, and
+an example of its use.  Note that you cannot read from the DATA
+filehandle in a BEGIN block: the BEGIN block is executed as soon
+as it is seen (during compilation), at which point the corresponding
+__DATA__ (or __END__) token has not yet been seen.
+
+=end original
+
+__DATA__ 의 자세한 내용과 그것을 사용한 예제는 L<SelfLoader> 를 참조해주세요.
+BEGIN 블록에서는 파일 핸들 DATA 에서 읽어낼 수 없다는 것에 주의해주세요.
+BEGIN 블록은 그것이 발견된 시점에서 즉시 실행되기 때문에 
+__DATA__(나 __END__) 토큰이 어디에 있는지 알 수 없습니다.
+
+=head3 Barewords
+X<bareword>
+
+(Barewords)
+
+=begin original
+
+A word that has no other interpretation in the grammar will
+be treated as if it were a quoted string.  These are known as
+"barewords".  As with filehandles and labels, a bareword that consists
+entirely of lowercase letters risks conflict with future reserved
+words, and if you use the C<use warnings> pragma or the B<-w> switch, 
+Perl will warn you about any
+such words.  Some people may wish to outlaw barewords entirely.  If you
+say
+
+=end original
+
+문법적으로 별도의 해석을 할 수 없는 단어는 인용문자열처럼 다뤄집니다.
+이것은 barewords 라고 부릅니다.
+파일핸들이나 라벨처럼 소문자만으로 구성된 barewords 는 장래에 
+예약어와 충돌될 위험이 있습니다.
+그런 단어가 있는 경우 C<use warnings> 프라그마나 
+B<-w> 스위치를 붙이는 것으로 ㅖerl 이 그런 단어를 지적해줍니다.
+barewords 를 쓰지 말아줬음 하는 사람도 있습니다.
+아래처럼 하면:
+
+    use strict 'subs';
+
+=begin original
+
+then any bareword that would NOT be interpreted as a subroutine call
+produces a compile-time error instead.  The restriction lasts to the
+end of the enclosing block.  An inner block may countermand this
+by saying C<no strict 'subs'>.
+
+=end original
+
+서브루틴 호출과 해석할 수 없는 단어가 컴파일 시에 에러가 됩니다.
+이 제약은 감싸고 있는 블록의 끝까지 유효합니다.
+안쪽의 블록에서 C<no strict 'subs'> 라고 쓰는 것으로, 이 기능을 
+회피할 수도 있습니다.
+
+=head3 Array Joining Delimiter
+X<array, interpolation> X<interpolation, array> X<$">
+
+(배열을 결합하는 구분자)
+
+=begin original
+
+Arrays and slices are interpolated into double-quoted strings
+by joining the elements with the delimiter specified in the C<$">
+variable (C<$LIST_SEPARATOR> if "use English;" is specified), 
+space by default.  The following are equivalent:
+
+=end original
+
+배열과 슬라이스는 쌍따옴표 문자열 안에서 요소를 변수 C<$"> 
+("use English;" 가 지정되어 있다면 C<$LIST_SEPARATOR>) 안에 
+나타나는 구분문자(기본값은 스페이스) 로 연결되어 전개됩니다.
+아래와 같습니다:
+
+    $temp = join($", @ARGV);
+    system "echo $temp";
+
+    system "echo @ARGV";
+
+=begin original
+
+Within search patterns (which also undergo double-quotish substitution)
+there is an unfortunate ambiguity:  Is C</$foo[bar]/> to be interpreted as
+C</${foo}[bar]/> (where C<[bar]> is a character class for the regular
+expression) or as C</${foo[bar]}/> (where C<[bar]> is the subscript to array
+@foo)?  If @foo doesn't otherwise exist, then it's obviously a
+character class.  If @foo exists, Perl takes a good guess about C<[bar]>,
+and is almost always right.  If it does guess wrong, or if you're just
+plain paranoid, you can force the correct interpretation with curly
+braces as above.
+
+=end original
+
+검색 패턴 (여기에서도 쌍따옴표처럼 치환이 이루어집니다) 안에서는 
+해석되는 것에 불행한 애매함이 있습니다.
+C</$foo[bar]/>는 C</${foo}[bar]/> 라고 해석될까요?
+(이 경우 C<[bar]>는、정규표현의 문자클래스)
+C</${foo[bar]}/> 라고 해석될까요 (이 경우는 C<[bar]> 는 배열 @foo 의 첨자)
+@foo 가 다른 곳에 의존하지 않는 경우에는 명백하게 문자클래스가 됩니다.
+@foo 가 존재하면, Perl 이 C<[bar]> 의 의미에 해당되지만, 대개는 
+바른 해석을 합니다.
+만약 추측이 틀렸을 때나 편집적으로 집착하고 싶을 ㄸ애ㅔ는 위에 
+쓰인 것처럼 중괄호를 붙여서 강제적으로 해석하는 방법을 결정할 수 있습니다.
+
+=begin original
+
+If you're looking for the information on how to use here-documents,
+which used to be here, that's been moved to
+L<perlop/Quote and Quote-like Operators>.
+
+=end original
+
+이전 여기에 있었던 히어 도큐먼트의 사용법에 관한 정보를 찾고 있다면 
+그 정보는 L<perlop/Quote and Quote-like Operators> 로 이동했습니다.
+
+=head2 List value constructors
+X<list>
+
+(리스트 값의 생성자)
+
+=begin original
+
+List values are denoted by separating individual values by commas
+(and enclosing the list in parentheses where precedence requires it):
+
+=end original
+
+리스트 값은 개개의 값을 컴마로 나눠 (필요에 따라서 괄호로 감싸서) 표시됩니다:
+
+    (LIST)
+
+=begin original
+
+In a context not requiring a list value, the value of what appears
+to be a list literal is simply the value of the final element, as
+with the C comma operator.  For example,
+
+=end original
+
+리스트 값이 요구되지 ㅇ낳는 컨텍스트에서는 리스트 리터럴처럼 보이는 값의 경우는 
+C 의 컴마 연산자의 경우처럼, 단순히 마지막 요소의 값이 사용됩니다.
+예를들어:
+
+    @foo = ('cc', '-E', $bar);
+
+=begin original
+
+assigns the entire list value to array @foo, but
+
+=end original
+
+이것은 리스트 값 전체를 배열 @foo 에 대입하지만:
+
+    $foo = ('cc', '-E', $bar);
+
+=begin original
+
+assigns the value of variable $bar to the scalar variable $foo.
+Note that the value of an actual array in scalar context is the
+length of the array; the following assigns the value 3 to $foo:
+
+=end original
+
+이것은 변수 $bar 의 값을 스칼라 변수  $foo 에 대입합니다.
+본래의 배열이 스칼라 컨텍스트로 평가되는 때의 값은, 그 배열의 크기가 됩니다.
+아래의 예제에서는 $foo 에 3 이라는 값이 대입됩니다:
+
+    @foo = ('cc', '-E', $bar);
+    $foo = @foo;                # $foo gets 3
+
+=begin original
+
+You may have an optional comma before the closing parenthesis of a
+list literal, so that you can say:
+
+=end original
+
+리스트 리터럴의 닫힌 과롷의 앞에는 여분으로 컴마를 놓아도 상관없기 때문에 
+아래처럼 쓸 수 있습니다:
+
+    @foo = (
+        1,
+        2,
+        3,
+    );
+
+=begin original
+
+To use a here-document to assign an array, one line per element,
+you might use an approach like this:
+
+=end original
+
+배열로의 대입에 히어 도큐먼트를 사용기에는 요소마다 1줄이 되고, 
+아래와 같은 수법을 사용할 수 있습니다:
+
+    @sauces = <<End_Lines =~ m/(\S.*\S)/g;
+        normal tomato
+        spicy tomato
+        green chile
+        pesto
+        white wine
+    End_Lines
+
+=begin original
+
+LISTs do automatic interpolation of sublists.  That is, when a LIST is
+evaluated, each element of the list is evaluated in list context, and
+the resulting list value is interpolated into LIST just as if each
+individual element were a member of LIST.  Thus arrays and hashes lose their
+identity in a LIST--the list
+
+=end original
+
+리스트 안에 리스트가 있는 경우에는 자동적으로 전개되어 버립니다.
+이것은 바깥쪽의 리스트가 평가되면, 리스트의 각각의 요소가 리스트 컨텍스트로 평가되고,
+그 결과의 리스트 값의 각각의 값이 원래의 리스트 요소처럼 전개되는 것입니다.
+즉, 리스트 안에서는 배열도 해쉬도, 그 성질이 나타나지 않습니다 -- 
+아래의 리스트는
+
+    (@foo,@bar,&SomeSub,%glarch)
+
+=begin original
+
+contains all the elements of @foo followed by all the elements of @bar,
+followed by all the elements returned by the subroutine named SomeSub 
+called in list context, followed by the key/value pairs of %glarch.
+To make a list reference that does I<NOT> interpolate, see L<perlref>.
+
+=end original
+
+@foo 의 모든 요소의 뒤에 @bar 의 모든 요소를 이어, 
+그 뒤에 SomeSub 라는 서브루틴이 반환하는 모든 요소를 이어, 
+최후에 %glarch 의 키/값의 페어를 이은 것을 요소로 가집니다.
+전개 B<되지 않은> 리스트의 리퍼런스를 만들기 위해서는 L<perlref> 를 참조해주세요.
+
+=begin original
+
+The null list is represented by ().  Interpolating it in a list
+has no effect.  Thus ((),(),()) is equivalent to ().  Similarly,
+interpolating an array with no elements is the same as if no
+array had been interpolated at that point.
+
+=end original
+
+빈 리스트는 () 로 표현됩니다.
+리스트 안에서 빈 리스트를 전개해도 아무것도 일어나지 않습니다.
+즉 ((), (), ())는 () 와 같습니다.
+마찬가지로, 요소가 없는 배열을 전개하는 것은, 그 장소에서 아무것도 
+전개하지 않은 것과 같은 것이 됩니다.
+
+=begin original
+
+This interpolation combines with the facts that the opening
+and closing parentheses are optional (except when necessary for
+precedence) and lists may end with an optional comma to mean that
+multiple commas within lists are legal syntax. The list C<1,,3> is a
+concatenation of two lists, C<1,> and C<3>, the first of which ends
+with that optional comma.  C<1,,3> is C<(1,),(3)> is C<1,3> (And
+similarly for C<1,,,3> is C<(1,),(,),3> is C<1,3> and so on.)  Not that
+we'd advise you to use this obfuscation.
+
+=end original
+
+이 전개는 열린 괄호와 닫힌 괄혼는 (우선순위를 위한 필요성이 없다면)
+생략가능하다는 것과, 리스트 안에 복수의 컴마가 있어도 문법적으로 
+유효하기 때문에, 리스트의 최후에 추가한 컴마를 붙일 수 있는 것을 조합한 것입니다.
+리스트 C<1,,3> 은 2개의 리스트 C<1,> 와 C<3> 의 결합이고,
+첫번째의 리스트는 옵션의 컴마로 끝납니다.
+C<1,,3> 은 C<(1,),(3)> 으로 C<1,3> 입니다 (그리고 마찬가지로 C<1,,,3> 은 
+C<(1,),(,),3> 으로 C<1,3> 입니다)
+이 어두운 면을 사용하도록 권하는 것은 아닙니다.
+
+=begin original
+
+A list value may also be subscripted like a normal array.  You must
+put the list in parentheses to avoid ambiguity.  For example:
+
+=end original
+
+리스트 값에도 보통 배열과 마찬가지로, 첨자를 붙일 수 있습니다.
+리스트에는 애매함을 없애기 위해서, 괄호를 붙이지 않아서는 안됩니다.
+예제:
+
+    # Stat returns list value.
+    $time = (stat($file))[8];
+
+    # SYNTAX ERROR HERE.
+    $time = stat($file)[8];  # OOPS, FORGOT PARENTHESES
+
+    # Find a hex digit.
+    $hexdigit = ('a','b','c','d','e','f')[$digit-10];
+
+    # A "reverse comma operator".
+    return (pop(@foo),pop(@foo))[0];
+
+=begin original
+
+Lists may be assigned to only when each element of the list
+is itself legal to assign to:
+
+=end original
+
+리스트 자신을 구성하는 각각의 요소 모든 것에 대입이 허락되는 경우에만, 
+전체의 리스트에 대입을 수행할 수 있습니다:
+
+    ($a, $b, $c) = (1, 2, 3);
+
+    ($map{'red'}, $map{'blue'}, $map{'green'}) = (0x00f, 0x0f0, 0xf00);
+
+=begin original
+
+An exception to this is that you may assign to C<undef> in a list.
+This is useful for throwing away some of the return values of a
+function:
+
+=end original
+
+이 예외로써, 리스트에 C<undef> 를 대입할 수도 있습니다.
+이것은 함수의 반환값이 일부를 버리는 것에 편리합니다.
+
+    ($dev, $ino, undef, undef, $uid, $gid) = stat($file);
+
+=begin original
+
+List assignment in scalar context returns the number of elements
+produced by the expression on the right side of the assignment:
+
+=end original
+
+스칼라 컨텍스트 안에 리스트 대입은 대입 좌변에 이쓴 식에 의해 
+생성된 요소의 수를 반환합니다:
+
+    $x = (($foo,$bar) = (3,2,1));       # set $x to 3, not 2
+    $x = (($foo,$bar) = f());           # set $x to f()'s return count
+
+=begin original
+
+This is handy when you want to do a list assignment in a Boolean
+context, because most list functions return a null list when finished,
+which when assigned produces a 0, which is interpreted as FALSE.
+
+=end original
+
+이것은 불 컨텍스트에서 리스트 대입을 하고 싶은 때에 편리합니다.
+왜냐면, 대부분의 리스트 함수는 종료시에 빈리스트를 반환하기 때문입니다.
+이것은 대입이 0 을 생성한 때에는 거짓으로 해석됩니다.
+
+=begin original
+
+It's also the source of a useful idiom for executing a function or
+performing an operation in list context and then counting the number of
+return values, by assigning to an empty list and then using that
+assignment in scalar context. For example, this code:
+
+=end original
+
+이것은 또, 함수의 실행이나 조작의 처리를 리스트 컨텍스트에서 수행하고, 
+그리고 그것을 빈리스트에서 컨텍스트에서의 대이비을 수행하는 것으로 
+반환값의 수를 세기 위한 편리한 관용법이 되었습니다.
+예를들면 아래의 코드는:
+
+    $count = () = $string =~ /\d+/g;
+
+=begin original
+
+will place into $count the number of digit groups found in $string.
+This happens because the pattern match is in list context (since it
+is being assigned to the empty list), and will therefore return a list
+of all matching parts of the string. The list assignment in scalar
+context will translate that into the number of elements (here, the
+number of times the pattern matched) and assign that to $count. Note
+that simply using
+
+=end original
+
+$string 의 안에서 발견한 숫자의 그룹의 수를 $count 로 설정합니다.
+이것은 (값이 빈 리스트에 대입되기 때문에) 패턴매치는 
+리스트 컨텍스트로 수행되고, 따라서 문자열에서의 모든 매치한 부분의 
+리스트가 반환되기 때문에 발생합니다.
+스칼라 컨텍스트에서의 리스트 대입은 요소수(여기에서는 매치한 패턴의 수)에 변환되고, 
+그것이 $count 에 대입됩니다.
+단순히 아래처럼 해도:
+
+    $count = $string =~ /\d+/g;
+
+=begin original
+
+would not have worked, since a pattern match in scalar context will
+only return true or false, rather than a count of matches.
+
+=end original
+
+잘 움직이지 않는 것에 주의해주세요; 스칼라 컨텍스트에서의 패턴 매칭은 매치한 수가 아니라,
+단순히 참이나 거짓을 반환하기 때문입니다.
+
+=begin original
+
+The final element of a list assignment may be an array or a hash:
+
+=end original
+
+리스트 대입의 마지막 요소는 배열이나 해쉬라도 상관없습니다:
+
+    ($a, $b, @rest) = split;
+    my($a, $b, %rest) = @_;
+
+=begin original
+
+You can actually put an array or hash anywhere in the list, but the first one
+in the list will soak up all the values, and anything after it will become
+undefined.  This may be useful in a my() or local().
+
+=end original
+
+실제는 리스트의 임의의 요소로써 배열을 사용할 수 있지만, 
+리스트 안의 최초의 배영링 오른쪽의 값을 모두 집어넣어 버리기 때문에,
+그 이후의 것은 미정의가 됩니다.
+이것은 my() 나 local() 에서는 유효할지도 모릅니다.
+
+=begin original
+
+A hash can be initialized using a literal list holding pairs of
+items to be interpreted as a key and a value:
+
+=end original
+
+해쉬는 키와 값으로 해석되는 값의 쌍이 되는 리스트 리터럴을 사용해서 
+초기화 됩니다:
+
+    # same as map assignment above
+    %map = ('red',0x00f,'blue',0x0f0,'green',0xf00);
+
+=begin original
+
+While literal lists and named arrays are often interchangeable, that's
+not the case for hashes.  Just because you can subscript a list value like
+a normal array does not mean that you can subscript a list value as a
+hash.  Likewise, hashes included as parts of other lists (including
+parameters lists and return lists from functions) always flatten out into
+key/value pairs.  That's why it's good to use references sometimes.
+
+=end original
+
+종종, 리스트 리터럴이라고 이름지어진 배열은 서로 교환가능하지만, 
+해쉬의 경우는 그렇지 않습니다.
+보통의 배열이 해쉬로서 리스트 값으로 첨자를 붙일 수 없다는 것과 마찬가지로, 
+리스트 값을 사용해서 첨자를 붙일 수는 없습니다.
+마찬가지로, 그 일부로써 다른 리스트를 포함한 해쉬(파라메터 리스트나 
+함수의 반환값 리스트를 포함합니다)는 항상 평탄한 키/값의 페어가 됩니다.
+이것은 리퍼런스를 제대로 사용하는 이유입니다.
+
+=begin original
+
+It is often more readable to use the C<< => >> operator between key/value
+pairs.  The C<< => >> operator is mostly just a more visually distinctive
+synonym for a comma, but it also arranges for its left-hand operand to be
+interpreted as a string -- if it's a bareword that would be a legal simple
+identifier (C<< => >> doesn't quote compound identifiers, that contain
+double colons). This makes it nice for initializing hashes:
+
+=end original
+
+key/value 의 쌍 사이에 C<< => >> 연산자를 사용하면 읽기 쉬워집니다.
+C<< => >> 연산자는 실질, 보기에는 판별하기 쉬운 컴마 연산자 이지만, 
+그 왼쪽에 있는 오퍼랜드가 정당한 단순한 식별지인 것처럼 
+barewords 인 때에 그것을 문자열로 해석하게 됩니다.
+(C<< => >> 는 2가지의 콜론을 포함하는 복합식별자를 인용하지 않습니다)
+이것은 해쉬의 초기화를 보기좋게 합니다:
+
+    %map = (
+                 red   => 0x00f,
+                 blue  => 0x0f0,
+                 green => 0xf00,
+   );
+
+=begin original
+
+or for initializing hash references to be used as records:
+
+=end original
+
+혹은, 레코드로써 사용하는 해쉬 리퍼런스를 초기화하기 위해서 사용합니다:
+
+    $rec = {
+                witch => 'Mable the Merciless',
+                cat   => 'Fluffy the Ferocious',
+                date  => '10/31/1776',
+    };
+
+=begin original
+
+or for using call-by-named-parameter to complicated functions:
+
+=end original
+
+복잡한 함수를 위해서 이름붙은 파라메터에 의한 호ㅜㄹ을 사용하기 위해서도 사용할 수 있습니다:
+
+   $field = $query->radio_group(
+               name      => 'group_name',
+               values    => ['eenie','meenie','minie'],
+               default   => 'meenie',
+               linebreak => 'true',
+               labels    => \%labels
+   );
+
+=begin original
+
+Note that just because a hash is initialized in that order doesn't
+mean that it comes out in that order.  See L<perlfunc/sort> for examples
+of how to arrange for an output ordering.
+
+=end original
+
+해쉬에서는 순서에 의미가 없기 때문에, 초기화의 순서에도 의미는 없다는 것에 주의해주세요.
+출력의 순서를 바꾸는 방법의 예제는 L<perlfunc/sort> 를 참조해주세요.
+
+=head2 Subscripts
+
+(첨자)
+
+=begin original
+
+An array is subscripted by specifying a dollar sign (C<$>), then the
+name of the array (without the leading C<@>), then the subscript inside
+square brackets.  For example:
+
+=end original
+
+배열은 달러기호 (C<$>), (앞의 C<@> 없는) 배열이름, 대괄호로 감싸진 첨자 의 순서로 
+지정하는 것으로 첨자가 붙습니다.
+예제:
+
+    @myarray = (5, 50, 500, 5000);
+    print "Element Number 2 is", $myarray[2], "\n";
+
+=begin original
+
+The array indices start with 0. A negative subscript retrieves its 
+value from the end.  In our example, C<$myarray[-1]> would have been 
+5000, and C<$myarray[-2]> would have been 500.
+
+=end original
+
+배열의 첨자는 0 에서 시작됩니다.
+부수의 첨자는 뒤에서 값을 뽑아냅니다.
+앞에 기술한 예제에서는 C<$myarray[-1]> 은 5000이고, C<$myarray[-2]> 는 
+500이 됩니다.
+
+=begin original
+
+Hash subscripts are similar, only instead of square brackets curly brackets
+are used. For example:
+
+=end original
+
+해쉬의 첨자도 마찬가지지만, 대괄호 대신에 중괄호를 사용합니다.
+예제:
+
+    %scientists = 
+    (
+        "Newton" => "Isaac",
+        "Einstein" => "Albert",
+        "Darwin" => "Charles",
+        "Feynman" => "Richard",
+    );
+
+    print "Darwin's First Name is ", $scientists{"Darwin"}, "\n";
+
+=head2 Slices
+X<slice> X<array, slice> X<hash, slice>
+
+(슬라이스)
+
+=begin original
+
+A common way to access an array or a hash is one scalar element at a
+time.  You can also subscript a list to get a single element from it.
+
+=end original
+
+배열이나 해쉬에 접근하는 일반적인 방법은 한번에 하나의 스칼라 요소입니다.
+리스트에서 하나의 요소를 뽑아내기 위해서도, 첨자를 사용할 수 있습니다.
+
+    $whoami = $ENV{"USER"};             # one element from the hash
+    $parent = $ISA[0];                  # one element from the array
+    $dir    = (getpwnam("daemon"))[7];  # likewise, but with list
+
+=begin original
+
+A slice accesses several elements of a list, an array, or a hash
+simultaneously using a list of subscripts.  It's more convenient
+than writing out the individual elements as a list of separate
+scalar values.
+
+=end original
+
+슬라이스는 첨자의 리스트를 사용해서 리스트, 배열, 해쉬의 복수의 요소에 동시에 
+접근합니다.
+이것은 각각의 요소를 개개의 스칼라 값의 리스트로 다루는 것보다 편리합니다.
+
+    ($him, $her)   = @folks[0,-1];              # array slice
+    @them          = @folks[0 .. 3];            # array slice
+    ($who, $home)  = @ENV{"USER", "HOME"};      # hash slice
+    ($uid, $dir)   = (getpwnam("daemon"))[2,7]; # list slice
+
+=begin original
+
+Since you can assign to a list of variables, you can also assign to
+an array or hash slice.
+
+=end original
+
+변수의 리스트에 대입할 수 있기 때문에, 배열이나 해쉬의 슬라이스에도 대입할 수 있습니다.
+
+    @days[3..5]    = qw/Wed Thu Fri/;
+    @colors{'red','blue','green'} 
+                   = (0xff0000, 0x0000ff, 0x00ff00);
+    @folks[0, -1]  = @folks[-1, 0];
+
+=begin original
+
+The previous assignments are exactly equivalent to
+
+=end original
+
+앞에 기술한 대입은 아래와 완전히 같습니다:
+
+    ($days[3], $days[4], $days[5]) = qw/Wed Thu Fri/;
+    ($colors{'red'}, $colors{'blue'}, $colors{'green'})
+                   = (0xff0000, 0x0000ff, 0x00ff00);
+    ($folks[0], $folks[-1]) = ($folks[-1], $folks[0]);
+
+=begin original
+
+Since changing a slice changes the original array or hash that it's
+slicing, a C<foreach> construct will alter some--or even all--of the
+values of the array or hash.
+
+=end original
+
+슬라이스를 변경하면, 슬라이스한 원래의 배열이나 해쉬를 변경하기 때문에, 
+C<foreach> 구조는 배열이나 해쉬의 값의 일부 -- 혹은 전부 -- 를 
+치환할 수 있습니다.
+
+    foreach (@array[ 4 .. 10 ]) { s/peter/paul/ } 
+
+    foreach (@hash{qw[key1 key2]}) {
+        s/^\s+//;           # trim leading whitespace
+        s/\s+$//;           # trim trailing whitespace
+        s/(\w+)/\u\L$1/g;   # "titlecase" words
+    }
+
+=begin original
+
+A slice of an empty list is still an empty list.  Thus:
+
+=end original
+
+빈 리스트의 슬라이스는 역시 빈 리스트입니다.
+따라서:
+
+    @a = ()[1,0];           # @a has no elements
+    @b = (@a)[0,1];         # @b has no elements
+    @c = (0,1)[2,3];        # @c has no elements
+
+=begin original
+
+But:
+
+=end original
+
+그러나:
+
+    @a = (1)[1,0];          # @a has two elements
+    @b = (1,undef)[1,0,2];  # @b has three elements
+
+=begin original
+
+This makes it easy to write loops that terminate when a null list
+is returned:
+
+=end original
+
+이것을 사용하면, 빈리스트가 반환되면 종료하는 룰을 간단하게 쓸 수 있습니다:
+
+    while ( ($home, $user) = (getpwent)[7,0]) {
+        printf "%-8s %s\n", $user, $home;
+    }
+
+=begin original
+
+As noted earlier in this document, the scalar sense of list assignment
+is the number of elements on the right-hand side of the assignment.
+The null list contains no elements, so when the password file is
+exhausted, the result is 0, not 2.
+
+=end original
+
+이 문서에서 앞서 기술한 대로, 리스트 대입의 스칼라 평가는 대입의 좌측의 요소의 수입니다.
+빈리스트는 요소를 포함하지 않기 때문에, 패스워드 파일을 다 읽으면, 
+결과는 2가 아닌 0이 됩니다.
+
+=begin original
+
+If you're confused about why you use an '@' there on a hash slice
+instead of a '%', think of it like this.  The type of bracket (square
+or curly) governs whether it's an array or a hash being looked at.
+On the other hand, the leading symbol ('$' or '@') on the array or
+hash indicates whether you are getting back a singular value (a
+scalar) or a plural one (a list).
+
+=end original
+
+만약, 왜 여기에서 해쉬 슬라이스에 '%' 가 아닌 '@' 를 사용하는 가에 대해서 
+혼란한다면, 다음처럼 생각해보세요.
+괄호의 종류(대괄호나 중괄호나)는, 보고있는 것이 배열인지 해쉬인지를 
+구분합니다.
+한편, 배열이나 해쉬의 앞의 기호('$' 나 '@') 는, 반환해주는 것이 
+단일의 값(슬라이스)나 복수의 값(리스트)를 나타내고 있습니다.
+
+=head2 Typeglobs and Filehandles
+X<typeglob> X<filehandle> X<*>
+
+(형태 글로브와 파일핸들)
+
+=begin original
+
+Perl uses an internal type called a I<typeglob> to hold an entire
+symbol table entry.  The type prefix of a typeglob is a C<*>, because
+it represents all types.  This used to be the preferred way to
+pass arrays and hashes by reference into a function, but now that
+we have real references, this is seldom needed.  
+
+=end original
+
+Perl 은 I<형태 글로브> 라고 불리는 내부형을 심볼 테이블 엔트리 전체를 
+가지기 위해 사용하고 있습니다.
+이 형태 글로브의 형태 접두사는 C<*> 입니다.
+왜냐면, 그것이 형태 전체를 나타내기 때문입니다.
+이것은 함수에 대해서 리퍼런스를 사용해서 배열이나 해쉬를 건네기 위해서 
+자주 선호되는 방법이었습니다.
+그러나, 저희들은 이금에서는 진짜 리퍼런스를 가지고 있기 때문에, 
+형태 글로브를 사용하는 필요는 거의 없습니다.
+
+=begin original
+
+The main use of typeglobs in modern Perl is create symbol table aliases.
+This assignment:
+
+=end original
+
+최근의 Perl 에서의 형태 글로브의 주요한 용도는 심볼 테이블의 alias 를 만드는 것입니다.
+구체적으로는 아래처럼 합니다:
+
+    *this = *that;
+
+=begin original
+
+makes $this an alias for $that, @this an alias for @that, %this an alias
+for %that, &this an alias for &that, etc.  Much safer is to use a reference.
+This:
+
+=end original
+
+이것은 $this 를 $that 의 alias 로 해서, 
+@this 를 $that 의 alias 로 해서, %this 를 %that 의 alis 로, 
+&this 를 &that 의 alias 로 하는... 것처럼 합니다.
+보다 안전하게 하기위해서는 리퍼런스를 사용합니다.
+
+    local *Here::blue = \$There::green;
+
+=begin original
+
+temporarily makes $Here::blue an alias for $There::green, but doesn't
+make @Here::blue an alias for @There::green, or %Here::blue an alias for
+%There::green, etc.  See L<perlmod/"Symbol Tables"> for more examples
+of this.  Strange though this may seem, this is the basis for the whole
+module import/export system.
+
+=end original
+
+이 예제에서는 $Here::blue 를 일시적으로 $There::green 의 alias 로 했지만, 
+@Here::blue 를 $There::blue 의 alias 로는 하지 않고, 
+마찬가지로 %Here::blue 를 %There::green 의 alias 로는 하지 않습니다.
+이것은 기묘하게 생각할 수 있지만, 이것이 모듈의 임포트/익스포트 시스템의 
+기반이 되는 것입니다.
+
+=begin original
+
+Another use for typeglobs is to pass filehandles into a function or
+to create new filehandles.  If you need to use a typeglob to save away
+a filehandle, do it this way:
+
+=end original
+
+형태 글로브의 별도의 용도에는 함수에 파일핸들을 건내거나, 
+새로운 파일핸들을 생성하는 것이 있습니다.
+만약 파일핸들을 가지기 위해서는 형태 글로브를 사용하는 필요가 있다면, 
+아래처럼 합니다:
+
+    $fh = *STDOUT;
+
+=begin original
+
+or perhaps as a real reference, like this:
+
+=end original
+
+혹은, 아래처럼 진짜 리퍼런스를 사용합니다:
+
+    $fh = \*STDOUT;
+
+=begin original
+
+See L<perlsub> for examples of using these as indirect filehandles
+in functions.
+
+=end original
+
+개발중에서 간접적으로 파일핸들을 사용하는 예제에 대해서는 L<perlsub> 를 
+참조해주세요.
+
+=begin original
+
+Typeglobs are also a way to create a local filehandle using the local()
+operator.  These last until their block is exited, but may be passed back.
+For example:
+
+=end original
+
+형태 글로브는 local() 연산자를 사용한 로컬한 파일핸들을 작성하는 것에도 사용됩니다.
+그에 의해 작성된 것은 그것을 감싸는 블록이 존재하는 사이에서만 존재하지만, 
+호출한 곳으로 반환하는 것이 가능합니다.
+예를 들어보겠습니다:
+
+    sub newopen {
+        my $path = shift;
+        local  *FH;  # not my!
+        open   (FH, $path)          or  return undef;
+        return *FH;
+    }
+    $fh = newopen('/etc/passwd');
+
+=begin original
+
+Now that we have the C<*foo{THING}> notation, typeglobs aren't used as much
+for filehandle manipulations, although they're still needed to pass brand
+new file and directory handles into or out of functions. That's because
+C<*HANDLE{IO}> only works if HANDLE has already been used as a handle.
+In other words, C<*FH> must be used to create new symbol table entries;
+C<*foo{THING}> cannot.  When in doubt, use C<*FH>.
+
+=end original
+
+지금에서는 C<*foo{THING}> 표기가 있기때문에, 형태 글로브는 파일핸들의 
+조작을 위해서 사용되는 것은 그렇게 많지 많습니다만, 
+파일핸들이나 디렉토리 핸들을 함수에 대해서 건네거나,
+함수의바깥으로 반환하기 위해서는 아직 필요합니다.
+이것은 C<*HANDLE{IO}> 는 HANDLE 이 이미 핸들로써 사용되는 경우에만 
+동작하기 때문입니다.
+바꿔 말하면, C<*FH> 는 새로운 심볼 테이블의 엔트리를 작성하기 위해서 
+사용하지 않으면 안되지만, C<*foo{THING}> 를 사용할 수는 없습니다.
+의심되는 경우는 C<*FJ> 를 사용해주세요.
+
+=begin original
+
+All functions that are capable of creating filehandles (open(),
+opendir(), pipe(), socketpair(), sysopen(), socket(), and accept())
+automatically create an anonymous filehandle if the handle passed to
+them is an uninitialized scalar variable. This allows the constructs
+such as C<open(my $fh, ...)> and C<open(local $fh,...)> to be used to
+create filehandles that will conveniently be closed automatically when
+the scope ends, provided there are no other references to them. This
+largely eliminates the need for typeglobs when opening filehandles
+that must be passed around, as in the following example:
+
+=end original
+
+파일핸들을 작성할 수 있는 모든 함수 (open(), opendir(), pipe(), socketpair(), 
+sysopen(), socket(), adn accept()) 는 
+만약 건네진 핸들이 초기화되지 않은 스칼라 변수인 경우, 
+이름없는 파일핸들을 작성합니다.
+이것에 의해 C<open(my $fh, ...)> 나 C<open(local $fh, ...)> 가은 
+구문에 의해서, 다른 곳에서의 리퍼런스가 없다면, 영역의 끝에 자동적으로 
+닫혀진 편리한 파일핸들을 만들 수 있습니다.
+이것은 라애의 예제처럼, 다른 곳에 건넬 필요가 있는 파일핸들을 열 때에 
+형태 글로브를 사용하는 필요성은 크게 줄어듭니다:
+
+    sub myopen {
+        open my $fh, "@_"
+             or die "Can't open '@_': $!";
+        return $fh;
+    }
+
+    {
+        my $f = myopen("</etc/motd");
+        print <$f>;
+        # $f implicitly closed here
+    }
+
+=begin original
+
+Note that if an initialized scalar variable is used instead the
+result is different: C<my $fh='zzz'; open($fh, ...)> is equivalent
+to C<open( *{'zzz'}, ...)>.
+C<use strict 'refs'> forbids such practice.
+
+=end original
+
+대신에 초기화된 스칼라 변수가 사용되면, 결과는 다르다는 것에 주의해주세요.
+C<my $fh = 'zzz'; open($fh, ...)> 는 C<open( *{'zzz'}, ...)> 와 같습니다.
+이 같은 동작을 금지하기에는 C<use strict 'refs'> 를 사용해주세요.
+
+=begin original
+
+Another way to create anonymous filehandles is with the Symbol
+module or with the IO::Handle module and its ilk.  These modules
+have the advantage of not hiding different types of the same name
+during the local().  See the bottom of L<perlfunc/open()> for an
+example.
+
+=end original
+
+이름없는 파일햄드릉ㄹ 사용하는 다른 하나의 방법은 Symbol 모듈이나 
+IO::Handle 모듈을 사용하는 것입니다.
+이것은 모듈은 local() 을 사용한 때처럼 같은 이름을 
+숨겨버리는 일이 없다는 이점이 있습니다.
+이것을 사용한 예제는 L<perlfunc/open()> 의 끝을 참조해주세요.
+
+=head1 SEE ALSO
+
+=begin original
+
+See L<perlvar> for a description of Perl's built-in variables and
+a discussion of legal variable names.  See L<perlref>, L<perlsub>,
+and L<perlmod/"Symbol Tables"> for more discussion on typeglobs and
+the C<*foo{THING}> syntax.
+
+=end original
+
+Perl 의 내장변수와 유명한 변수이름에 관한 의논에 관해서는 
+L<perlvar> 를 참조해주세요.
+형태 글로브에 관한 의논과 *foo{THING} 구문에 관한 것은, L<perlref>,
+L<perlsub>, L<perlmod/"Symbol Tables"> 을 참조해주세요.

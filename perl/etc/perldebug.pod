@@ -1,0 +1,2609 @@
+=head1 NAME
+X<debug> X<debugger>
+
+=begin original
+
+perldebug - Perl debugging
+
+=end original
+
+perldebug - Perl 디버깅
+
+=head1 DESCRIPTION
+
+=begin original
+
+First of all, have you tried using the B<-w> switch?
+
+=end original
+
+일단 먼저, "B<-w> 스위치는 사용하고 계십니까?"
+
+=begin original
+
+If you're new to the Perl debugger, you may prefer to read
+L<perldebtut>, which is a tutorial introduction to the debugger .
+
+=end original
+
+만약 Perl 디버거에 적응되지 않았다면, 디버거에 관한 튜토리얼인
+L<perldebtut> 를 읽는 편이 좋을 지도 모릅니다.
+
+=head1 The Perl Debugger
+
+=begin original
+
+If you invoke Perl with the B<-d> switch, your script runs under the
+Perl source debugger.  This works like an interactive Perl
+environment, prompting for debugger commands that let you examine
+source code, set breakpoints, get stack backtraces, change the values of
+variables, etc.  This is so convenient that you often fire up
+the debugger all by itself just to test out Perl constructs
+interactively to see what they do.  For example:
+X<-d>
+
+=end original
+
+Perl 을 B<-d> 스위치를 붙여서 기동시키면, 스크립트는 Perl 소스디버거위에서
+실행되게 됩니다. 이것은 대화적인 Perl 환경처럼 작동하고,
+소스코드의 표시, 브레이크포인트의 설정, 스택의 역추적, 변수의 값 변경,
+등을 실행하는 디버거커맨드를 입력할 수 있습니다.
+이것은 매우 편리하므로, 단지 하고 싶은 것을 대화적으로 시험하기 위해
+디버거를 기동하게 될 겁니다.
+예를 들면:
+X<-d>
+
+    $ perl -d -e 42
+
+=begin original
+
+In Perl, the debugger is not a separate program the way it usually is in the
+typical compiled environment.  Instead, the B<-d> flag tells the compiler
+to insert source information into the parse trees it's about to hand off
+to the interpreter.  That means your code must first compile correctly
+for the debugger to work on it.  Then when the interpreter starts up, it
+preloads a special Perl library file containing the debugger.
+
+=end original
+
+그러나, Perl 디버거는 전형적인 컴파일된 환경처럼 독립된 프로그램이 아닙니다.
+그 대신에, -d 플래그에 의해, 컴파일러가 인터프리터에 넘겨져 파스 트리 위에
+동작되기 위해서는, 일단 정상적으로 컴파일되지 않으면 안되는 것입니다.
+그러면 인터프리터가 기동되고, 디버거를 포함한 특별한 Perl 라이브러리를
+로드합니다.
+
+=begin original
+
+The program will halt I<right before> the first run-time executable
+statement (but see below regarding compile-time statements) and ask you
+to enter a debugger command.  Contrary to popular expectations, whenever
+the debugger halts and shows you a line of code, it always displays the
+line it's I<about> to execute, rather than the one it has just executed.
+
+=end original
+
+프로그램은, 맨 처음 실행 시에 실행문의 I<직전>에 정지하고
+(단, 아래 컴파일시 실행문에 대해서는 뒤에 기술하겠습니다), 아래에 나타내는
+것 중의 커맨드 하나가 입력되기를 기다립니다.
+흔한 기대와는 달리,
+디버거가 정지하고 있는 행의 코를 표시하고 있을 때는,
+직전에 실행한 줄이 아닌, 항상 I<지금부터 실행하는> 줄을 표시합니다.
+
+=begin original
+
+Any command not recognized by the debugger is directly executed
+(C<eval>'d) as Perl code in the current package.  (The debugger
+uses the DB package for keeping its own state information.)
+
+=end original
+
+디버거가 인식할 수 없는 커맨드는 현재의 패키지안에서 Perl 의 코드로써
+실행(C<eval>)됩니다.
+(디버거는 자기자신의 상태를 보존하기 위해 DB패키지를 사용합니다.)
+
+=begin original
+
+Note that the said C<eval> is bound by an implicit scope. As a
+result any newly introduced lexical variable or any modified
+capture buffer content is lost after the eval. The debugger is a
+nice environment to learn Perl, but if you interactively experiment using
+material which should be in the same scope, stuff it in one line.
+
+=end original
+
+C<eval> 은 암묵의 스코프에서 나뉜다는 것에 주의해주세요.
+결과로써, 새롭게 도입된 렉시컬 변수나 변경된 보조 버퍼의 내용은
+eval 뒤에 잃어버립니다.
+디버거는 Perl 을 배우는 보다 좋은 환경이지만, 만약 같은 스코프안에서
+어떤 것을 사용해 대화적인 실험을 하고 싶은 경우에는, 그것을 첫번째 줄에 
+써주세요.
+
+=begin original
+
+For any text entered at the debugger prompt, leading and trailing whitespace
+is first stripped before further processing.  If a debugger command
+coincides with some function in your own program, merely precede the
+function with something that doesn't look like a debugger command, such
+as a leading C<;> or perhaps a C<+>, or by wrapping it with parentheses
+or braces.
+
+=end original
+
+디버거커맨드로써 입력된 문자열은, 우선 맨앞과 맨끝의 공백이 잘려나갑니다.
+디버거커맨드가 프로그램의 함수이름과 일치하는 경우,
+함수이름의 앞에 C<;>나 C<+> 같은, 디버거 커맨드에게 보이지 않는 문자를
+덧붙이거나, 괄호로 감싸주세요.
+
+=head2 Debugger Commands
+
+(디버거 커맨드)
+
+=begin original
+
+The debugger understands the following commands:
+
+=end original
+
+디버거는 아래의 커맨드를 이해합니다.
+
+=over 12
+
+=item h
+X<debugger command, h>
+
+=begin original
+
+Prints out a summary help message
+
+=end original
+
+요약된 도움말을 표시합니다.
+
+=item h [command]
+
+=begin original
+
+Prints out a help message for the given debugger command.
+
+=end original
+
+지정된 커맨드의 설명을 표시합니다.
+
+=item h h
+
+=begin original
+
+The special argument of C<h h> produces the entire help page, which is quite long.
+
+=end original
+
+C<h h> 라고 하는 특별한 커맨드는 꽤 긴 도움말 전체를 표시합니다.
+
+=begin original
+
+If the output of the C<h h> command (or any command, for that matter) scrolls
+past your screen, precede the command with a leading pipe symbol so
+that it's run through your pager, as in
+
+=end original
+
+C<h h> 커맨드(나 그외의 커맨드에서도) 의 출력으로 화면이 스크롤되어버릴 경우,
+아래처럼 커맨드의 앞에 파이프기호를 붙이면 페이저를 호출합니다.
+
+    DB> |h h
+
+=begin original
+
+You may change the pager which is used via C<o pager=...> command.
+
+=end original
+
+사용되는 페이저는 C<O pager=...> 커맨드로 변경할 수 있습니다.
+
+=item p expr
+X<debugger command, p>
+
+=begin original
+
+Same as C<print {$DB::OUT} expr> in the current package.  In particular,
+because this is just Perl's own C<print> function, this means that nested
+data structures and objects are not dumped, unlike with the C<x> command.
+
+=end original
+
+현재의 패키지에서의 C<print {$DB::OUT} expr> 과 같습니다.
+특히, 이것은 Perl 자신의 C<print> 함수이므로,
+C<x> 커맨드와 달리, 중첩된 데이터 구조나 오브젝트는 덤프하지 않습니다.
+
+=begin original
+
+The C<DB::OUT> filehandle is opened to F</dev/tty>, regardless of
+where STDOUT may be redirected to.
+
+=end original
+
+STDOUT 이 어디로 리다이렉트되어도, 파일핸들 C<DB::OUT> 는 F</dev/tty>에 대해서
+오픈됩니다.
+
+=item x [maxdepth] expr
+X<debugger command, x>
+
+=begin original
+
+Evaluates its expression in list context and dumps out the result in a
+pretty-printed fashion.  Nested data structures are printed out
+recursively, unlike the real C<print> function in Perl.  When dumping
+hashes, you'll probably prefer 'x \%h' rather than 'x %h'.
+See L<Dumpvalue> if you'd like to do this yourself.
+
+=end original
+
+식을 리스트컨텍스트로 평가하고, 결과를 다소 읽기 쉬운 형태로 표시합니다.
+중첩된 데이터는 재귀적으로 표시합니다.
+이것은 Perl 의 실제 C<print> 함수와는 다릅니다.
+해쉬를 덤프할 때는, 'x %h' 가 아닌 'x \%h'로 해주어야 합니다.
+이것을 자기 스스로 하고 싶을 경우는 L<Dumpvalue> 를 참조해주세요.
+
+=begin original
+
+The output format is governed by multiple options described under
+L<"Configurable Options">.
+
+=end original
+
+출력커맨드는 L<"Configurable Options"> 는 기술된 여러 옵션의 영향을 받습니다.
+
+=begin original
+
+If the C<maxdepth> is included, it must be a numeral I<N>; the value is
+dumped only I<N> levels deep, as if the C<dumpDepth> option had been
+temporarily set to I<N>.
+
+=end original
+
+C<maxdepth> 가 지정되어진 경우, 그것을 변수 I<N> 이어야 합니다;
+C<dumpDepth> 옵션이 일시적으로 I<N> 에 설정된 것처럼,
+값은 I<N> 레벨의 깊이만큼 덤프됩니다.
+
+=item V [pkg [vars]]
+X<debugger command, V>
+
+=begin original
+
+Display all (or some) variables in package (defaulting to C<main>)
+using a data pretty-printer (hashes show their keys and values so
+you see what's what, control characters are made printable, etc.).
+Make sure you don't put the type specifier (like C<$>) there, just
+the symbol names, like this:
+
+=end original
+
+package (기본적으로는 C<main>) 안의 모든 (또는, 일부) 변수(variable)를
+데이터 프리티 프린터를 사용해서 표시합니다.
+(해쉬는 뭐가뭔지 알수 있도록, key 와 value 를 표시하고,
+컨트롤문자는 표시할 수 있는 형태로 합니다).
+아래에 나타내고 있는 것처럼, symbol 은 이름만을 표하고, (C<$> 등의) 
+형태 식별자를 붙이지 않도록 해주세요.
+
+    V DB filename line
+
+=begin original
+
+Use C<~pattern> and C<!pattern> for positive and negative regexes.
+
+=end original
+
+참 거짓의 정규표현식을 위해서 C<~pattern> 와 C<!pattern>을 사용해 주세요.
+
+=begin original
+
+This is similar to calling the C<x> command on each applicable var.
+
+=end original
+
+이것은 유효한 각각의 변수에 대해 C<x> 를 호출하는 것과 비슷합니다.
+
+=item X [vars]
+X<debugger command, X>
+
+=begin original
+
+Same as C<V currentpackage [vars]>.
+
+=end original
+
+C<V 현재의 패키지 [vars]> 와 같습니다.
+
+=item y [level [vars]]
+X<debugger command, y>
+
+=begin original
+
+Display all (or some) lexical variables (mnemonic: C<mY> variables)
+in the current scope or I<level> scopes higher.  You can limit the
+variables that you see with I<vars> which works exactly as it does
+for the C<V> and C<X> commands.  Requires the C<PadWalker> module
+version 0.08 or higher; will warn if this isn't installed.  Output
+is pretty-printed in the same style as for C<V> and the format is
+controlled by the same options.
+
+=end original
+
+현재의 스코프나, I<level> 만 높은 스코프의 모든(혹은 몇개의)
+렉시컬변수를 표시합니다(기억법 : C<mY> 변수).
+C<V> 나 C<X> 커맨드 처럼, I<vars> 를 지정하는 것으로
+표시되는 변수를 제한할 수 있습니다.
+버젼 0.08 이후의 C<PadWalker> 모듈이 필요합니다;
+만약 인스톨되어있지 않으면 경고를 냅니다.
+출력은 C<V> 커맨드와 같은 스타일로 포맷이 정해지고,
+이 포맷은 같은 옵션으로 제어됩니다.
+
+=item T
+X<debugger command, T> X<backtrace> X<stack, backtrace>
+
+=begin original
+
+Produce a stack backtrace.  See below for details on its output.
+
+=end original
+
+스택의 역추적을 수행합니다. 출력에 대해서의 자세한 내용은 뒤에 기술하겠습니다.
+
+=item s [expr]
+X<debugger command, s> X<step>
+
+=begin original
+
+Single step.  Executes until the beginning of another
+statement, descending into subroutine calls.  If an expression is
+supplied that includes function calls, it too will be single-stepped.
+
+=end original
+
+싱글 스텝을 실행합니다.
+서브루틴을 호출하면서, 별도의 실행문의 맨 앞에 도달하기까지 실행합니다.
+함수호출을 포함한 식이 주어진 경우, 이것도 싱글스텝 실행을 합니다.
+
+=item n [expr]
+X<debugger command, n>
+
+=begin original
+
+Next.  Executes over subroutine calls, until the beginning
+of the next statement.  If an expression is supplied that includes
+function calls, those functions will be executed with stops before
+each statement.
+
+=end original
+
+그리고. 다음 실행문의 맨앞에 도달하기 까지, 서브루틴 호출을 거쳐서 실행됩니다.
+함수호출을 포함한 식이 주어진 경우, 매 줄마다 정지하면서 함수를 실행합니다.
+
+=item r
+X<debugger command, r>
+
+=begin original
+
+Continue until the return from the current subroutine.
+Dump the return value if the C<PrintRet> option is set (default).
+
+=end original
+
+현재의 서브루틴에서 돌아오기까지 실행합니다.
+C<PrintRet> 가 정의되어있다면 (기본적으로 정의되어있습니다)
+반환값을 덤프합니다.
+
+=item <CR>
+
+=begin original
+
+Repeat last C<n> or C<s> command.
+
+=end original
+
+마지막의 C<n> 또는 C<s> 를 반복합니다.
+
+=item c [line|sub]
+X<debugger command, c>
+
+=begin original
+
+Continue, optionally inserting a one-time-only breakpoint
+at the specified line or subroutine.
+
+=end original
+
+다음을 실행합니다.
+옵션으로써, 단 한번의 브레이크 포인트를 지정된 줄, 또는
+서브루틴에 설정합니다.
+
+=item l
+X<debugger command, l>
+
+=begin original
+
+List next window of lines.
+
+=end original
+
+다음의 한 화면분의 리스트를 표시합니다.
+
+=item l min+incr
+
+=begin original
+
+List C<incr+1> lines starting at C<min>.
+
+=end original
+
+C<min> 에서 C<incr+1> 줄을 리스트표시합니다.
+
+=item l min-max
+
+=begin original
+
+List lines C<min> through C<max>.  C<l -> is synonymous to C<->.
+
+=end original
+
+C<min> 줄에서 C<max> 줄을 리스트표시합니다.
+C<l -> 은 C<-> 과 같습니다. 
+
+=item l line
+
+=begin original
+
+List a single line.
+
+=end original
+
+지정줄을 리스트표시합니다.
+
+=item l subname
+
+=begin original
+
+List first window of lines from subroutine.  I<subname> may
+be a variable that contains a code reference.
+
+=end original
+
+서브루틴의 최초의 한 화면분을 리스트표시합니다.
+I<subname> 은 코드리퍼런스가 들어있는 변수라도 상관없습니다.
+
+=item -
+X<debugger command, ->
+
+=begin original
+
+List previous window of lines.
+
+=end original
+
+앞의 한화면분을 리스트표시합니다.
+
+=item v [line]
+X<debugger command, v>
+
+=begin original
+
+View a few lines of code around the current line.
+
+=end original
+
+지정한 줄 부근의 몇 줄의 코드를 리스트 표시합니다.
+
+=item .
+X<debugger command, .>
+
+=begin original
+
+Return the internal debugger pointer to the line last
+executed, and print out that line.
+
+=end original
+
+마지막에 실행한 줄로 내부 디버거 포인터를 돌려주고, 
+그 행을 표시합니다.
+
+=item f filename
+X<debugger command, f>
+
+=begin original
+
+Switch to viewing a different file or C<eval> statement.  If I<filename>
+is not a full pathname found in the values of %INC, it is considered
+a regex.
+
+=end original
+
+다른 파일 또는 C<eval> 줄에 표시를 바꿉니다.
+만약 I<filename> 이 %INC 에 있는 풀 패스 이름이 아니라면,
+정규표현으로 취급합니다.
+
+=begin original
+
+C<eval>ed strings (when accessible) are considered to be filenames:
+C<f (eval 7)> and C<f eval 7\b> access the body of the 7th C<eval>ed string
+(in the order of execution).  The bodies of the currently executed C<eval>
+and of C<eval>ed strings that define subroutines are saved and thus
+accessible.
+
+=end original
+
+C<eval> 한 문자열은(접근가능하다면) 파일이름으로써 취급됩니다:
+C<f (eval 7)> 과 C<f eval 7\b> 은 (실행한 순서대로) 7번째에 C<eval>한
+문자열의 내용에 접근합니다.
+현재 실행한 C<eval>의 내용과 서브루틴을 정의하는 C<eval> 한
+내용은 보존되기에, 접근 가능합니다.
+
+=item /pattern/
+
+=begin original
+
+Search forwards for pattern (a Perl regex); final / is optional.
+The search is case-insensitive by default.
+
+=end original
+
+pattern 을 사용해서 Perl 정규표현에의한 전방검색을 수행합니다.
+마지막의 /는 없어도 됩니다.
+기본적으로는 검색은 대문자소문자를 구별하지 않습니다.
+
+=item ?pattern?
+
+=begin original
+
+Search backwards for pattern; final ? is optional.
+The search is case-insensitive by default.
+
+=end original
+
+pattern 을 사용해 후방검색을 수행합니다.
+마지막의 ? 는 없어도 상관없습니다.
+기본적으로는 검색은 대문자와 소문자를 구별하 않습니다.
+
+=item L [abw]
+X<debugger command, L>
+
+=begin original
+
+List (default all) actions, breakpoints and watch expressions
+
+=end original
+
+브레이크포인트, 액션, watch expressions를 
+(기본은 모두) 나열합니다.
+
+=item S [[!]regex]
+X<debugger command, S>
+
+=begin original
+
+List subroutine names [not] matching the regex.
+
+=end original
+
+regex 에 일치하는(또는 일치하지않는) 서브루틴 이름을 나열합니다.
+
+=item t
+X<debugger command, t>
+
+=begin original
+
+Toggle trace mode (see also the C<AutoTrace> option).
+
+=end original
+
+추적 모드의 on/off 를 바꿉니다. (C<AutoTrace> 옵션도 참조해주세요)
+
+=item t expr
+X<debugger command, t>
+
+=begin original
+
+Trace through execution of C<expr>.
+See L<perldebguts/"Frame Listing Output Examples"> for examples.
+
+=end original
+
+C<expr> 의 실행을 추적합니다.
+예제에 대해서는 L<perldebguts/"Frame Listing Output Examples"> 를 참조해주세요.
+
+=item b
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Sets breakpoint on current line
+
+=end original
+
+현재의 위에 브레이크포인트를 설정합니다.
+
+=item b [line] [condition]
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Set a breakpoint before the given line.  If a condition
+is specified, it's evaluated each time the statement is reached: a
+breakpoint is taken only if the condition is true.  Breakpoints may
+only be set on lines that begin an executable statement.  Conditions
+don't use C<if>:
+
+=end original
+
+주어진 줄의 직전에 브레이크포인트를 설정합니다.
+condition 이 설정되면, 그 구문에 접근할 때마다 평가됩니다.
+condition 이 참이 되었을 때에만 브레이크 포인트가 작동합니다.
+브레이크 포인트는 실행가능한 구문으로 시작되는 행에만,
+설정가능합니다. condition 에는 C<if> 를 사용할 수 없습니다:
+
+    b 237 $x > 30
+    b 237 ++$count237 < 11
+    b 33 /pattern/i
+
+=item b subname [condition]
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Set a breakpoint before the first line of the named subroutine.  I<subname> may
+be a variable containing a code reference (in this case I<condition>
+is not supported).
+
+=end original
+
+서브루틴의 최초의 실행가능문에 브레이크 포인트를 설정합니다.
+I<subname> 은 코드리퍼런스가 들어있는 변수여도 상관없습니다.
+(이 경우는 I<condition> 은 비대응입니다)
+
+=item b postpone subname [condition]
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Set a breakpoint at first line of subroutine after it is compiled.
+
+=end original
+
+컴파일 뒤, 서브루틴의 최초의 줄에 브레이크포인트를 설정합니다.
+
+=item b load filename
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Set a breakpoint before the first executed line of the I<filename>,
+which should be a full pathname found amongst the %INC values.
+
+=end original
+
+I<filename> 의 최초에 실행된 줄의 앞에 브레이크 포인트를 설정합니다.
+이것은 %INC 의 값에 포함된 전체 경로 이름이어야 합니다.
+
+=item b compile subname
+X<breakpoint>
+X<debugger command, b>
+
+=begin original
+
+Sets a breakpoint before the first statement executed after the specified
+subroutine is compiled.
+
+=end original
+
+지정된 서브루틴이 컴파일된 후, 최초에 실행된 구문 앞에
+브레이크 포인트를 설정합니다.
+
+=item B line
+X<breakpoint>
+X<debugger command, B>
+
+=begin original
+
+Delete a breakpoint from the specified I<line>.
+
+=end original
+
+I<line> 으로 지정된 브레이크포인트를 삭제합니다.
+
+=item B *
+X<breakpoint>
+X<debugger command, B>
+
+=begin original
+
+Delete all installed breakpoints.
+
+=end original
+
+모든 브레이크포인트를 삭제합니다.
+
+=item a [line] command
+X<debugger command, a>
+
+=begin original
+
+Set an action to be done before the line is executed.  If I<line> is
+omitted, set an action on the line about to be executed.
+The sequence of steps taken by the debugger is
+
+=end original
+
+그 줄을 실행하기 전에 실행하는 액션을 설정합니다.
+I<line>이 생략되면, 그때 실행하려고 한 줄에 액션을 설정합니다.
+디버거가 실행하는 처리의 순서는 아래와 같습니다.
+
+=begin original
+
+  1. check for a breakpoint at this line
+  2. print the line if necessary (tracing)
+  3. do any actions associated with that line
+  4. prompt user if at a breakpoint or in single-step
+  5. evaluate line
+
+=end original
+
+  1. 이 줄의 브레이크 포인트를 체크합니다.
+  2. 필요하다면 줄을 표시합니다(추적)
+  3. 이 줄에 연결된 액션을 실행합니다.
+  4. 브레이크포인트나 싱글스텝의 경우는 유저에게 확인합니다.
+  5. 줄을 평가합니다.
+
+=begin original
+
+For example, this will print out $foo every time line
+53 is passed:
+
+=end original
+
+예를들면, 아래의 코드는 53 행을 통과할 때마다 $foo 를 표시합니다.
+
+    a 53 print "DB FOUND $foo\n"
+
+=item A line
+X<debugger command, A>
+
+=begin original
+
+Delete an action from the specified line.
+
+=end original
+
+설정된 줄에 설정된 액션을 삭제합니다.
+I<line> 이 생략되면, 지금 바로 실행하고자하는 줄에 설정되어 있는
+액션이 삭제됩니다.
+
+=item A *
+X<debugger command, A>
+
+=begin original
+
+Delete all installed actions.
+
+=end original
+
+설정된 모든 액션을 삭제합니다.
+
+=item w expr
+X<debugger command, w>
+
+=begin original
+
+Add a global watch-expression.  We hope you know what one of these
+is, because they're supposed to be obvious.
+
+=end original
+
+전역 워치 식을 추가합니다. 이 기능은 자주 쓰이는 것으로,
+어떤 것인가 알아주었으면 합니다.
+
+=item W expr
+X<debugger command, W>
+
+=begin original
+
+Delete watch-expression
+
+=end original
+
+워치식을 삭제합니다.
+
+=item W *
+X<debugger command, W>
+
+=begin original
+
+Delete all watch-expressions.
+
+=end original
+
+모든 워치식을 삭제합니다.
+
+=item o
+X<debugger command, o>
+
+=begin original
+
+Display all options
+
+=end original
+
+모든 옵션을 표시합니다.
+
+=item o booloption ...
+X<debugger command, o>
+
+=begin original
+
+Set each listed Boolean option to the value C<1>.
+
+=end original
+
+리스트된 각 참/거짓값 옵션의 값을 C<1> 에 설정합니다.
+
+=item o anyoption? ...
+X<debugger command, o>
+
+=begin original
+
+Print out the value of one or more options.
+
+=end original
+
+하나 이상의 옵션 값을 표시합니다.
+
+=item o option=value ...
+X<debugger command, o>
+
+=begin original
+
+Set the value of one or more options.  If the value has internal
+whitespace, it should be quoted.  For example, you could set C<o
+pager="less -MQeicsNfr"> to call B<less> with those specific options.
+You may use either single or double quotes, but if you do, you must
+escape any embedded instances of same sort of quote you began with,
+as well as any escaping any escapes that immediately precede that
+quote but which are not meant to escape the quote itself.  In other
+words, you follow single-quoting rules irrespective of the quote;
+eg: C<o option='this isn\'t bad'> or C<o option="She said, \"Isn't
+it?\"">.
+
+=end original
+
+하나 이상의 옵션을 설정합니다.
+값에 공백을 포함한 경우, 인용할 필요가 있습니다.
+예를 들면, B<less>를 옵션을 붙여서 호출할 경우는
+C<o pager="less -MQeicsNfr"> 처럼 럼 합니다.
+따옴표와 쌍따옴표 어느쪽이라도 쓸 수 있지만, 인용할 경우는,
+인용문자와 같은 문자는 이스케이프할 필요가 있습니다;
+그리고 이스케이프 문자도 이스케이프해서, 인용문자를 
+이스케이프하고 있는 것이 아니라는 것을 나타낼 필요가 있습니다.
+바꿔 말하면, 인용에 상관없이, 따움표룰에 따릅니다;
+예를들면 : C<o option='this isn\'t bad'> 나
+C<o option="She said, \"Isn't it?\"">
+
+=begin original
+
+For historical reasons, the C<=value> is optional, but defaults to
+1 only where it is safe to do so--that is, mostly for Boolean
+options.  It is always better to assign a specific value using C<=>.
+The C<option> can be abbreviated, but for clarity probably should
+not be.  Several options can be set together.  See L<"Configurable Options">
+for a list of these.
+
+=end original
+
+역사적인 이유에 의해, C<=value> 는 생략가능합니다만, 그렇게 하는 것이
+안전한 경웨만 기본값은 1입니다 -- 이것은 대부분의 경우 불값옵션입니다.
+C<=> 를 사용해 지정한 값을 대입하는 쪽이 더 좋습니다.
+C<option> 은 단축할 수 있지만, 명확화를 위해서는 그러지 않는 편이 좋습니다.
+몇개인가의 옵션은 상호간에 설정할 수 있습니다.
+그런 것들의 리스트에 대해서는 L<"Configurable Options"> 를 참조해주세요.
+
+=item < ?
+X<< debugger command, < >>
+
+=begin original
+
+List out all pre-prompt Perl command actions.
+
+=end original
+
+프롬프트 표시전에 실행하는 액션을 모두 표시합니다.
+
+=item < [ command ]
+X<< debugger command, < >>
+
+=begin original
+
+Set an action (Perl command) to happen before every debugger prompt.
+A multi-line command may be entered by backslashing the newlines.
+
+=end original
+
+디버거가 프롬프트를 출력하기 직전에, 매번 실행하는 액션(Perl 커맨드)를
+설정합니다.
+여러 줄의 커맨드는, 백슬래쉬와 줄바꿈으로 쓸 수 있습니다.
+
+=item < *
+X<< debugger command, < >>
+
+=begin original
+
+Delete all pre-prompt Perl command actions.
+
+=end original
+
+프롬프트 표시전에 실행하는 액션을 모두 삭제합니다.
+
+=item << command
+X<< debugger command, << >>
+
+=begin original
+
+Add an action (Perl command) to happen before every debugger prompt.
+A multi-line command may be entered by backwhacking the newlines.
+
+=end original
+
+디버거가 프롬프트를 출력하기 직전에, 매번 실행하는 액션(Perl 커맨드)를
+추가합니다.
+여러 줄의 커맨드는 백슬래쉬와 줄바꿈으로 쓸 수 있습니다.
+
+=item > ?
+X<< debugger command, > >>
+
+=begin original
+
+List out post-prompt Perl command actions.
+
+=end original
+
+프롬프트 표시 뒤에 실행하는 액션을 모두 표시합니다.
+
+=item > command
+X<< debugger command, > >>
+
+=begin original
+
+Set an action (Perl command) to happen after the prompt when you've
+just given a command to return to executing the script.  A multi-line
+command may be entered by backslashing the newlines (we bet you
+couldn't've guessed this by now).
+
+=end original
+
+스크립트 실행으로 돌아가는 커맨드를 입력한 때에, 디버거가
+프롬프트를 출력한 뒤에, 매번 실행하는 액션(Perl 커맨드)를 설정합니다.
+여러 줄의 커맨드는, 백 슬래쉬와 줄바꿈으로 쓸 수 있습니다.
+(분명 지금까지 이런 것을 몰랐겠죠?)
+
+=item > *
+X<< debugger command, > >>
+
+=begin original
+
+Delete all post-prompt Perl command actions.
+
+=end original
+
+프롬프트 표시 뒤에 실행하는 액션을 모두 삭제합니다.
+
+=item >> command
+X<<< debugger command, >> >>>
+
+=begin original
+
+Adds an action (Perl command) to happen after the prompt when you've
+just given a command to return to executing the script.  A multi-line
+command may be entered by backslashing the newlines.
+
+=end original
+
+스크립트 실행으로 돌아가는 커맨드를 입력한 때에, 디버거가 스크립트를
+출력한 뒤에, 매번 실행하는 액션(Perl 커맨드)를 추가합니다.
+여러 줄의 커맨드는 백슬래쉬와 줄바꿈으로 쓸 수 있습니다.
+
+=item { ?
+X<debugger command, {>
+
+=begin original
+
+List out pre-prompt debugger commands.
+
+=end original
+
+프롬프트 표시 전에 실행하는 디버거 커맨드를 표시합니다.
+
+=item { [ command ]
+
+=begin original
+
+Set an action (debugger command) to happen before every debugger prompt.
+A multi-line command may be entered in the customary fashion.
+
+=end original
+
+디버거가 프롬프트를 출력하기 전에, 매번 실행하는 액션(디버거의 커맨드)
+을 설정합니다.
+여러 줄의 커맨드는 하던 대로 쓸 수 있습니다.
+B<경고> 혹은 C<command> 가 없으면, 모든 액션이 지워집니다!
+
+=begin original
+
+Because this command is in some senses new, a warning is issued if
+you appear to have accidentally entered a block instead.  If that's
+what you mean to do, write it as with C<;{ ... }> or even
+C<do { ... }>.
+
+=end original
+
+이 커맨드는 어떤 의미에서 새로운 것이기에, 만약 대신해서 잘못된 블록을
+입력한 듯이 보일때에는 경고를 냅니다.
+진짜로 알릴 때는 C<;{ ... }> 나, C<do { ... }>로 써주세요.
+
+=item { *
+X<debugger command, {>
+
+=begin original
+
+Delete all pre-prompt debugger commands.
+
+=end original
+
+프롬프트 앞에 실행하는 디버거 커맨드를 전부 삭제합니다.
+
+=item {{ command
+X<debugger command, {{>
+
+=begin original
+
+Add an action (debugger command) to happen before every debugger prompt.
+A multi-line command may be entered, if you can guess how: see above.
+
+=end original
+
+매번 디버거 프롬프트를 나타내기 전에 실행하는 액션(디버거 커맨드)를
+추가합니다. 예측가능한 방법으로 여러 줄로 된 커맨드도 등록할 수 있습니다:
+위를 참조해주세요.
+
+=item ! number
+X<debugger command, !>
+
+=begin original
+
+Redo a previous command (defaults to the previous command).
+
+=end original
+
+이전의 커맨드를 다시 실행합니다.
+(number 가 생략되면, 직전의 커맨드를 실행합니다)
+
+=item ! -number
+X<debugger command, !>
+
+=begin original
+
+Redo number'th previous command.
+
+=end original
+
+지정수치만큼 앞의 커맨드를 실행합니다.
+
+=item ! pattern
+X<debugger command, !>
+
+=begin original
+
+Redo last command that started with pattern.
+See C<o recallCommand>, too.
+
+=end original
+
+pattern 으로 시작하는 동안, 제일 최근에 실행된 커맨드를 재실행합니다.
+C<O recallCommand> 도 참조해주세요.
+
+=item !! cmd
+X<debugger command, !!>
+
+=begin original
+
+Run cmd in a subprocess (reads from DB::IN, writes to DB::OUT) See
+C<o shellBang>, also.  Note that the user's current shell (well,
+their C<$ENV{SHELL}> variable) will be used, which can interfere
+with proper interpretation of exit status or signal and coredump
+information.
+
+=end original
+
+cmd 를 서브프로세스로 실행합니다(DB::IN 으로 읽어들이고, DB::OUT으로 써냅니다)
+C<O shellBang> 도 참조해주세요
+유저의 현재 셸(즉, C<$ENV{SHELL}> 변수)가 사용되기 때문에,
+종료 코드의 적절한 해석이나 시그널과 코어덤프의 정보가 방하될지도 모르는 것에
+주의해주세요.
+
+=item source file
+X<debugger command, source>
+
+=begin original
+
+Read and execute debugger commands from I<file>.
+I<file> may itself contain C<source> commands.
+
+=end original
+
+디버거커맨드를 I<file>에서 읽어들여 실행합니다.
+I<file> 스스로 C<source> 커맨드를 포함하고 있어도 상관없습니다.
+
+=item H -number
+X<debugger command, H>
+
+=begin original
+
+Display last n commands.  Only commands longer than one character are
+listed.  If I<number> is omitted, list them all.
+
+=end original
+
+최근의 지정수치만큼의 커맨드를 표시합니다.
+2글자 이상의 커맨드만이 표시됩니다.
+I<nunmber> 가 생략되면, 모든 것을 표시합니다.
+
+=item q or ^D
+X<debugger command, q>
+X<debugger command, ^D>
+
+=begin original
+
+Quit.  ("quit" doesn't work for this, unless you've made an alias)
+This is the only supported way to exit the debugger, though typing
+C<exit> twice might work.
+
+=end original
+
+디버거를 종료합니다.
+(Alias를 설정하지 않는 한, "quit"는 이 목적에는 사용할 수 없습니다)
+이것은 디버거를 종료하는 유일한 방법입니다만, C<exit>를 2번
+입력해도 동작합니다.
+
+=begin original
+
+Set the C<inhibit_exit> option to 0 if you want to be able to step
+off the end the script.  You may also need to set $finished to 0
+if you want to step through global destruction.
+
+=end original
+
+스크립트의 마지막에 스텝 실행할수 있게 하고 싶은 경우는,
+C<inhibit_exit> 옵션에 0를 설정해주세요.
+글로벌한 파괴자를 실행해서 스텝실행하고 싶을 경우는,
+$finished 에 0를 설정할 필요가 있습니다.
+
+=item R
+X<debugger command, R>
+
+=begin original
+
+Restart the debugger by C<exec()>ing a new session.  We try to maintain
+your history across this, but internal settings and command-line options
+may be lost.
+
+=end original
+
+새로운 세션을 C<exec()> 하는 것으로 디버거를 재기동합니다.
+이력은 남길려고 노력합니다만, 내부설정이나 커맨드라인 옵션은
+잃어버릴 지도 모릅니다.
+
+=begin original
+
+The following setting are currently preserved: history, breakpoints,
+actions, debugger options, and the Perl command-line
+options B<-w>, B<-I>, and B<-e>.
+
+=end original
+
+현재, 아래의 설정은 보존됩니다: 이력, 브레이크포인트, 액션,
+디버거옵션, Perl 커맨드라인옵션 B<-w>, B<-I>, B<-e>.
+
+=item |dbcmd
+X<debugger command, |>
+
+=begin original
+
+Run the debugger command, piping DB::OUT into your current pager.
+
+=end original
+
+디버거 커맨드를 실행해서, DB::OUT을 파이프로 현재의 페이저와 연결합니다.
+
+=item ||dbcmd
+X<debugger command, ||>
+
+=begin original
+
+Same as C<|dbcmd> but DB::OUT is temporarily C<select>ed as well.
+
+=end original
+
+C<|dbcmd> 와 같지만, DB::OUT은 일시적은 C<select> 로
+선택되는 것이 됩니다.
+
+=item = [alias value]
+X<debugger command, =>
+
+=begin original
+
+Define a command alias, like
+
+=end original
+
+아래처럼 커맨드Alias 를 정의한다.
+
+    = quit q
+
+=begin original
+
+or list current aliases.
+
+=end original
+
+또는 현재의 Alias 리스트를 표시합니다.
+
+=item command
+
+=begin original
+
+Execute command as a Perl statement.  A trailing semicolon will be
+supplied.  If the Perl statement would otherwise be confused for a
+Perl debugger, use a leading semicolon, too.
+
+=end original
+
+command 를 Perl 의 구문으로써 실행합니다. 마지막의 세미콜론은 없어도 됩니다.
+Perl의 구문이 Perl 디버거에게 혼돈을 주는 경우에는 앞에 서미콜론을 붙여주세요.
+
+=item m expr
+X<debugger command, m>
+
+=begin original
+
+List which methods may be called on the result of the evaluated
+expression.  The expression may evaluated to a reference to a
+blessed object, or to a package name.
+
+=end original
+
+평가한 표현의 결과가 호출된 메소드를 리스트표시합니다.
+표현은 bless 된 오브젝트로의 리퍼런스나 패키지이름으로써 평가됩니다.
+
+=item M
+X<debugger command, M>
+
+=begin original
+
+Displays all loaded modules and their versions
+
+=end original
+
+읽어들인 모듈과 버젼을 모두 표시합니다.
+
+=item man [manpage]
+X<debugger command, man>
+
+=begin original
+
+Despite its name, this calls your system's default documentation
+viewer on the given page, or on the viewer itself if I<manpage> is
+omitted.  If that viewer is B<man>, the current C<Config> information
+is used to invoke B<man> using the proper MANPATH or S<B<-M>
+I<manpath>> option.  Failed lookups of the form C<XXX> that match
+known manpages of the form I<perlXXX> will be retried.  This lets
+you type C<man debug> or C<man op> from the debugger.
+
+=end original
+
+그 이름에도 상관없이, 이것은 주어진 페이지(I<manpage> 가 생략된
+경우는 Viewr자신)에 대해 시스템의 기본 문서뷰어를 호출합니다.
+뷰어가 B<man> 일 경우, 적절한 MANPATH 나 <B<-M> I<manpath>> 옵션을 사용해
+B<man>을 기동하기 위해, 현재의 C<Config> 정보가 사용됩니다.
+C<XXX> 의 형태로 일치하는 man 페이지의 검색에 실패한 경우,
+I<perlXXX> 의 형태의 것도 재검색합니다.
+이것에 의해 디버거에서 C<man debug>랑 C<man op>를 입력할 수 있게 됩니다.
+
+=begin original
+
+On systems traditionally bereft of a usable B<man> command, the
+debugger invokes B<perldoc>.  Occasionally this determination is
+incorrect due to recalcitrant vendors or rather more felicitously,
+to enterprising users.  If you fall into either category, just
+manually set the $DB::doccmd variable to whatever viewer to view
+the Perl documentation on your system.  This may be set in an rc
+file, or through direct assignment.  We're still waiting for a
+working example of something along the lines of:
+
+=end original
+
+전통적으로 이용가능한 B<man> 커맨드를 사용할 수 없는 시스템에서는 디버거는
+B<perldoc>을 기동합니다.
+반항적인 벤더나, 보다 적절하게는, 적극적인 유저에 의해, 이 판단은 
+정확하지 않습니다.
+만약 당시이 어느쪽이니가의 분류에 맞춰버리면, Perl 의 문서를
+표시하기 위해 어느 뷰어를 사용할 까를 수동으로 $DB::doccmd 변수에 
+설정해주세요.
+이것은 rc 파일에서도, 직접 대입해서 설정할 수 있습니다.
+우리들은 아래와 같은 것으로, 실제로 동작하는 예를 기다리고 있습니다:
+
+    $DB::doccmd = 'netscape -remote http://something.here/';
+
+=back
+
+=head2 Configurable Options
+
+(설정가능한 옵션)
+
+=begin original
+
+The debugger has numerous options settable using the C<o> command,
+either interactively or from the environment or an rc file.
+(./.perldb or ~/.perldb under Unix.)
+
+=end original
+
+디버거에는 C<O> 커맨드에서 설정할 수 있는 여러가지 옵션이 있습니다.
+이것은 대화적, 환경변수, rc 파일( Unix 에서는 ./.perldb 혹은
+~/.perldb) 에서 설정할 수 있습니다.
+
+=over 12
+
+=item C<recallCommand>, C<ShellBang>
+X<debugger option, recallCommand>
+X<debugger option, ShellBang>
+
+=begin original
+
+The characters used to recall command or spawn shell.  By
+default, both are set to C<!>, which is unfortunate.
+
+=end original
+
+재귀호출 커맨드와 셸기동에 사용되는 문자입니다.
+기본적으로는, 불행히도, 양쪽 다 C<!>에 설정되어 있습니다.
+
+=item C<pager>
+X<debugger option, pager>
+
+=begin original
+
+Program to use for output of pager-piped commands (those beginning
+with a C<|> character.)  By default, C<$ENV{PAGER}> will be used.
+Because the debugger uses your current terminal characteristics
+for bold and underlining, if the chosen pager does not pass escape
+sequences through unchanged, the output of some debugger commands
+will not be readable when sent through the pager.
+
+=end original
+
+페이저에 파이프된 커맨드(문자 C<|> 로 시작하는 것) 출력에
+사용되는 프로그램.
+기본적으로는, C<$ENV{PAGER}> 가 사용됩니다.
+디버거는 강조와 밑선에 관해서 현재의 단말설정을 사용하기에, 만약 선택된
+페이저가 이스케이프시퀀스를 변경하지 않고 통과되지 않는 경우,
+일부의 디버거 커맨드 출력은 페이저에 보내지면 읽어질 수 없게 됩니다.
+
+=item C<tkRunning>
+X<debugger option, tkRunning>
+
+=begin original
+
+Run Tk while prompting (with ReadLine).
+
+=end original
+
+프로그램으로 (ReadLine 과 같이) Tk 를 실행합니다.
+
+=item C<signalLevel>, C<warnLevel>, C<dieLevel>
+X<debugger option, signalLevel> X<debugger option, warnLevel>
+X<debugger option, dieLevel>
+
+=begin original
+
+Level of verbosity.  By default, the debugger leaves your exceptions
+and warnings alone, because altering them can break correctly running
+programs.  It will attempt to print a message when uncaught INT, BUS, or
+SEGV signals arrive.  (But see the mention of signals in L<BUGS> below.)
+
+=end original
+
+상세한 레벨.
+기본적으로는, 디버거는 예외와 경로를 출력해냅니다:
+이것을 변경하면, 프로그램이 정확히 움직이 않을 수 있기 때문입니다.
+충분하지 않은 INT, BUS, SEGV 신호가 있으면, 메시지를 표시하도록 합니다.
+(그러나, 아래의 L<BUGS> 신호에 관한 주의를 참조해 주세요)
+
+=begin original
+
+To disable this default safe mode, set these values to something higher
+than 0.  At a level of 1, you get backtraces upon receiving any kind
+of warning (this is often annoying) or exception (this is
+often valuable).  Unfortunately, the debugger cannot discern fatal
+exceptions from non-fatal ones.  If C<dieLevel> is even 1, then your
+non-fatal exceptions are also traced and unceremoniously altered if they
+came from C<eval'd> strings or from any kind of C<eval> within modules
+you're attempting to load.  If C<dieLevel> is 2, the debugger doesn't
+care where they came from:  It usurps your exception handler and prints
+out a trace, then modifies all exceptions with its own embellishments.
+This may perhaps be useful for some tracing purposes, but tends to hopelessly
+destroy any program that takes its exception handling seriously.
+
+=end original
+
+이 기본 세이프모드를 무효화하기 위해, 이것들의 값을 0이상으로 설정해주세요.
+레벨 1에서는 여러 종류의 경고(이것은 때때로 귀찮은 것입니다)나
+예외(이것은 때때로 가치가 있습니다)를 수신한 때에 역추적을 얻습니다.
+불행히도, 디버거는 치명적인 예외와 치명적이지않은 예외를 식별할 수 없습니다.
+C<dieLevel> 은 1이어도, 치명적이지 않은 예외도 추적되어,
+그것이 C<eval 된> 문자열ㅔ서인가, 읽어들이려고한 모듈 안의
+여러 종류의 C<eval>에서의 것이라면, 돌연 치환되어버립니다.
+C<dieLevel>이 2라면, 디버거는 예외의 출력장소를 신경쓰지 않습니다;
+예외 핸들러를 얻어 추적을 표시하고, 그리고 모든 예외를 자신이 수정합니다.
+이것은 어떤 의미의 트레이스 목적에는 유용하지만,
+예외를 제대로 다루는 프로그램을 어떻게 할 수 없게 파괴해버리는 경향이 
+있습니다.
+
+=item C<AutoTrace>
+X<debugger option, AutoTrace>
+
+=begin original
+
+Trace mode (similar to C<t> command, but can be put into
+C<PERLDB_OPTS>).
+
+=end original
+
+추적모드(C<t> 커맨드와 같지만, C<PERLDB_OPTS>에 쓸 수 있습니다).
+
+=item C<LineInfo>
+X<debugger option, LineInfo>
+
+=begin original
+
+File or pipe to print line number info to.  If it is a pipe (say,
+C<|visual_perl_db>), then a short message is used.  This is the
+mechanism used to interact with a slave editor or visual debugger,
+such as the special C<vi> or C<emacs> hooks, or the C<ddd> graphical
+debugger.
+
+=end original
+
+줄 번호 정보를 기록하는 파일 혹은 파이프.
+이것이 (C<|visual_perl_db> 처럼) 파이프인 경우, 짧은 문장이 사용됩니다.
+이것은 특별한 C<vi> 나 C<emacs> 후크나, C<ddd> 그래피컬 디버거처럼
+슬레이브 에디터나 비쥬얼 디버거와 상호작용하기 위해 사용되는 도구입니다.
+
+=item C<inhibit_exit>
+X<debugger option, inhibit_exit>
+
+=begin original
+
+If 0, allows I<stepping off> the end of the script.
+
+=end original
+
+0일 경우, 스크립트 마지막에서 I<프로그램을 종료하는> 것을 인식합니다.
+
+=item C<PrintRet>
+X<debugger option, PrintRet>
+
+=begin original
+
+Print return value after C<r> command if set (default).
+
+=end original
+
+설정되면, C<r> 커맨드의 뒤에 반환값을 표시합니다.(기본값)
+
+=item C<ornaments>
+X<debugger option, ornaments>
+
+=begin original
+
+Affects screen appearance of the command line (see L<Term::ReadLine>).
+There is currently no way to disable these, which can render
+some output illegible on some displays, or with some pagers.
+This is considered a bug.
+
+=end original
+
+커맨드라인의 화면으로의 표시에 영향을 줍니다(L<Term::ReadLine> 을
+참조해주세요).
+현재, 이것을 무효화하는 방법은 없습니다;
+이것에 의해, 디스플레이나 페이저에 의해서는 판독할 수 없는 출력을
+수행할 수 있습니다.
+이것은 버그라고 생각됩니다.
+
+=item C<frame>
+X<debugger option, frame>
+
+=begin original
+
+Affects the printing of messages upon entry and exit from subroutines.  If
+C<frame & 2> is false, messages are printed on entry only. (Printing
+on exit might be useful if interspersed with other messages.)
+
+=end original
+
+서브루틴에 출입할 때의 메시지 표시에 영향을 줍니다.
+C<frame & 2> 이 거짓이면, 서브루틴에 들어갈 때에만 메시지를 출력합니다.
+(나올 때의 메시는, 다른 메시지가 뿌려져 있을 때에는 유용할 겁니다)
+
+=begin original
+
+If C<frame & 4>, arguments to functions are printed, plus context
+and caller info.  If C<frame & 8>, overloaded C<stringify> and
+C<tie>d C<FETCH> is enabled on the printed arguments.  If C<frame
+& 16>, the return value from the subroutine is printed.
+
+=end original
+
+C<frame & 4> 의 경우, 함수의 인수에 더해, 컨텍스트라와 호출하는 곳의
+정보를 표시합니다.
+C<frame & 8> 의 경우, 인수의 표시에 오버로드된 C<문자열화>와
+C<tie> 한 C<FETCH> 가 유효하게 됩니다.
+C<frame & 16> 의 경우, 서브루틴에서의 반환값이 표시됩니다.
+
+=begin original
+
+The length at which the argument list is truncated is governed by the
+next option:
+
+=end original
+
+<BLAH>
+
+=item C<maxTraceLen>
+X<debugger option, maxTraceLen>
+
+=begin original
+
+Length to truncate the argument list when the C<frame> option's
+bit 4 is set.
+
+=end original
+
+C<frame> 옵션의 bit 4가 정의되어 있을 때의 인수리스트를 <BLAH>한 길이
+C<frame> オプションの bit 4 がセットされている時の引数リストを切り詰める
+長さ。
+
+=item C<windowSize>
+X<debugger option, windowSize>
+
+=begin original
+
+Change the size of code list window (default is 10 lines).
+
+=end original
+
+코드 리스트윈도우의 길이를 변경합니다(기본값은 10줄입니다).
+
+=back
+
+=begin original
+
+The following options affect what happens with C<V>, C<X>, and C<x>
+commands:
+
+=end original
+
+아래의 옵션은 C<V>, C<X>, C<x> 커맨드에 영향을 줍니다.
+
+=over 12
+
+=item C<arrayDepth>, C<hashDepth>
+X<debugger option, arrayDepth> X<debugger option, hashDepth>
+
+=begin original
+
+Print only first N elements ('' for all).
+
+=end original
+
+최초의 N 요소만을 표시합니다('' 를 지정하면 모두 표시합니다).
+
+=item C<dumpDepth>
+X<debugger option, dumpDepth>
+
+=begin original
+
+Limit recursion depth to N levels when dumping structures.
+Negative values are interpreted as infinity.  Default: infinity.
+
+=end original
+
+구조를 덤프할 때에 재귀의 깊이를 N 레벨로 제한합니다.
+부수를 지정하면 무한으로 해석됩니다.
+기본값 : 무한
+
+=item C<compactDump>, C<veryCompact>
+X<debugger option, compactDump> X<debugger option, veryCompact>
+
+=begin original
+
+Change the style of array and hash output.  If C<compactDump>, short array
+may be printed on one line.
+
+=end original
+
+배열과 해쉬의 출력 스타일을 변경합니다.
+C<compactDump> 경우는, 짧은 배열은 1줄로 표시합니다.
+
+=item C<globPrint>
+X<debugger option, globPrint>
+
+=begin original
+
+Whether to print contents of globs.
+
+=end original
+
+GLOB의 내용을 표시할 것인지 말지입니다.
+
+=item C<DumpDBFiles>
+X<debugger option, DumpDBFiles>
+
+=begin original
+
+Dump arrays holding debugged files.
+
+=end original
+
+디버그하 있는 파일이 가지고 있는 배열을 덤프합니다.
+
+=item C<DumpPackages>
+X<debugger option, DumpPackages>
+
+=begin original
+
+Dump symbol tables of packages.
+
+=end original
+
+패키지의 심볼테이블을 덤프합니다.
+
+=item C<DumpReused>
+X<debugger option, DumpReused>
+
+=begin original
+
+Dump contents of "reused" addresses.
+
+=end original
+
+[재이용된] 주소의 내용을 덤프합니다.
+
+=item C<quote>, C<HighBit>, C<undefPrint>
+X<debugger option, quote> X<debugger option, HighBit>
+X<debugger option, undefPrint>
+
+=begin original
+
+Change the style of string dump.  The default value for C<quote>
+is C<auto>; one can enable double-quotish or single-quotish format
+by setting it to C<"> or C<'>, respectively.  By default, characters
+with their high bit set are printed verbatim.
+
+=end original
+
+문자열 덤프의 스타일을 변경합니다.
+C<quote> 의 기본값은 C<auto> 입니다;
+C<"> 나 C<'> 로 설정하는 것으로 쌍따옴표나 따옴표 형태로 됩니다.
+기본값으로는 최상위 비트가 설정되어 있는 문자는 그대로 표시됩니.
+
+=item C<UsageOnly>
+X<debugger option, UsageOnly>
+
+=begin original
+
+Rudimentary per-package memory usage dump.  Calculates total
+size of strings found in variables in the package.  This does not
+include lexicals in a module's file scope, or lost in closures.
+
+=end original
+
+기본적인 패키지단위의 메모리 사용율 덤프.
+패키지 안의 변수에서 발견한 문자열의 사이즈의 합계를 계산합니다.
+모듈의 파일스코프 안의 렉시컬이나 클로져안에서
+잃어버린 것은 포함되지 않습니다.
+
+=back
+
+=begin original
+
+After the rc file is read, the debugger reads the C<$ENV{PERLDB_OPTS}>
+environment variable and parses this as the remainder of a "O ..."
+line as one might enter at the debugger prompt.  You may place the
+initialization options C<TTY>, C<noTTY>, C<ReadLine>, and C<NonStop>
+there.
+
+=end original
+
+rc 파일이 읽어진 다음, 디버거는 C<$ENV{PERLDB_OPTS}> 환경변수를 읽어들여,
+더버거의 프롬프트에서 "O ..."로써 입력된 건처럼 파싱합니다.
+초기화옵션 C<TTY>, C<noTTY>, C<ReadLine>, C<NonStop> 도 
+여기서 설정할 수 있습니다.
+
+=begin original
+
+If your rc file contains:
+
+=end original
+
+rc 파일에 아래처럼 쓰면:
+
+  parse_options("NonStop=1 LineInfo=db.out AutoTrace");
+
+=begin original
+
+then your script will run without human intervention, putting trace
+information into the file I<db.out>.  (If you interrupt it, you'd
+better reset C<LineInfo> to F</dev/tty> if you expect to see anything.)
+
+=end original
+
+스크립트는 인간의 개입없이 실행되어, 추적정보를 I<db.out> 파일에 출력합니다.
+(중단해서, 무엇도 표시되지 않는 경우는, C<LineInfo> 를 F</dev/tty> 에
+리셋한 편이 좋을 겁니다)
+
+=over 12
+
+=item C<TTY>
+X<debugger option, TTY>
+
+=begin original
+
+The TTY to use for debugging I/O.
+
+=end original
+
+디버거 I/O 로써 TTY 를 사용합니다.
+
+=item C<noTTY>
+X<debugger option, noTTY>
+
+=begin original
+
+If set, the debugger goes into C<NonStop> mode and will not connect to a TTY.  If
+interrupted (or if control goes to the debugger via explicit setting of
+$DB::signal or $DB::single from the Perl script), it connects to a TTY
+specified in the C<TTY> option at startup, or to a tty found at
+runtime using the C<Term::Rendezvous> module of your choice.
+
+=end original
+
+절정하면, 디버거는 C<NonStop> 모드가 되고, TTY 와 접속되지 않습니다.
+만약 중단된(또는 펄 스크립트에서 명시적인 $DB::signal 이나
+$DB::single 을 설정하는 것에 의해 디버거에 제어가 넘어간) 경우,
+기동시에 C<TTY> 옵션으로 지정된 TTY 나, 실행시에 C<Term::Rendezvous>
+모듈로 선택된 TTY에 접속됩니다.
+
+=begin original
+
+This module should implement a method named C<new> that returns an object
+with two methods: C<IN> and C<OUT>.  These should return filehandles to use
+for debugging input and output correspondingly.  The C<new> method should
+inspect an argument containing the value of C<$ENV{PERLDB_NOTTY}> at
+startup, or C<"$ENV{HOME}/.perldbtty$$"> otherwise.  This file is not
+inspected for proper ownership, so security hazards are theoretically
+possible.
+
+=end original
+
+이 모듈은 2개의 메소드 C<IN> 과 C<OUT> 을 가진 오브젝트를 
+반환하는 메소드 C<new> 를 구성할 필요가 있습니다.
+이런것은 각각, 디버거 입력과 출력을 위한 파일핸들을 반환하게 됩니다.
+C<new> 메소드는 기동시에 C<$ENV{PERLDB_NOTTY}> 의 값을 포함한
+인수를 검사하고, 없으면 C<"$ENV{HOME}/.perldbtty$$"> 가 됩니다.
+이 파일은 적절한 소유권에 대해 검사되지 않으므로,
+이론적으로는 보안문제가 발생할 수 있습니다.
+
+=item C<ReadLine>
+X<debugger option, ReadLine>
+
+=begin original
+
+If false, readline support in the debugger is disabled in order
+to debug applications that themselves use ReadLine.
+
+=end original
+
+거짓이면, 디버그하는 어플리케이션 자신이 ReadLine 을 사용하기 위해,
+readline 대응을 무효화합니다.
+
+=item C<NonStop>
+X<debugger option, NonStop>
+
+=begin original
+
+If set, the debugger goes into non-interactive mode until interrupted, or
+programmatically by setting $DB::signal or $DB::single.
+
+=end original
+
+설정되면, 디버거는 중단되거나, 프로그램적으로 $DB::signal 이나
+$DB::single 에 설정되기까지, 비대화적 모드가 됩니다.
+
+=back
+
+=begin original
+
+Here's an example of using the C<$ENV{PERLDB_OPTS}> variable:
+
+=end original
+
+아래에 C<$ENV{PERLDB_OPTS}> 변수를 사용한 예를 나타냅니다;
+
+    $ PERLDB_OPTS="NonStop frame=2" perl -d myprogram
+
+=begin original
+
+That will run the script B<myprogram> without human intervention,
+printing out the call tree with entry and exit points.  Note that
+C<NonStop=1 frame=2> is equivalent to C<N f=2>, and that originally,
+options could be uniquely abbreviated by the first letter (modulo
+the C<Dump*> options).  It is nevertheless recommended that you
+always spell them out in full for legibility and future compatibility.
+
+=end original
+
+이것은, 인간의 관여없이 스크립트 B<myprogram> 을 실행하고, 진입과 종료의
+포인트의 호출트리를 표시합니다.
+C<NonStop=1 frame=2> 은 C<N f=2> 와 같으며, 본래 옵션은 최초의 문자
+(C<Dump*> 옵션을 기반으로한)에 생략할 수 있습니다.
+그래도 역시, 읽기 쉬움과 장래의 호환성을 위해, 항상 풀 스펠을 쓰는 것을
+권장합니다.
+
+=begin original
+
+Other examples include
+
+=end original
+
+또다른 예제로서는:
+
+    $ PERLDB_OPTS="NonStop LineInfo=listing frame=2" perl -d myprogram
+
+=begin original
+
+which runs script non-interactively, printing info on each entry
+into a subroutine and each executed line into the file named F<listing>.
+(If you interrupt it, you would better reset C<LineInfo> to something
+"interactive"!)
+
+=end original
+
+라고 하면 스크립트는 비대화적으로 실행되고, 서브틴으로의 진입과 실행줄을
+F<listing> 이라고 하는 이름의 파일로 기술합니다.
+(중단하면, 뭔가가 "대화적"으로 하기 위해 C<LineInfo> 를 리셋하는 편이
+좋을겁니다)
+
+=begin original
+
+Other examples include (using standard shell syntax to show environment
+variable settings):
+
+=end original
+
+(환경변수설정을 표시하는 표준모듈구문을 사용한) 다른 하나의 예로써는:
+
+  $ ( PERLDB_OPTS="NonStop frame=1 AutoTrace LineInfo=tperl.out"
+      perl -d myprogram )
+
+=begin original
+
+which may be useful for debugging a program that uses C<Term::ReadLine>
+itself.  Do not forget to detach your shell from the TTY in the window that
+corresponds to F</dev/ttyXX>, say, by issuing a command like
+
+=end original
+
+이것은 C<Term::ReadLine> 을 사용한 프로그램을 디버그하기에 편리합니다.
+아래처럼 커맨드를 사용해서, 사용중의 셸을, F</dev/ttyXX> 에 대응하는
+윈도우의 TTY에서 디터치하는 것을 잊지 말아주세요.
+
+  $ sleep 1000000
+
+=begin original
+
+See L<perldebguts/"Debugger Internals"> for details.
+
+=end original
+
+자세한 내용은 L<perldebguts/"Debugger Internals"> 을 참조해주세요.
+
+=head2 Debugger input/output
+
+(디버거의 입출력)
+
+=over 8
+
+=item Prompt
+
+=begin original
+
+The debugger prompt is something like
+
+=end original
+
+디버거의 프롬프트는 아래와 같거나:
+
+    DB<8>
+
+=begin original
+
+or even
+
+=end original
+
+또는 아래와 같거나 합니다.
+
+    DB<<17>>
+
+=begin original
+
+where that number is the command number, and which you'd use to
+access with the built-in B<csh>-like history mechanism.  For example,
+C<!17> would repeat command number 17.  The depth of the angle
+brackets indicates the nesting depth of the debugger.  You could
+get more than one set of brackets, for example, if you'd already
+at a breakpoint and then printed the result of a function call that
+itself has a breakpoint, or you step into an expression via C<s/n/t
+expression> command.
+
+=end original
+
+여기에 수치는 커맨드 번호로, 내장 B<csh> 같은 이력기구를 사용해서
+접근하는 것에 사용합니다.
+예를들면, C<!17> 은 커맨드 번호 17을 재실행합니다.
+부등호의 깊이는 디버거의 중첩의 깊이를 표시합니다.
+예를들면, 이미 브레이크포인트에 있고, 그 자신에도 브레이크포인트를
+포함한 함수호출의 결과를 표시하거나, C<s/n/t expression> 커맨드를
+사용해 식을 스텝 실행하거나 하는 때에 복수의 부등호의 쌍을 볼 때가 있습니다.
+
+=item Multiline commands
+
+=begin original
+
+If you want to enter a multi-line command, such as a subroutine
+definition with several statements or a format, escape the newline
+that would normally end the debugger command with a backslash.
+Here's an example:
+
+=end original
+
+여러 구문에서의 서브루틴정의나 포맷같은, 여러줄의 커맨드를 입력하고 싶은 경우는
+일반적으로는 디버거 커맨드를 종료시키는 개행을 백슬래쉬로 이스케이프해주세요.
+아래는 예입니다;
+
+      DB<1> for (1..4) {         \
+      cont:     print "ok\n";   \
+      cont: }
+      ok
+      ok
+      ok
+      ok
+
+=begin original
+
+Note that this business of escaping a newline is specific to interactive
+commands typed into the debugger.
+
+=end original
+
+이 개행을 이스케이프하는 문제는, 대화적으로 디버거에 입력된 커맨드에
+특유한 것에 주의하세요.
+
+=item Stack backtrace
+X<backtrace> X<stack, backtrace>
+
+=begin original
+
+Here's an example of what a stack backtrace via C<T> command might
+look like:
+
+=end original
+
+이것은, C<T> 커맨드에 의해 표시되는 스택백트레이스의 예입니다:
+
+    $ = main::infested called from file `Ambulation.pm' line 10
+    @ = Ambulation::legs(1, 2, 3, 4) called from file `camel_flea' line 7
+    $ = main::pests('bactrian', 4) called from file `camel_flea' line 4
+
+=begin original
+
+The left-hand character up there indicates the context in which the
+function was called, with C<$> and C<@> meaning scalar or list
+contexts respectively, and C<.> meaning void context (which is
+actually a sort of scalar context).  The display above says
+that you were in the function C<main::infested> when you ran the
+stack dump, and that it was called in scalar context from line
+10 of the file I<Ambulation.pm>, but without any arguments at all,
+meaning it was called as C<&infested>.  The next stack frame shows
+that the function C<Ambulation::legs> was called in list context
+from the I<camel_flea> file with four arguments.  The last stack
+frame shows that C<main::pests> was called in scalar context,
+also from I<camel_flea>, but from line 4.
+
+=end original
+
+위의 좌측의 문자는 함수가 호출된 컨텍스트를 나타내고 있습니다;
+C<$> 와 C<@> 은 각각 스칼라컨텍스트와 리스트 컨텍스트를 의미하고,
+C<.> 은 무효컨텍스트(실제로는 스칼라컨텍스트같은 것)를 의미합니다.
+위의 표시는, 스택 탭을 실행한 때에 C<main::infested> 에 있고,
+이것은 파일 I<Ambulation.pm> 의 10번째 줄에서, 스칼라컨텍스트로
+인수없이 호출되고 있습니다; 즉 C<&infested> 처럼 해서
+호출되고 있습니다.
+다음의 스택프레임은 함수 <Ambulation::legs> 가 I<camel_flea> 에서
+리스트컨텍스트로 4개의 인수와 함께 호출됩니다.
+마지막의 스택프레임은, C<main::pets> 가, 같은 파일 I<camel_flea> 의
+4번째줄에서 스칼라컨텍스트로 호출됩니다.
+
+=begin original
+
+If you execute the C<T> command from inside an active C<use>
+statement, the backtrace will contain both a C<require> frame and
+an C<eval>) frame.
+
+=end original
+
+유효한 C<use> 문의 안에서 C<T> 커맨드를 실행하면, 역추적에는
+C<reuqire> 프레임과 C<eval> 프레임의 양쪽이 포함됩니다.
+
+=item Line Listing Format
+
+=begin original
+
+This shows the sorts of output the C<l> command can produce:
+
+=end original
+
+이것은 C<l> 커맨드의 출력을 나타내고 있습니다:
+
+    DB<<13>> l
+  101:                @i{@i} = ();
+  102:b               @isa{@i,$pack} = ()
+  103                     if(exists $i{$prevpack} || exists $isa{$pack});
+  104             }
+  105
+  106             next
+  107==>              if(exists $isa{$pack});
+  108
+  109:a           if ($extra-- > 0) {
+  110:                %isa = ($pack,1);
+
+=begin original
+
+Breakable lines are marked with C<:>.  Lines with breakpoints are
+marked by C<b> and those with actions by C<a>.  The line that's
+about to be executed is marked by C<< ==> >>.
+
+=end original
+
+브레이크가능한 줄에는 C<:> 가 붙어있습니다.
+브레이크포인트인 줄에는 C<b> 가, 액션이 있는 줄에는 C<a> 가 있습니다.
+지금부터 실행하려고하는 줄에는 C<< ==> >> 가 붙어있습니다.
+
+=begin original
+
+Please be aware that code in debugger listings may not look the same
+as your original source code.  Line directives and external source
+filters can alter the code before Perl sees it, causing code to move
+from its original positions or take on entirely different forms.
+
+=end original
+
+디버거로 표시된 코드는, 원래 소스코드와 똑같이 보인다고 말할 수 없는 것에
+주의해 주세요.
+행지시자와 외부 소스필터가, Perl 이 코드를 보기 전에 코드를 
+변경할 때가 있고, 그것에 의해 코드가 원래의 위치에서 이동하거나,
+완전히 다른 형태가 되거나 합니다.
+
+=item Frame listing
+
+=begin original
+
+When the C<frame> option is set, the debugger would print entered (and
+optionally exited) subroutines in different styles.  See L<perldebguts>
+for incredibly long examples of these.
+
+=end original
+
+C<frame> 옵션이 설정되면, 디버거는 서브루틴에 들어갔을 때
+(그리고 나올때도 옵션으로) 다른 스타일로 표시합니다.
+이런것들의 꽤 긴 예제에 대해서는 L<perldebguts> 를 참조해주세요.
+
+=back
+
+=head2 Debugging compile-time statements
+
+(컴파일 시에 실행되는 구문의 디버깅)
+
+=begin original
+
+If you have compile-time executable statements (such as code within
+BEGIN and CHECK blocks or C<use> statements), these will I<not> be
+stopped by debugger, although C<require>s and INIT blocks will, and
+compile-time statements can be traced with C<AutoTrace> option set
+in C<PERLDB_OPTS>).  From your own Perl code, however, you can
+transfer control back to the debugger using the following statement,
+which is harmless if the debugger is not running:
+
+=end original
+
+컴파일 시에 실행될 구문 (BEGIN 과 CHECK 의 블록 안의 코드나
+C<use> 구문) 이 있다면, 그것들은 디버거에 의해 I<멈출 수 없습니다>.
+C<require> 와 INIT 블록은 가능합니다.
+또, 컴파일 시 실행문은 C<PERLDB_OPTS> 로 C<AutoTrace> 옵션을
+설정하는 것으로 추적할 수 있습니다.
+그러나, 아래처럼 구문을 스스로 Perl 코드에 포함하면
+디버거에 제어를 넘길 수가 있습니다.
+이 구문은, 디버거를 기동하지 않을 때에는 아무것도 하지 않습니다.
+
+    $DB::single = 1;
+
+=begin original
+
+If you set C<$DB::single> to 2, it's equivalent to having
+just typed the C<n> command, whereas a value of 1 means the C<s>
+command.  The C<$DB::trace>  variable should be set to 1 to simulate
+having typed the C<t> command.
+
+=end original
+
+C<$DB::single> 에 2 를 설정하면, C<n> 커맨드를 넣은 것과 같아집니다.
+1 을 설정하면 C<s> 커맨드가 됩니다.
+C<$DB::trace> 변수는 C<t> 커맨드를 넣은 상태를 시험하기 위해
+1 으로 설정해야합니다.
+
+=begin original
+
+Another way to debug compile-time code is to start the debugger, set a
+breakpoint on the I<load> of some module:
+
+=end original
+
+컴파일 시에 실행될 코드를 디버그하는 다른 하나의 방법은,
+모듈의 I<load> 에 브레이크 포인트를 설정하고;
+
+    DB<7> b load f:/perllib/lib/Carp.pm
+  Will stop on load of `f:/perllib/lib/Carp.pm'.
+
+=begin original
+
+and then restart the debugger using the C<R> command (if possible).  One can use C<b
+compile subname> for the same purpose.
+
+=end original
+
+(가능하면) C<R> 커맨드를 사용해서 디버거를 재기동하는 것입니다.
+C<b compile subname> 도 같은 목적으로 사용할 수 있습니다.
+
+=head2 Debugger Customization
+
+(디버거의 커스터마이즈)
+
+=begin original
+
+The debugger probably contains enough configuration hooks that you
+won't ever have to modify it yourself.  You may change the behaviour
+of debugger from within the debugger using its C<o> command, from
+the command line via the C<PERLDB_OPTS> environment variable, and
+from customization files.
+
+=end original
+
+디버거에는 아마도 당신이 자신이 수정할 필요가 있다고는 생각하지 않을 
+곳까지 포함된 설정후크가 있습니다.
+디버거의 행동은, 디버거 안에서 C<o> 커맨드를 사용해 변경할 수 있습니다;
+이것은 C<PERLDB_OPT> 환경변수 경유로 커맨드라인에서나, 설정파일에서
+변경할 수 있습니다.
+
+=begin original
+
+You can do some customization by setting up a F<.perldb> file, which
+contains initialization code.  For instance, you could make aliases
+like these (the last one is one people expect to be there):
+
+=end original
+
+초기화코드를 넣은 파일 .perldb 를 설정하는 것으로도,
+몇가지인가의 커스터마이즈가 됩니다.
+예를들어, 아래처럼 alias 를 실행할 수 있습니다.
+
+    $DB::alias{'len'}  = 's/^len(.*)/p length($1)/';
+    $DB::alias{'stop'} = 's/^stop (at|in)/b/';
+    $DB::alias{'ps'}   = 's/^ps\b/p scalar /';
+    $DB::alias{'quit'} = 's/^quit(\s*)/exit/';
+
+=begin original
+
+You can change options from F<.perldb> by using calls like this one;
+
+=end original
+
+F<.perldb> 의 옵션을, 아래와 같은 호출에 의해 변경될 수 있습니다:
+
+    parse_options("NonStop=1 LineInfo=db.out AutoTrace=1 frame=2");
+
+=begin original
+
+The code is executed in the package C<DB>.  Note that F<.perldb> is
+processed before processing C<PERLDB_OPTS>.  If F<.perldb> defines the
+subroutine C<afterinit>, that function is called after debugger
+initialization ends.  F<.perldb> may be contained in the current
+directory, or in the home directory.  Because this file is sourced
+in by Perl and may contain arbitrary commands, for security reasons,
+it must be owned by the superuser or the current user, and writable
+by no one but its owner.
+
+=end original
+
+코드는 C<DB> 패키지에서 실행됩니다.
+F<.perldb> 는 C<PERLDB_OPTS> 의 앞에서 처리되는 것에 주의해주세요.
+F<.perldb> 에서 C<afterinit> 서브루틴이 정의되면, 이 함수는
+디버거의 초기화종료 뒤에 호출됩니다.
+F<.perldb> 는 최근 디렉토리인나 홈디렉토리에 놓을 수 있습니다.
+이 파일은 Perl 에 의해 실행되어, 임의의 커맨드를 포함하는 것이 가능하므로,
+보안상의 이유에서, 슈퍼유저가 현재의 유저에 의해 소유되고, 소유자이외에는
+쓰기 금지가 되어 있지 않으면 안됩ㄴ디ㅏ.
+
+=begin original
+
+You can mock TTY input to debugger by adding arbitrary commands to
+@DB::typeahead. For example, your F<.perldb> file might contain:
+
+=end original
+
+@DB::typeahead 에 임의의 커맨드를 추가하는 것으로, 디버거로의 TTY 입력을
+모방할 수 있습니다.
+예를 들어, 당신의 F<.perldb> 파일에 아래처럼 쓰면:
+
+    sub afterinit { push @DB::typeahead, "b 4", "b 6"; }
+
+=begin original
+
+Which would attempt to set breakpoints on lines 4 and 6 immediately
+after debugger initialization. Note that @DB::typeahead is not a supported
+interface and is subject to change in future releases.
+
+=end original
+
+디버거 초기화의 값 뒤에 4줄째와 6줄째에 브레이크포인트를 설정하도록 합니다.
+@DB::typeahead 는 서포트하고 있는 인터페이스가 아니라, 앞으로 릴리즈에서는
+변경될 수가 있으니 주의해주세요.
+
+=begin original
+
+If you want to modify the debugger, copy F<perl5db.pl> from the
+Perl library to another name and hack it to your heart's content.
+You'll then want to set your C<PERL5DB> environment variable to say
+something like this:
+
+=end original
+
+디버거를 변경하고 싶은 경우에는, perl5db.pl 을 Perl 라이브러리에서
+별도의 이름으로 복사해서, 수정해주세요. 그리고,
+환경변수 C<PERL5DB> 에는, 아래처럼 설정할 필요가 있을 겁니다:
+
+    BEGIN { require "myperl5db.pl" }
+
+=begin original
+
+As a last resort, you could also use C<PERL5DB> to customize the debugger
+by directly setting internal variables or calling debugger functions.
+
+=end original
+
+마지막 수단으로써, C<PERL5DB> 를 직접내부변수를 설정하거나,
+디버거 함수를 호출하는 것으로 디버거를 커스터마이즈ㄹ 수도 있습니다.
+
+=begin original
+
+Note that any variables and functions that are not documented in
+this document (or in L<perldebguts>) are considered for internal
+use only, and as such are subject to change without notice.
+
+=end original
+
+이 문서(또는 L<perldebguts>)에 기술되지 않은 변수나 
+함수는 내부사용전용으로 취급되어, 예고없이 변경될 수 있습니다.
+
+=head2 Readline Support
+
+(readline 지원)
+
+=begin original
+
+As shipped, the only command-line history supplied is a simplistic one
+that checks for leading exclamation points.  However, if you install
+the Term::ReadKey and Term::ReadLine modules from CPAN, you will
+have full editing capabilities much like GNU I<readline>(3) provides.
+Look for these in the F<modules/by-module/Term> directory on CPAN.
+These do not support normal B<vi> command-line editing, however.
+
+=end original
+
+출하시의 상태에서는, 커맨드라인 이력참조기능으로써 제공되는 것은,
+Exclamation Point를 붙이는 것으로 가능합니다.
+그러나 CPAN에서 Term::ReadKey 와 Term::ReadLine 의 모듈을 
+인스톨하는 것으로, GNU I<readline>(3) 가 제공되는 듯한 완전한
+편집기능을 사용하게 되었습니다.
+이것들은 CPAN 의 F<modules/by-module/Term> 디렉토리에 있습니다.
+그러나 이것들은 일반적인 B<vi> 커맨드라인 편집은 지원하지 않습니다.
+
+=begin original
+
+A rudimentary command-line completion is also available.
+Unfortunately, the names of lexical variables are not available for
+completion.
+
+=end original
+
+기본적인 커맨드라인보완도 이용가능합니다.
+아쉽게도, 렉시컬변수이름은 보완할 수 없습니다.
+
+=head2 Editor Support for Debugging
+
+(디버깅을 위한 에디터 지원)
+
+=begin original
+
+If you have the FSF's version of B<emacs> installed on your system,
+it can interact with the Perl debugger to provide an integrated
+software development environment reminiscent of its interactions
+with C debuggers.
+
+=end original
+
+FSF 판의 B<emacs> 가 시스템에 인스톨 된 경우는,
+C 디버거와의 연계를 연상시키는 것처럼, Perl 디버거와의 통합
+소프트웨어 개발환경을 제공합니다.
+
+=begin original
+
+Perl comes with a start file for making B<emacs> act like a
+syntax-directed editor that understands (some of) Perl's syntax.
+Look in the I<emacs> directory of the Perl source distribution.
+
+=end original
+
+Perl 에는 B<emacs> 를 Perl 의 문법(의 일부)를 해석하는 문법지향의
+에디터로써 다루기위한 스타트파일을 가지고 있습니다.
+Perl 소스배포의 I<emacs> 디렉토리를 참조해주세요.
+
+=begin original
+
+A similar setup by Tom Christiansen for interacting with any
+vendor-shipped B<vi> and the X11 window system is also available.
+This works similarly to the integrated multiwindow support that
+B<emacs> provides, where the debugger drives the editor.  At the
+time of this writing, however, that tool's eventual location in the
+Perl distribution was uncertain.
+
+=end original
+
+어느 벤더에도 들어있는 B<vi> 및 X11 윈도우시스템과 상호작용시키기 위한
+Tom Christiansen 에 의한 비슷한 셋업도 이용할 수 있습니다.
+이것은 B<emacs> 가 제공하는 통합 멀티윈도우서포트처럼 동작하고,
+디버거가 에디터를 제어합니다.
+그러나, 이것을 기술하고 있는 시점에서는, 이 툴의 Perl 배포의 안에서의
+최종적인 위치는 불확정입니다.
+
+=begin original
+
+Users of B<vi> should also look into B<vim> and B<gvim>, the mousey
+and windy version, for coloring of Perl keywords.
+
+=end original
+
+B<vi> 유저는, Perl 키워드를 색지정할 경우, 마우스와 윈도우 대응의
+B<vim> 과 B<gvim> 을 알아보세요.
+
+=begin original
+
+Note that only perl can truly parse Perl, so all such CASE tools
+fall somewhat short of the mark, especially if you don't program
+your Perl as a C programmer might.
+
+=end original
+
+Perl 만이 완전하게 Perl 을 파싱할 수 있기에, 이것들 모두의 CASE 툴에는
+부족한 부분이 있는 것에 주의해주세요; 특히 C 프로그래머가 쓸 듯한
+Perl 프로그램을 쓰지 않을 경우가 그렇습니다.
+
+=head2 The Perl Profiler
+X<profile> X<profiling> X<profiler>
+
+(Perl 프로파일러)
+
+=begin original
+
+If you wish to supply an alternative debugger for Perl to run, just
+invoke your script with a colon and a package argument given to the
+B<-d> flag.  The most popular alternative debuggers for Perl is the
+Perl profiler.  Devel::DProf is now included with the standard Perl
+distribution.  To profile your Perl program in the file F<mycode.pl>,
+just type:
+
+=end original
+
+Perl 실행에 다른 디버거를 사용하고 싶은 경우는 간단하게 B<-d> 옵션에
+콜론과 패키지로 구성된 인수를 붙여서 스크립트를를 기동해주세요.
+가장 유명한 Perl 용 대용 디버거는 Perl 프로파일러입니다.
+Devel::DProf 는 Perl 표준배포에 포함되어 있습니다.
+파일 F<mycode.pl> 에 있는 Perl 프로그램을 프로파일링하고 싶은 경우,
+아래처럼 합니다.
+
+    $ perl -d:DProf mycode.pl
+
+=begin original
+
+When the script terminates the profiler will dump the profile
+information to a file called F<tmon.out>.  A tool like B<dprofpp>,
+also supplied with the standard Perl distribution, can be used to
+interpret the information in that profile.
+
+=end original
+
+스크립트가 종료하면, 프로파일러는 프로파일 정보를
+F<tmon.out> 이라는 파일에 덤프합니다.
+Perl 표준배포에 포함된 B<dprofpp> 같은 툴이, 이 프로파일의 정보를
+해석하는 것에 사용할 수 있습니다.
+
+=head1 Debugging regular expressions
+X<regular expression, debugging>
+X<regex, debugging> X<regexp, debugging>
+
+(정규표현의 디버그)
+
+=begin original
+
+C<use re 'debug'> enables you to see the gory details of how the Perl
+regular expression engine works. In order to understand this typically
+voluminous output, one must not only have some idea about how regular
+expression matching works in general, but also know how Perl's regular
+expressions are internally compiled into an automaton. These matters
+are explored in some detail in
+L<perldebguts/"Debugging regular expressions">.
+
+=end original
+
+C<use re 'debug'> 를 지정하면, Perl 정규표현엔진이 어떻게 동작하는 가의
+자세한 내용을 볼 수 있습니다.
+이 전형적으로는 대량의 출력을 이해하기 위해서는,
+일반적으로 정규표현 매치가 어떻게 수행되는 가뿐만 아니라,
+Perl 의 정규표현이 내부적으로 어떻게 오토마톤에 컴파일 되는 가를
+모르면 안됩니다.
+자세한 내용은 L<perldebguts/"Debugging regular expressions"> 에 있습니다.
+
+
+=head1 Debugging memory usage
+X<memory usage>
+
+(메모리 사용의 디버그)
+
+=begin original
+
+Perl contains internal support for reporting its own memory usage,
+but this is a fairly advanced concept that requires some understanding
+of how memory allocation works.
+See L<perldebguts/"Debugging Perl memory usage"> for the details.
+
+=end original
+
+Perl 에는 자신의 메모리사용상황을 보고하기 위한 내부기능이 있습니다.
+그러나 이것은 꽤 상급의 개념으로, 메모리 할당이 어떻게 수행되는 가에
+대해 이해할 필요가 있습니다.
+상세한 내용은 L<perldebguts/"Debugging Perl memory usage"> 를 참조해주세요.
+
+=head1 SEE ALSO
+
+=begin original
+
+You did try the B<-w> switch, didn't you?
+
+=end original
+
+B<-w> 스위치는 이미 사용했었죠?
+
+=begin original
+
+L<perldebtut>,
+L<perldebguts>,
+L<re>,
+L<DB>,
+L<Devel::DProf>,
+L<dprofpp>,
+L<Dumpvalue>,
+and
+L<perlrun>.
+
+=end original
+
+L<perldebtut>,
+L<perldebguts>,
+L<re>,
+L<DB>,
+L<Devel::DProf>,
+L<dprofpp>,
+L<Dumpvalue>,
+L<perlrun>.
+
+=begin original
+
+When debugging a script that uses #! and is thus normally found in
+$PATH, the -S option causes perl to search $PATH for it, so you don't
+have to type the path or C<which $scriptname>.
+
+=end original
+
+#! 를 사용하고 있기때문에 보통은 $PATH 에 보이는 스크립트를 디버그할 때,
+-S 옵션을 붙이면 perl 은 $PATH 에서 스크립트를 찾기때문에,
+경로나 C<which $scriptname> 을 사용할 필요가 없어집니다.
+
+  $ perl -Sd foo.pl
+
+=head1 BUGS
+
+=begin original
+
+You cannot get stack frame information or in any fashion debug functions
+that were not compiled by Perl, such as those from C or C++ extensions.
+
+=end original
+
+C 나 C++ 확장처럼, Perl 에서 컴파일되지 않은 것에 대해서
+스택플레임정보나 여러 디버그 함수를 사용할 수는 없습니다.
+
+=begin original
+
+If you alter your @_ arguments in a subroutine (such as with C<shift>
+or C<pop>), the stack backtrace will not show the original values.
+
+=end original
+
+서브루틴 안에서(C<shift> 나 C<pop> 을 사용해서) @_ 인수를 변경한 경우,
+스택 역추적으로 원래의 값을 표시할 수는 없습니다.
+
+=begin original
+
+The debugger does not currently work in conjunction with the B<-W>
+command-line switch, because it itself is not free of warnings.
+
+=end original
+
+디버거는 현재 B<-W> 커맨드라인스위치와 동시에 사용할 수는 없습니다.
+이 자신이 경고에서 자유로울 수 없기 때문입니다.
+
+=begin original
+
+If you're in a slow syscall (like C<wait>ing, C<accept>ing, or C<read>ing
+from your keyboard or a socket) and haven't set up your own C<$SIG{INT}>
+handler, then you won't be able to CTRL-C your way back to the debugger,
+because the debugger's own C<$SIG{INT}> handler doesn't understand that
+it needs to raise an exception to longjmp(3) out of slow syscalls.
+
+=end original
+
+(키보드나 소켓에서의 C<wait>, C<accept>, C<read> 등의)
+느린 시스템 호출을 실행중이고, 독자의 C<$SIG{INT}> 핸들러를 설정하지않는 경우
+디버거로 돌아오기 위해 CTRL-C를 사용할 수는 없습니다.
+이것은 디버거 자신의 C<$SIG{INT}> 핸들러가
+느린 시스템 호출으로부터 longjmp(3) 에서 나오기 위해 예외를 발생시킬 필요성을
+이해하지 않기 때문입니다.

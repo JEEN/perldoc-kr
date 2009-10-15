@@ -1,0 +1,2713 @@
+
+=encoding utf-8
+
+=head1 NAME
+
+=begin original
+
+perltooc - Tom's OO Tutorial for Class Data in Perl
+
+=end original
+
+perltooc - 틈의 Perl 클래스 데이터를 위한 오브젝트 지향 튜토리얼 
+
+=head1 DESCRIPTION
+
+=begin original
+
+When designing an object class, you are sometimes faced with the situation
+of wanting common state shared by all objects of that class.
+Such I<class attributes> act somewhat like global variables for the entire
+class, but unlike program-wide globals, class attributes have meaning only to
+the class itself.
+
+=end original
+
+오브젝트 클래스를 선언할 때, 공통의 상태를 클래스의 모든 오브젝트가 
+공유하고 싶은 상황에 직면할 수가 있습니다.
+그런 I<클래스 속성> 은 어느정도 클래스 전체의 글로벌 변수처럼 움직입니다.
+하지만 프로그램 전체의 글로벌 변수와는 달리, 클래 속성은 클래스 
+그 자신에 의해서만 글로벌입니다.
+
+=begin original
+
+Here are a few examples where class attributes might come in handy:
+
+=end original
+
+클래스속성이 도움되는 예제가 몇 가지 있습니다.
+
+=over 4
+
+=item *
+
+=begin original
+
+to keep a count of the objects you've created, or how many are
+still extant.
+
+=end original
+
+성성한 오브젝트의 수를 확보해 두기위해, 
+또 아직 몇 개 있는 가를 세기위해.
+
+=item *
+
+=begin original
+
+to extract the name or file descriptor for a logfile used by a debugging
+method.
+
+=end original
+
+디버그메소드에서 사용되는 로그파일의 이름이 파일 식별자를 뽑아내기 위해 
+
+=item *
+
+=begin original
+
+to access collective data, like the total amount of cash dispensed by
+all ATMs in a network in a given day.
+
+=end original
+
+전체적인 데이터에 접근하기 위해.
+예를 들면, 주어진 날의 네트워크의 전 ATM 에서 지불된 현금의 
+총금액같은 것에 접근할 때에.
+
+=item *
+
+=begin original
+
+to access the last object created by a class, or the most accessed object,
+or to retrieve a list of all objects.
+
+=end original
+
+클래스에 의해, 마지막에 만들어진 오브젝트에 접근하기 위해
+또, 제일 많이 접근된 오브젝트 접근하기 위해,
+또, 모든 오브젝트의 리스트를 검색하기 위해.
+
+=back
+
+=begin original
+
+Unlike a true global, class attributes should not be accessed directly.
+Instead, their state should be inspected, and perhaps altered, only
+through the mediated access of I<class methods>.  These class attributes
+accessor methods are similar in spirit and function to accessors used
+to manipulate the state of instance attributes on an object.  They provide a
+clear firewall between interface and implementation.
+
+=end original
+
+진짜 글로벌 변수와는 달리, 클래스 속성은 직접 접근되어야 하는 것은 
+아닙니다만 클래스 속성의 상태는 조사되어져야 하고, 변경되어야 합니다.
+하지만 I<클래스 메소드> 를 중개해서, 접근하는 것을 통해서만입니다.
+클래스 속성의 접근자 메소드는 기분과 성능위에서는 오브젝트의 인스턴스 속성의 
+상태를 조작하는 것에 사용되는 접근자와 비슷합니다.
+이것들은 인터페스와 구성의 사이에 투명한 파이어월을 제공합니다.
+
+=begin original
+
+You should allow access to class attributes through either the class
+name or any object of that class.  If we assume that $an_object is of
+type Some_Class, and the &Some_Class::population_count method accesses
+class attributes, then these two invocations should both be possible,
+and almost certainly equivalent.
+
+=end original
+
+클래스 속성으로의 접근은 클래스의 이름이나 클래스의 오브젝트 어느쪽을 
+통해서도 가능하도록 해야합니다.
+$an_object 가 Some_Class 의 형태의 것으로, 
+&Some_Class::population_count 메소드가 클래스 속성에 접근한다고 합시다.
+그렇게 하면, 2개의 호출이 양쪽 모두 가능해야합니다.
+그리고 물론, 대부분 같아야 합니다.
+
+    Some_Class->population_count()
+    $an_object->population_count()
+
+=begin original
+
+The question is, where do you store the state which that method accesses?
+Unlike more restrictive languages like C++, where these are called
+static data members, Perl provides no syntactic mechanism to declare
+class attributes, any more than it provides a syntactic mechanism to
+declare instance attributes.  Perl provides the developer with a broad
+set of powerful but flexible features that can be uniquely crafted to
+the particular demands of the situation.
+
+=end original
+
+의문이 있습니다.
+이 메소드가 접근하는 그 상태를 어디에 두는 것일까요?
+C++ 같은 보다 엄격한 언어와는 달리, Perl 에는 정적인 데이터 멤버라고 
+불리는 장소는 없습니다.
+Perl 은 클래스 속성을 선언하는 것에 종합의 매커니즘은 전혀 제공하지 않습니다.
+인스턴스 속성을 선언하는 종합의 매커니즘밖에 없습니다.
+Perl 은 개발자에게 특수한 상황의 요구에도 잘 만들 수 있고, 
+강력하지만 유연한 큰 세트를 제공합니다.
+
+=begin original
+
+A class in Perl is typically implemented in a module.  A module consists
+of two complementary feature sets: a package for interfacing with the
+outside world, and a lexical file scope for privacy.  Either of these
+two mechanisms can be used to implement class attributes.  That means you
+get to decide whether to put your class attributes in package variables
+or to put them in lexical variables.
+
+=end original
+
+Perl 의 클래스는 전형적인 모듈로 구성됩니다.
+모듈은 2개의 상보적인 특징의 조합으로 되어 있습니다: 바깥 세계와의 
+인터페이스를 위해 패키지와 프라이버시를 위한 렉시컬한 파일 영역의 세트입니다.
+이 두 매커니즘을 클래스 속성의 구성에 사용할 수 있습니다.
+이 것은 즉, 클래스 속성을 패키지 변수에 둘 것인가, 렉시컬 변수에 둘 것인가를 
+결정하는 것이 가능하다는 것입니다.
+
+=begin original
+
+And those aren't the only decisions to make.  If you choose to use package
+variables, you can make your class attribute accessor methods either ignorant
+of inheritance or sensitive to it.  If you choose lexical variables,
+you can elect to permit access to them from anywhere in the entire file
+scope, or you can limit direct data access exclusively to the methods
+implementing those attributes.
+
+=end original
+
+또, 이것들은 만드는 것에 맞는 유일한 판단이 아닙니다. 
+패키지 변수를 선택했다고 해도, 클래스 속성 접근자 메소드에 상속을 
+무시하도록 할 수도 상속에 반응하도록 할 수도 있습니다.
+렉시컬 변수를 선택했다고 해도, 전혀 파일 영역의 안의 
+어디에서든 클래스 속성에 접근하는 것을 허락할 수도 있습니다, 또, 
+직접 데이터에 접근하는 것을 
+배타적으로 그것들의 속성을 구성하는 메소드에게만 제한할 수도 있습니다.
+
+=head1 Class Data in a Can
+
+(캔 안의 클래스 데이터)
+
+=begin original
+
+One of the easiest ways to solve a hard problem is to let someone else
+do it for you!  In this case, Class::Data::Inheritable (available on a
+CPAN near you) offers a canned solution to the class data problem
+using closures.  So before you wade into this document, consider
+having a look at that module.
+
+=end original
+
+어려운 문제를 해결하기 위한 제일 간단한 방법 중 하나는 어떤 다른 사람에게 
+문제를 해결하도록 하는 것입니다!
+이 경우, Class::Data::Inheritable (가까운 CPAN 에서 이용할 수 있습니다)가
+클로져를 사용하는 클래스 데이터 문제의 결정적인 해결법을 제공합니다.
+그래서, 이 문서를 고생해서 읽어나가기 전에, 
+Class::Data::Inheritable 모듈을 보는 것을 검토해주세요.
+
+=head1 Class Data as Package Variables
+
+(패키지 변수로써 클래스 데이터)
+
+=begin original
+
+Because a class in Perl is really just a package, using package variables
+to hold class attributes is the most natural choice.  This makes it simple
+for each class to have its own class attributes.  Let's say you have a class
+called Some_Class that needs a couple of different attributes that you'd
+like to be global to the entire class.  The simplest thing to do is to
+use package variables like $Some_Class::CData1 and $Some_Class::CData2
+to hold these attributes.  But we certainly don't want to encourage
+outsiders to touch those data directly, so we provide methods
+to mediate access.
+
+=end original
+
+Perl 의 클래스는 정말 단순한 패키지이기에, 클래스 속성을 가지는 것에 
+패키지 변수를 사용하는 것은 가장 자연스러운 선택입니다.
+즉, 패키지에 단순히 그 자신의 클래스 속성을 가지는 것입니다.
+예를 들어 클래스 전체에 글로벌같은 다른 속성이 몇가지 필요한 
+Some_Class 라고 하는 클래스가 있다고 합시다.
+제일 간단한 것은, $Some_Class::CData1 이나 $Some_Class::CData2 같은 
+패키지 변수를 사용해서 이 속성들을 가지는 것입니다.
+하지만 물론 다른 사람이 데이터 디렉토리에 접근하는 것을 
+권하고 싶지는 않습니다.
+그렇기에 접근을 중개하는 메소드를 제공합니다.
+
+=begin original
+
+In the accessor methods below, we'll for now just ignore the first
+argument--that part to the left of the arrow on method invocation, which 
+is either a class name or an object reference.
+
+=end original
+
+아래의 접근자 메소드에서 지금 첫번재 인수 -- 메소드 호출의 화살표의 
+왼쪽 부분에서 클래스 이름이나 오브젝트 리퍼런스 -- 를 무시하고 있습니다.
+
+=begin original
+
+    package Some_Class;
+    sub CData1 {
+	shift;	# XXX: ignore calling class/object
+	$Some_Class::CData1 = shift if @_;
+	return $Some_Class::CData1;
+    } 
+    sub CData2 {
+	shift;	# XXX: ignore calling class/object
+	$Some_Class::CData2 = shift if @_;
+	return $Some_Class::CData2;
+    } 
+
+=end original
+
+    package Some_Class;
+    sub CData1 {
+	shift;	# XXX: 클래스/ 오브젝트 호출을 무시합니다. 
+	$Some_Class::CData1 = shift if @_;
+	return $Some_Class::CData1;
+    } 
+    sub CData2 {
+	shift;	# XXX: 클래스/ 오브젝트 호출을 무시합니다.
+	$Some_Class::CData2 = shift if @_;
+	return $Some_Class::CData2;
+    } 
+
+=begin original
+
+This technique is highly legible and should be completely straightforward
+to even the novice Perl programmer.  By fully qualifying the package
+variables, they stand out clearly when reading the code.  Unfortunately,
+if you misspell one of these, you've introduced an error that's hard
+to catch.  It's also somewhat disconcerting to see the class name itself
+hard-coded in so many places.
+
+=end original
+
+이 테크닉은 상당히 읽기 쉽고, 보통 Perl 프로그래머에게도 
+완전한 방법입니다.
+패키지 변수를 완전하게 수식하는 것으로, 코드를 읽을 때에 제대로 눈에 띕니다.
+아쉬운 것에 만약 이중 하나라도 스펠을 틀렸다면 보정해줄 에러를 
+가지게 됩니다.
+또, 클래스 이름 스스로를 많은 장소에 하드코드 하고 있는 것을 보는 것은 
+꽤 화나는 일이기도 합니다.
+
+=begin original
+
+Both these problems can be easily fixed.  Just add the C<use strict>
+pragma, then pre-declare your package variables.  (The C<our> operator
+will be new in 5.6, and will work for package globals just like C<my>
+works for scoped lexicals.)
+
+=end original
+
+이 2개의 문제는, 양쪽 모두 간단하게 수정할 수 있습니다.
+C<user struct> 프라그마를 더하고, 거기서 패키지 변수를 앞서 
+선언하는 것 뿐입니다.
+(C<our> 연산자는 5.6 의, 새로운 것입니. C<my> 가 영역지어진 렉시컬 함수에 
+움직이는 것처럼 패키지의 글로벌 변수로 움직입니다.)
+
+=begin original
+
+    package Some_Class;
+    use strict;
+    our($CData1, $CData2);   	# our() is new to perl5.6
+    sub CData1 {
+	shift;	# XXX: ignore calling class/object
+	$CData1 = shift if @_;
+	return $CData1;
+    } 
+    sub CData2 {
+	shift;	# XXX: ignore calling class/object
+	$CData2 = shift if @_;
+	return $CData2;
+    } 
+
+=end original
+
+    package Some_Class;
+    use strict;
+    our($CData1, $CData2);   	# our() is new to perl5.6
+    sub CData1 {
+	shift;	# XXX: 클래스/오브젝트 호출을 무시합니다.
+	$CData1 = shift if @_;
+	return $CData1;
+    } 
+    sub CData2 {
+	shift;	# XXX: 클래스/오브젝트 호출을 무시합니다.
+	$CData2 = shift if @_;
+	return $CData2;
+    } 
+
+=begin original
+
+As with any other global variable, some programmers prefer to start their
+package variables with capital letters.  This helps clarity somewhat, but
+by no longer fully qualifying the package variables, their significance
+can be lost when reading the code.  You can fix this easily enough by
+choosing better names than were used here.
+
+=end original
+
+다른 어떤 글로벌 변수와도 같게, 
+이 패키지 변수들을 대문자로 시작하는 것을 좋아하는 프로그래머가 있습니다. 
+이 것은 어느정도 명료함을 주지만, 패키지 변수가 전혀 
+수식되지 않았기에 코드를 읽을 때에 그 중요성이 없어질 지도 모릅니다.
+이것을 수정하는 것은 간단하고 여기서 사용되고 있는 것보다 더욱 좋은 이름을 
+고르면 됩니다.
+
+=head2 Putting All Your Eggs in One Basket
+
+(계란을 모두 하나의 바스켓에 넣기)
+
+=begin original
+
+Just as the mindless enumeration of accessor methods for instance attributes
+grows tedious after the first few (see L<perltoot>), so too does the
+repetition begin to grate when listing out accessor methods for class
+data.  Repetition runs counter to the primary virtue of a programmer:
+Laziness, here manifesting as that innate urge every programmer feels
+to factor out duplicate code whenever possible.
+
+=end original
+
+마침 인터페이스 속성의 접근자 메소드를 고려없이 열거하는 것이 
+맨처음의 몇 번 뒤에는 질려버리는 게 되는 것처럼(L<perltoot> 를 참조), 
+클래스 데이터의 접근자 메소드를 리스트할 때도, 같은 것을 반복하는 것에 
+상당히 화가 날겁니다.
+반복작업은 프로그래머의 주요한 미덕, 게으름에 반합니다.
+여기서는 여러 프로그래머가 느끼는 원초적인 충동이 
+생기는 한 코드의 이중화를 줄이는 것으로 나타납니다.
+
+=begin original
+
+Here's what to do.  First, make just one hash to hold all class attributes.
+
+=end original
+
+다음과 같이 해야합니다.
+맨처음에 모든 클래스 속성을 가지는 해쉬를 단 하나 만듭니다.
+
+    package Some_Class;
+    use strict;
+    our %ClassData = (   	# our() is new to perl5.6
+	CData1 => "",
+	CData2 => "",
+    );
+
+=begin original
+
+Using closures (see L<perlref>) and direct access to the package symbol
+table (see L<perlmod>), now clone an accessor method for each key in
+the %ClassData hash.  Each of these methods is used to fetch or store
+values to the specific, named class attribute.
+
+=end original
+
+클로져(L<perlref> 참조)를 사용해서, 패키지의 심볼테이블(L<perlmod> 참조)에 
+직접 접근합니다.
+그럼 %ClassData 해쉬의 안에 각각의 키마다 접근자 메소드를 
+클로닝합니다.
+이 메소드들은 값을 가지고 오든가 특정 지정된 클래스 속성에 값을 
+넣기 위해 사용됩니다.
+
+=begin original
+
+    for my $datum (keys %ClassData) {
+	no strict "refs";	# to register new methods in package
+	*$datum = sub {
+	    shift;	# XXX: ignore calling class/object
+	    $ClassData{$datum} = shift if @_;
+	    return $ClassData{$datum};
+	} 
+    } 
+
+=end original
+
+    for my $datum (keys %ClassData) {
+	no strict "refs";	# 패키지에 새로운 메소드를 등록하기 위해
+	*$datum = sub {
+	    shift;	# XXX: 클래스 오브젝트 호출을 무시합니다.
+	    $ClassData{$datum} = shift if @_;
+	    return $ClassData{$datum};
+	} 
+    } 
+
+=begin original
+
+It's true that you could work out a solution employing an &AUTOLOAD
+method, but this approach is unlikely to prove satisfactory.  Your
+function would have to distinguish between class attributes and object
+attributes; it could interfere with inheritance; and it would have to
+careful about DESTROY.  Such complexity is uncalled for in most cases,
+and certainly in this one.
+
+=end original
+
+&AUTOLOAD 메소드를 사용하는 해결법도 잘 되지만, 이 어프로치를 
+만족하는 것이라고 입증하는 것은 어느 정도 될지 모르겠습니다.
+함수는 클래스 속성과 오브젝트 속성의 사이를 구별하지 않으면 안됩니다.
+속성에 간섭합니다.
+또, DESTROY 에 주의할 필요가 있습니다.
+이같은 복잡성은 대부분의 경우에서 호출되지 않습니다.
+물론 이 경우도 그렇습니다.
+
+=begin original
+
+You may wonder why we're rescinding strict refs for the loop.  We're
+manipulating the package's symbol table to introduce new function names
+using symbolic references (indirect naming), which the strict pragma
+would otherwise forbid.  Normally, symbolic references are a dodgy
+notion at best.  This isn't just because they can be used accidentally
+when you aren't meaning to.  It's also because for most uses
+to which beginning Perl programmers attempt to put symbolic references,
+we have much better approaches, like nested hashes or hashes of arrays.
+But there's nothing wrong with using symbolic references to manipulate
+something that is meaningful only from the perspective of the package
+symbol table, like method names or package variables.  In other
+words, when you want to refer to the symbol table, use symbol references.
+
+=end original
+
+왜, strict refs 를 루프에서 무효화하고 있는 것일까 생각할지도 모르겠습니다.
+패키지의 심볼 테이블을 조작해서 새로운 함수이름을 심볼릭 리퍼런스를 사용해서
+(간접적인 명명에서) 도입하고 있습니다.
+심볼릭 리퍼런스는 strict 프라그마가 금지하고 있는 것입니다.
+보통은 심볼릭 리퍼런스는 꽤 위험한 생각입니다.
+단지 의도하지 않은 때에 잘못 사용될 가능성이 있기때문에 
+위험할지도 모른다는 것 뿐입니다.
+초심자의 Perl 프로그래머가 심볼릭리퍼런스를 두려고 하는,
+대부분의 사용법에는 중첩된 해쉬나 배열의 해쉬같은 
+보다 좋은 어프로치가 있기 때문입니다.
+하지만, 메소드이름이나 패키지 변수같은 패키지의 심볼릭 테이블의 
+관점에서만 의미가 있는 것을 조작하는 것에 심볼릭 리퍼런스를 
+사용하는 것은 전혀 틀리지 않습니다.
+바꿔 말하면 심볼릭 테이블을 참조하고 싶은 경우는, 심볼릭 리퍼런스를 
+사용해주세요.
+
+=begin original
+
+Clustering all the class attributes in one place has several advantages.
+They're easy to spot, initialize, and change.  The aggregation also
+makes them convenient to access externally, such as from a debugger
+or a persistence package.  The only possible problem is that we don't
+automatically know the name of each class's class object, should it have
+one.  This issue is addressed below in L<"The Eponymous Meta-Object">.
+
+=end original
+
+하나의 장소에 모든 클래스 속성을 집적하는 것은 여러 이점이 있습니다.
+클래스 속성은 눈에 띄기 쉽고, 초기화하기 쉽고, 바꾸기 쉽습니다.
+집약하는 것으로 클래스 속성을 바깥에서 예를 들면 디버거나 영속적인 
+패키지에서 접근하는 것이 편리합니다.
+유일하게 있을 듯한 문제는 각각의 클래스가 가지고 있을 클래스 오브젝트의
+이름을 자동적으로 알지 않는 것입니다.
+이 문제는 아래의 L<"The Eponymous Meta-object"> 에서 다루고 있습니다.
+
+=head2 Inheritance Concerns
+
+(상속의 개념)
+
+=begin original
+
+Suppose you have an instance of a derived class, and you access class
+data using an inherited method call.  Should that end up referring
+to the base class's attributes, or to those in the derived class?
+How would it work in the earlier examples?  The derived class inherits
+all the base class's methods, including those that access class attributes.
+But what package are the class attributes stored in?
+
+=end original
+
+파생 클래스의 인스턴스가 있음으로써 계속된 메소드 호출을 사용하고, 
+클래스 데이터에 접근합니다.
+이 때, 결국, 기본클래스의 속성을 참조해야 될까요
+파생 클래스의 속성을 참조해야되는 것일까요?
+앞의 예제에서는 어떻게 움직였을까요?
+파생 클래스는 기본 클래스의 모든 메소드를 계승합니다.
+클래스 속성은 접근하는 메소드도 포함합니다.
+하지만, 어 패키지에 클래스 속성이 넣어질 까요?
+
+=begin original
+
+The answer is that, as written, class attributes are stored in the package into
+which those methods were compiled.  When you invoke the &CData1 method
+on the name of the derived class or on one of that class's objects, the
+version shown above is still run, so you'll access $Some_Class::CData1--or
+in the method cloning version, C<$Some_Class::ClassData{CData1}>.
+
+=end original
+
+답은 쓰여진대로 클래스 속성은 메소드들이 컴파일된 패키지에 넣어집니다.
+&CData1 메소드를 파생 클래스의 이름이나 파생 클래스의 오브젝트로 호출하면,
+위에 나타낸 버젼만이 움직입니다.
+즉, $Some_Class::Cdata1 -- 또는 클로닝하고 있는 버젼의 메소드에서 
+C<$Some_Class::ClassData{CData1}> 에 접근할 수 있습니다.
+
+=begin original
+
+Think of these class methods as executing in the context of their base
+class, not in that of their derived class.  Sometimes this is exactly
+what you want.  If Feline subclasses Carnivore, then the population of
+Carnivores in the world should go up when a new Feline is born.
+But what if you wanted to figure out how many Felines you have apart
+from Carnivores?  The current approach doesn't support that.
+
+=end original
+
+파생클래스의 컨텍스트가 아닌, 
+기본 클래스의 컨텍스트에 실행하는 클래스 메소드를 생각해봅시다.
+원하는 것에 딱 맞는 것이 있습니다.
+고양이는 육식동물의 하위에 분류되어 있으면, 새로운 고양이가 태어나면, 
+세계의 육식동물의 개체수 늘어납니다.
+하지만, 육식동물이라는 것을 떼어버리면 몇 마리의 고양이가 있는 가를 
+세아리고 싶다면 어떻게 할까요?
+현재의 어프로치에서는 그것에는 대응할 수 없습니다.
+
+=begin original
+
+You'll have to decide on a case-by-case basis whether it makes any sense
+for class attributes to be package-relative.  If you want it to be so,
+then stop ignoring the first argument to the function.  Either it will
+be a package name if the method was invoked directly on a class name,
+or else it will be an object reference if the method was invoked on an
+object reference.  In the latter case, the ref() function provides the
+class of that object.
+
+=end original
+
+클래스 속성이 package-relative 인 것에 상식적인지 어떤지를 
+케이스바이 케이스의 근거로 결정할 필요가 있을 겁니다.
+package-relative 로 있고 싶다면, 함수의 첫번째 변수를 무시하는 것을 
+그만둡니다. 첫번째 인수는 메소드가 클래스 이름으로 직접 호출되었다면, 
+패키지이름, 오브젝트리퍼런스에서 호출되었다면, 오브젝트리퍼런스 어느쪽입니다.
+후자에서는 ref() 함수가 오브젝트의 클래스이름을 줍니다.
+
+    package Some_Class;
+    sub CData1 {
+	my $obclass = shift;	
+	my $class   = ref($obclass) || $obclass;
+	my $varname = $class . "::CData1";
+	no strict "refs"; 	# to access package data symbolically
+	$$varname = shift if @_;
+	return $$varname;
+    } 
+
+=begin original
+
+And then do likewise for all other class attributes (such as CData2,
+etc.) that you wish to access as package variables in the invoking package
+instead of the compiling package as we had previously.
+
+=end original
+
+앞에서 했던 대로 컴파일 하고 있는 패키지가 아닌 호출하고 있는 
+패키지의 패키지변수로써 접근하고 싶다고 생각하고, 
+다른 모둔 클래스 속성(CData2 같은)처럼 하고 싶겠죠?
+
+=begin original
+
+Once again we temporarily disable the strict references ban, because
+otherwise we couldn't use the fully-qualified symbolic name for
+the package global.  This is perfectly reasonable: since all package
+variables by definition live in a package, there's nothing wrong with
+accessing them via that package's symbol table.  That's what it's there
+for (well, somewhat).
+
+=end original
+
+여기에서 다시 일시적인 strict references 를 금지하는 것을 그만둡니다.
+그렇지 않으면, 패키지의 글로벌 변수를 위해 완전하게 적격인 심볼이름을 
+사용할 수가 없기 때문입니다.
+이 것은 완전하게 합리적입니다: 모든 패키지 변수는 정의에 따라 
+패키지에 살고 있습니다.
+패키지의 심볼이름 경유로 패키지 변수에 접근하는 것은 전혀 틀리지 않습니다.
+그 때문에 그것이 있기때문입니다(아마도).
+
+=begin original
+
+What about just using a single hash for everything and then cloning
+methods?  What would that look like?  The only difference would be the
+closure used to produce new method entries for the class's symbol table.
+
+=end original
+
+모든 것을 위해 단 하나의 해쉬를 상요하고 메소드를 복제하는 것은 
+어떨까요?
+어떻게 보일까요?
+유일한 차이는 클래스의 심볼 테이블에 새로ㄴ 메소드를 생성하는 것에 
+클로져가 사용된다는 것입니다.
+
+    no strict "refs";	
+    *$datum = sub {
+	my $obclass = shift;	
+	my $class   = ref($obclass) || $obclass;
+	my $varname = $class . "::ClassData";
+	$varname->{$datum} = shift if @_;
+	return $varname->{$datum};
+    }
+
+=head2 The Eponymous Meta-Object
+
+(클래스 이름의 메타오브젝트)
+
+=begin original
+
+It could be argued that the %ClassData hash in the previous example is
+neither the most imaginative nor the most intuitive of names.  Is there
+something else that might make more sense, be more useful, or both?
+
+=end original
+
+앞의 예제의 %ClassData 해쉬는 변수이름이 창의적이라도 직관적이지도 않다는
+말을 들을 수 있을지도 모르겠습니다.
+더욱 의미가 있는지 유익한 것인지 그 양쪽을 위한 것은 없을 까요?
+
+=begin original
+
+As it happens, yes, there is.  For the "class meta-object", we'll use
+a package variable of the same name as the package itself.  Within the
+scope of a package Some_Class declaration, we'll use the eponymously
+named hash %Some_Class as that class's meta-object.  (Using an eponymously
+named hash is somewhat reminiscent of classes that name their constructors
+eponymously in the Python or C++ fashion.  That is, class Some_Class would
+use &Some_Class::Some_Class as a constructor, probably even exporting that
+name as well.  The StrNum class in Recipe 13.14 in I<The Perl Cookbook>
+does this, if you're looking for an example.)
+
+=end original
+
+네, 마침 그런게 있습니다.
+"클래스의 메타오브젝트"에 패키지와 같은 이름의 패키지 변수를 사용합시다.
+Some_Class 의 패키지선언의 영역 안에서 클래스의 메타오브젝트로써
+%Some_Class이라는 클래스 이름의 해쉬를 사용합시.
+(클래스 이름의 해쉬는 생성자를 클래스의 이름으로 하논 Python 이나 
+C++ 같은 클래스를 조금 생각나게 합니다. 즉 Some_Class 클래스가 
+&Some_Class::Some_Class 를 생성자로 하는 것입니다.
+아마도 그 이름을 같은 모양으로 익스포트만 하고 있겠죠.
+예제를 찾고 있다면 I<The Perl Cookbook> 의 StrNum 클래스는 그렇게 
+하고 있습니다)
+
+=begin original
+
+This predictable approach has many benefits, including having a well-known
+identifier to aid in debugging, transparent persistence,
+or checkpointing.  It's also the obvious name for monadic classes and
+translucent attributes, discussed later.
+
+=end original
+
+이 어프로치에는 많은 이점이 있습니다.
+잘 알고 있는 하나의 이름을 포함함으로써 디버그나 투과적인 영속성이나 
+채크포인트에 도움이 됩니다. 
+뒤에 기술할 하나의 클래스와 반투명한 속성에 대해서도 명확한 이름입니다.
+
+=begin original
+
+Here's an example of such a class.  Notice how the name of the 
+hash storing the meta-object is the same as the name of the package
+used to implement the class.
+
+=end original
+
+아랫것은 그런 클래스의 예제입니다.
+메타오브젝트를 넣는 해쉬의 이름이 어떻게 해서 
+클래스를 구성하는 것에 사용되는 패키지의 이름처럼 
+하고 있는 가에 주의해주세요.
+
+    package Some_Class;
+    use strict;
+
+=begin original
+
+    # create class meta-object using that most perfect of names
+    our %Some_Class = (   	# our() is new to perl5.6
+	CData1 => "",
+	CData2 => "",
+    );
+
+=end original
+
+    # 완전한 이름을 사용해서 클래스의 메타오브젝트를 만듭니다.
+    our %Some_Class = (   	# our() is new to perl5.6
+	CData1 => "",
+	CData2 => "",
+    );
+
+=begin original
+
+    # this accessor is calling-package-relative
+    sub CData1 {
+	my $obclass = shift;	
+	my $class   = ref($obclass) || $obclass;
+	no strict "refs"; 	# to access eponymous meta-object
+	$class->{CData1} = shift if @_;
+	return $class->{CData1};
+    }
+
+=end original
+
+    # 이 접근자는 calling-package-relative
+    sub CData1 {
+	my $obclass = shift;	
+	my $class   = ref($obclass) || $obclass;
+	no strict "refs"; 	# to access eponymous meta-object
+	$class->{CData1} = shift if @_;
+	return $class->{CData1};
+    }
+
+=begin original
+
+    # but this accessor is not
+    sub CData2 {
+	shift;			# XXX: ignore calling class/object
+	no strict "refs"; 	# to access eponymous meta-object
+	__PACKAGE__ -> {CData2} = shift if @_;
+	return __PACKAGE__ -> {CData2};
+    } 
+
+=end original
+
+    # こちらのアクセサは違います
+    sub CData2 {
+	shift;			# XXX: ignore calling class/object
+	no strict "refs"; 	# to access eponymous meta-object
+	__PACKAGE__ -> {CData2} = shift if @_;
+	return __PACKAGE__ -> {CData2};
+    } 
+
+=begin original
+
+In the second accessor method, the __PACKAGE__ notation was used for
+two reasons.  First, to avoid hardcoding the literal package name
+in the code in case we later want to change that name.  Second, to
+clarify to the reader that what matters here is the package currently
+being compiled into, not the package of the invoking object or class.
+If the long sequence of non-alphabetic characters bothers you, you can
+always put the __PACKAGE__ in a variable first.
+
+=end original
+
+2번째의 접근자에서 __PACKAGE__ 기법이 2개의 이유로 사용되고 있습니다.
+첫번째 이유는 뒤에 이름을 바꾸고 싶을 때에, 코드에 패키지 이름을 
+리터럴로 하드 코딩하는 것을 피하고 싶기 때문입니다.
+2번째 이유는, 코드를 읽는 사람에게 여기에서 뭔가 문제인지를 제대로 
+하기 때문입니다.
+여기에서 문제는 현재 컴파일되어 있는 패키지이고, 
+오브젝트 클래스를 호출한 패키지에서는 없다는 것입니다.
+알파벳이 아닌 문자열이 길게 늘어진 것이 귀찮다면, 
+항상 변수의 처음에는 __PACKAGE__ 를 놓아주세요.
+
+=begin original
+
+    sub CData2 {
+	shift;			# XXX: ignore calling class/object
+	no strict "refs"; 	# to access eponymous meta-object
+	my $class = __PACKAGE__;
+	$class->{CData2} = shift if @_;
+	return $class->{CData2};
+    } 
+
+=end original
+
+    sub CData2 {
+	shift;			# XXX: 클래스/오브젝트 호출을 무시하고, 
+	no strict "refs"; 	# 클래스 이름의 메타오브젝트에 접근합니다.
+	my $class = __PACKAGE__;
+	$class->{CData2} = shift if @_;
+	return $class->{CData2};
+    } 
+
+=begin original
+
+Even though we're using symbolic references for good not evil, some
+folks tend to become unnerved when they see so many places with strict
+ref checking disabled.  Given a symbolic reference, you can always
+produce a real reference (the reverse is not true, though).  So we'll
+create a subroutine that does this conversion for us.  If invoked as a
+function of no arguments, it returns a reference to the compiling class's
+eponymous hash.  Invoked as a class method, it returns a reference to
+the eponymous hash of its caller.  And when invoked as an object method,
+this function returns a reference to the eponymous hash for whatever
+class the object belongs to.
+
+=end original
+
+계속 심볼릭 리퍼런스를 사용하고 있지만, 나쁘지는 않습니다.
+꽤 많은 장소에서 strict ref 의 체크를 무효로 하고 있는 것에 
+짜증날 사람이 있을지도 모르겠지만, 
+심볼릭 리퍼런스라면, 항상 제대로된 리퍼런스를 만들 수 있습니다
+(그 반대는 참이 아니지만). 
+이 심볼릭 리퍼런스에서 진짜 리퍼런스로의 변환을 하는 서브루틴을 만듭시다.
+인수무시하고 불려지면, 컴파일하고 있는 클래스의 이름의 해쉬로의 
+리퍼런스를 반환합니다.
+클래스 메소드로써 부려지면, 그 호출한 클래스의 이름의 해쉬로의 
+리퍼런스를 반환합니다.
+오브젝트 메소드로써 불려지면, 이 함수는 오브젝트가 
+속하고 있는 어떤 클래스에서도 클래스의 이름의 해쉬로의 리퍼런스를 반환합니다.
+
+    package Some_Class;
+    use strict;
+
+    our %Some_Class = (   	# our() is new to perl5.6
+	CData1 => "",
+	CData2 => "",
+    );
+
+=begin original
+
+    # tri-natured: function, class method, or object method
+    sub _classobj {
+	my $obclass = shift || __PACKAGE__;
+	my $class   = ref($obclass) || $obclass;
+	no strict "refs";   # to convert sym ref to real one
+	return \%$class;
+    } 
+
+=end original
+
+    # tri-natured: function, class method, or object method
+    sub _classobj {
+	my $obclass = shift || __PACKAGE__;
+	my $class   = ref($obclass) || $obclass;
+	no strict "refs";   # 심볼릭 리퍼런스를 진짜 리퍼런스로 변환한다 
+	return \%$class;
+    } 
+
+=begin original
+
+    for my $datum (keys %{ _classobj() } ) { 
+	# turn off strict refs so that we can
+	# register a method in the symbol table
+	no strict "refs";    	
+	*$datum = sub {
+	    use strict "refs";
+	    my $self = shift->_classobj();
+	    $self->{$datum} = shift if @_;
+	    return $self->{$datum};
+	}
+    }
+
+=end original
+
+    for my $datum (keys %{ _classobj() } ) { 
+	# strict refs 를 껐기때문에 
+	# 심볼 테이블에 메소드를 등록할 수 있습니다. 
+	no strict "refs";    	
+	*$datum = sub {
+	    use strict "refs";
+	    my $self = shift->_classobj();
+	    $self->{$datum} = shift if @_;
+	    return $self->{$datum};
+	}
+    }
+
+=head2 Indirect References to Class Data
+
+(간접적인 클래스 데이터로의 리퍼런스) 
+
+=begin original
+
+A reasonably common strategy for handling class attributes is to store
+a reference to each package variable on the object itself.  This is
+a strategy you've probably seen before, such as in L<perltoot> and
+L<perlbot>, but there may be variations in the example below that you
+haven't thought of before.
+
+=end original
+
+클래스 속성을 취급하는 합리적이고 일반적인 작전으로는 
+오브젝트 그 자신으로 각각의 패키지 변수의 리퍼런스를 넣는 것입니다.
+이것은 아마도 이미 본 작전입니다.
+L<perltoot> 나, L<perlbot> 에 있는 것입니다. 
+하지만 아직 생각한 적이 없는 베리에이션의 예제가 밑에 있습니다. 
+
+    package Some_Class;
+    our($CData1, $CData2);      	# our() is new to perl5.6
+
+    sub new {
+	my $obclass = shift;
+	return bless my $self = {
+	    ObData1 => "",
+	    ObData2 => "",
+	    CData1  => \$CData1,
+	    CData2  => \$CData2,
+	} => (ref $obclass || $obclass);
+    } 
+
+    sub ObData1 {
+	my $self = shift;
+	$self->{ObData1} = shift if @_;
+	return $self->{ObData1};
+    } 
+
+    sub ObData2 {
+	my $self = shift;
+	$self->{ObData2} = shift if @_;
+	return $self->{ObData2};
+    } 
+
+    sub CData1 {
+	my $self = shift;
+	my $dataref = ref $self
+			? $self->{CData1}
+			: \$CData1;
+	$$dataref = shift if @_;
+	return $$dataref;
+    } 
+
+    sub CData2 {
+	my $self = shift;
+	my $dataref = ref $self
+			? $self->{CData2}
+			: \$CData2;
+	$$dataref = shift if @_;
+	return $$dataref;
+    } 
+
+=begin original
+
+As written above, a derived class will inherit these methods, which
+will consequently access package variables in the base class's package.
+This is not necessarily expected behavior in all circumstances.  Here's an
+example that uses a variable meta-object, taking care to access the
+proper package's data.
+
+=end original
+
+위에 쓰여진대로, 파생 클래스가 그 메소드들을 상속합니다.
+이 메소드들은 파생 클래스의 패키지의 패키지 변수에 지속적으로 접근합니다. 
+이 것은 모든 상황에서 필요하고, 기대된 행동이 아닙니다.
+변수, 메타오브젝트를 사용하는 예제가 있습니다.
+적당한 패키지의 데이터에 접근을 해결합니다.
+
+	package Some_Class;
+	use strict;
+
+	our %Some_Class = (   	# our() is new to perl5.6
+	    CData1 => "",
+	    CData2 => "",
+	);
+
+	sub _classobj {
+	    my $self  = shift;
+	    my $class = ref($self) || $self;
+	    no strict "refs";
+	    # get (hard) ref to eponymous meta-object
+	    return \%$class;
+	} 
+
+	sub new {
+	    my $obclass  = shift;
+	    my $classobj = $obclass->_classobj();
+	    bless my $self = {
+		ObData1 => "",
+		ObData2 => "",
+		CData1  => \$classobj->{CData1},
+		CData2  => \$classobj->{CData2},
+	    } => (ref $obclass || $obclass);
+	    return $self;
+	} 
+
+	sub ObData1 {
+	    my $self = shift;
+	    $self->{ObData1} = shift if @_;
+	    return $self->{ObData1};
+	} 
+
+	sub ObData2 {
+	    my $self = shift;
+	    $self->{ObData2} = shift if @_;
+	    return $self->{ObData2};
+	} 
+
+	sub CData1 {
+	    my $self = shift;
+	    $self = $self->_classobj() unless ref $self;
+	    my $dataref = $self->{CData1};
+	    $$dataref = shift if @_;
+	    return $$dataref;
+	} 
+
+	sub CData2 {
+	    my $self = shift;
+	    $self = $self->_classobj() unless ref $self;
+	    my $dataref = $self->{CData2};
+	    $$dataref = shift if @_;
+	    return $$dataref;
+	} 
+
+=begin original
+
+Not only are we now strict refs clean, using an eponymous meta-object
+seems to make the code cleaner.  Unlike the previous version, this one
+does something interesting in the face of inheritance: it accesses the
+class meta-object in the invoking class instead of the one into which
+the method was initially compiled.
+
+=end original
+
+지금, strict ref 를 빼고 있는 것 뿐아니라, 클래스의 이름의 메타오브젝트를
+사용해서, 코드크리너를 만들고 있는 것입니다. 
+앞의 버젼과는 달리 이것은 상속에 직면하면, 조금 재미있는 일을 합니다.
+이것은 호출하고 있는 클래스의 클래스 메타 오브젝트에 접근합니다.
+메소드가 맨처음에 컴파일된 클래스가 아닙니다.
+
+=begin original
+
+You can easily access data in the class meta-object, making
+it easy to dump the complete class state using an external mechanism such
+as when debugging or implementing a persistent class.  This works because
+the class meta-object is a package variable, has a well-known name, and
+clusters all its data together.  (Transparent persistence
+is not always feasible, but it's certainly an appealing idea.)
+
+=end original
+
+클래스의 메타오브젝트의 데이터에 간단하게 접근할 수 가 있습니다. 
+디버깅이나 영속 클래스를 구성하는 때처럼 외부의 매커니즘을 사용해서 
+완전한 클래스의 상태를 간단하게 덤프할 수 있습니다. 
+이렇게 행동하는 것은 클래스의 메타오브젝트가 패키지 변수이고, 
+잘 알려진 이름을 가지고, 모든 데이터를 함께 처리할 수 있기 때문입니다. 
+(투과적인 영속성은 항상 적합한 것은 아닙니다만, 매력적인 아이디어인 것은 
+분명합니다) 
+
+=begin original
+
+There's still no check that object accessor methods have not been
+invoked on a class name.  If strict ref checking is enabled, you'd
+blow up.  If not, then you get the eponymous meta-object.  What you do
+with--or about--this is up to you.  The next two sections demonstrate
+innovative uses for this powerful feature.
+
+=end original
+
+아직, 오브젝트의 접근자 메소드가 클래스의 이름으로 호출되지 않는 것을 
+체크하고 있지 않습ㅣ다. 
+strict ref 의 체크가 유효하면 부서집니다.
+그렇지 않으면 클래스의 이름의 메타오브젝트를 얻습니다.
+그것을 놔둘 것인가 어떻게 하는 가는 만드는 사람에 달려 있습니다.
+다음의 2개의 섹션에서 이 강력한 특징의 획기적인 이용법을 
+시험하겠습니다. 
+
+=head2 Monadic Classes
+
+(단가의 클래스) 
+
+=begin original
+
+Some of the standard modules shipped with Perl provide class interfaces
+without any attribute methods whatsoever.  The most commonly used module
+not numbered amongst the pragmata, the Exporter module, is a class with
+neither constructors nor attributes.  Its job is simply to provide a
+standard interface for modules wishing to export part of their namespace
+into that of their caller.  Modules use the Exporter's &import method by
+setting their inheritance list in their package's @ISA array to mention
+"Exporter".  But class Exporter provides no constructor, so you can't
+have several instances of the class.  In fact, you can't have any--it
+just doesn't make any sense.  All you get is its methods.  Its interface
+contains no statefulness, so state data is wholly superfluous.
+
+=end original
+
+Perl 에 실려있는 표준모듈에는, 어떤 속성 메소드도 없고, 
+클래스 인스턴스를 제공하고 있는 것이 몇 가지 있습니다.
+제일 일반적으로 사용되는 모듈은, 프라그마를 숫자로 넣지 않으면 
+Exporter 모듈입니다. 
+이 모듈은 생성자도 속성도 없는 클래스입니다. 
+Exporter 의 일은 단순히 모듈이 호출되는 곳에 자신의 이름공간의 일부를 
+배출하고, 표준 인스턴스를 제공하는 것입니다. 
+모듈은 각각의 모듈의 @ISA 배열에 상속의 리스트를 정의하는 것으로,
+Exporter 의 &import 메소드를 사용하고, "Exporter" 에 기재합니다.
+하지만, 클래스의 Exporter 에는 생성자가 없습니다.
+그 때문에 복수의 클래스의 인스턴스를 가질 수가 없습니다.
+실제로, 한개도 가지고 있지 않습니다 -- 전혀 의미하지 않습니다.
+당신이 얻는 모든 것은 그 메소드입니다.
+그 인터페이스에는 어떤 상태도 포함되지 않습니다.
+그렇기에 상태의 데이터는 전혀 필요없습니다.
+
+=begin original
+
+Another sort of class that pops up from time to time is one that supports
+a unique instance.  Such classes are called I<monadic classes>, or less
+formally, I<singletons> or I<highlander classes>.
+
+=end original
+
+다른 종류의 클래스에서 시간에서 시간까지를 얻는 모듈은, 
+단일한 인터페이스를 지원하는 것입니다.
+이런 클래스는 I<monadic 클래스>라고 불립니다.
+또는 그다지 정식은 아니지만, I<singletons> 라든가, 
+I<highlander classes> 라고 불립니다.
+
+=begin original
+
+If a class is monadic, where do you store its state, that is,
+its attributes?  How do you make sure that there's never more than
+one instance?  While you could merely use a slew of package variables,
+it's a lot cleaner to use the eponymously named hash.  Here's a complete
+example of a monadic class:
+
+=end original
+
+클래스가 moandic 이라면 그 상태 즉, 속성을 어디에 넣는 것일까요?
+하나의 인터페이스에서 다른곳에는 없으면 어떻게 확인할 까요?
+많은 패키지 변수를 단순히 사용할 수도 있습니다만, 
+클래스의 이름의 해쉬를 사용하는 클리너를 사용하는 것도 꽤 있습니다.
+monadic class 의 완벽한 예제입니다:
+
+    package Cosmos;
+    %Cosmos = ();
+
+=begin original
+
+    # accessor method for "name" attribute
+    sub name {
+	my $self = shift;
+	$self->{name} = shift if @_;
+	return $self->{name};
+    } 
+
+=end original
+
+    # "name" 속성의 접근자 메소드 
+    sub name {
+	my $self = shift;
+	$self->{name} = shift if @_;
+	return $self->{name};
+    } 
+
+=begin original
+
+    # read-only accessor method for "birthday" attribute
+    sub birthday {
+	my $self = shift;
+	die "can't reset birthday" if @_;  # XXX: croak() is better
+	return $self->{birthday};
+    } 
+
+=end original
+
+    # "birthday" 속성의 readonly 접근자 메소드 
+    sub birthday {
+	my $self = shift;
+	die "can't reset birthday" if @_;  # XXX: croak() is better
+	return $self->{birthday};
+    } 
+
+=begin original
+
+    # accessor method for "stars" attribute
+    sub stars {
+	my $self = shift;
+	$self->{stars} = shift if @_;
+	return $self->{stars};
+    } 
+
+=end original
+
+    # "stars" 속성의 접근자 메소드 
+    sub stars {
+	my $self = shift;
+	$self->{stars} = shift if @_;
+	return $self->{stars};
+    } 
+
+=begin original
+
+    # oh my - one of our stars just went out!
+    sub supernova {
+	my $self = shift;
+	my $count = $self->stars();
+	$self->stars($count - 1) if $count > 0;
+    } 
+
+=end original
+
+    # 어라.. 별이 하나 죽어버렸다!
+    sub supernova {
+	my $self = shift;
+	my $count = $self->stars();
+	$self->stars($count - 1) if $count > 0;
+    } 
+
+=begin original
+
+    # constructor/initializer method - fix by reboot
+    sub bigbang { 
+	my $self = shift;
+	%$self = (
+	    name  	 => "the world according to tchrist",
+	    birthday 	 => time(),
+	    stars 	 => 0,
+	);
+	return $self;	    # yes, it's probably a class.  SURPRISE!
+    }
+
+=end original
+
+    # 생성자/이니셜라이저 - 리부트로 고쳐진다. 
+    sub bigbang { 
+	my $self = shift;
+	%$self = (
+	    name  	 => "the world according to tchrist",
+	    birthday 	 => time(),
+	    stars 	 => 0,
+	);
+	return $self;	    # 아마도 클래스 입니다. 
+    }
+
+=begin original
+
+    # After the class is compiled, but before any use or require 
+    # returns, we start off the universe with a bang.  
+    __PACKAGE__ -> bigbang();
+
+=end original
+
+    # 클래스가 컴파일된 후, 하지만 use 도 require 도 돌아가기 전 
+    # 빅뱅과 함께 우주가 움직이기 시작합니다.
+    __PACKAGE__ -> bigbang();
+
+=begin original
+
+Hold on, that doesn't look like anything special.  Those attribute
+accessors look no different than they would if this were a regular class
+instead of a monadic one.  The crux of the matter is there's nothing
+that says that $self must hold a reference to a blessed object.  It merely
+has to be something you can invoke methods on.  Here the package name
+itself, Cosmos, works as an object.  Look at the &supernova method.  Is that
+a class method or an object method?  The answer is that static analysis
+cannot reveal the answer.  Perl doesn't care, and neither should you.
+In the three attribute methods, C<%$self> is really accessing the %Cosmos
+package variable.
+
+=end original
+
+그대로 있어주세요. 
+아무것도 특별한 것처럼 보이지 않습니다.
+이 속성 접근들은 monadic 클래스인가 보통의 클래스인가로 
+하는 것은 아무것도 다르지 않습니다.
+여기에서의 제일 중요한 포인트는 $self 가 오브젝트에 bless 되거나 리퍼런스를
+가지지 않으면 안된다고는 하지 않는 곳입니다. 
+단순히 메소드를 호출하는 것이 가능하면, 어쨌든 좋습니다. 
+패키지의 이름자신, Cosmos 에서도, 오브젝트처럼 움직입니다.
+&supernova 메소드를 봐주세요.
+이것은, 클래스메소드나 오브젝트메소드인가요?
+그 답은 정적인 해석에서는 그 답을 알리는 것은 불가능하다는 것입니다. 
+Perl 은 신경쓰지 않고, 당신도 신경쓰지 말아야 합니다. 
+3개의 속성 메소드에서 C<%$self> 는, 실제는, %Cosmose 패키지 변수에 
+접근하고 있습니다.
+
+=begin original
+
+If like Stephen Hawking, you posit the existence of multiple, sequential,
+and unrelated universes, then you can invoke the &bigbang method yourself
+at any time to start everything all over again.  You might think of
+&bigbang as more of an initializer than a constructor, since the function
+doesn't allocate new memory; it only initializes what's already there.
+But like any other constructor, it does return a scalar value to use
+for later method invocations.
+
+=end original
+
+스티븐 호킹처럼 복수의, 연속의, 관계없는 우주의 존재를 가정하면,
+&bigbang 메소드를 스스로 호출하고 언제라도 다시 모든 것을 
+시작할 수가 있습니다.
+&bigbang 을 생성자보다도 더욱 이니셜라이저로 
+생각하고 있을지도 모르겠습니다.
+&bigbang 은 새로운 메모리를 할당하지 않습니다. 즉, &bigbang 은, 이미 
+거기에 있는 것을 초기화하는 뿐이기 때문에.
+하지만, 다른 어떤 생성자처럼 뒤의 메소드 호출에 사용하기 위해 
+스칼라 값을 반환합니다.
+
+=begin original
+
+Imagine that some day in the future, you decide that one universe just
+isn't enough.  You could write a new class from scratch, but you already
+have an existing class that does what you want--except that it's monadic,
+and you want more than just one cosmos.
+
+=end original
+
+장래의 언젠가, 하나의 우주에서는 충분하지 않다고 결심했다고 하ì.
+스크래치에서 새로운 클래스를 쓸 수도 있습니다만, 
+기존의 클래스가 있습니다 -- monadic 인 것을 빼고, 원하는 클래스가 있고, 
+거기에 단 2개 이상의 우주만 필요할 뿐입니다.
+
+=begin original
+
+That's what code reuse via subclassing is all about.  Look how short
+the new code is:
+
+=end original
+
+서브클래스에서 코드의 재이용하는 것이 전부입니다.
+새로운 코드가 어느 정도 짧은가 봐주세요.
+
+    package Multiverse;
+    use Cosmos;
+    @ISA = qw(Cosmos);
+
+    sub new {
+	my $protoverse = shift;
+	my $class      = ref($protoverse) || $protoverse;
+	my $self       = {};
+	return bless($self, $class)->bigbang();
+    } 
+    1;
+
+=begin original
+
+Because we were careful to be good little creators when we designed our
+Cosmos class, we can now reuse it without touching a single line of code
+when it comes time to write our Multiverse class.  The same code that
+worked when invoked as a class method continues to work perfectly well
+when invoked against separate instances of a derived class.
+
+=end original
+
+Cosmos 클래스를 설계할 때에 신중하고 좋은 작은 크리에이터 였기에
+Multiverse 클래스를 쓸 때에 새로운 한 줄도 건드리지 않고, Cosmos 클래스를
+재이용할 수 있습니다.
+클래스 메소드로써 호출된 때에 움직이는 같은 코드가 파생 클래스의 각각의 
+인스턴스에서 호출되어도 완전히 계속해서 잘 움직입니다.
+
+=begin original
+
+The astonishing thing about the Cosmos class above is that the value
+returned by the &bigbang "constructor" is not a reference to a blessed
+object at all.  It's just the class's own name.  A class name is, for
+virtually all intents and purposes, a perfectly acceptable object.
+It has state, behavior, and identity, the three crucial components
+of an object system.  It even manifests inheritance, polymorphism,
+and encapsulation.  And what more can you ask of an object?
+
+=end original
+
+위에 든 Cosmos 클래스에서 깜짝놀래는 것은 &bigbang "생성자"가 
+반환하는 값이 전혀 bless 된 오브젝트로의 리퍼런스가 아니라는 것입니다.
+&bigbang 생성자가 반호나하는 값은 클래스 자신의 이름입니다.
+클래스 이름은 모든 목적과 수단으로써 실질적으로 완전히 조건을 만족하고 있는
+오브젝트입니다.
+상태, 행동, 동일성, 이 3개의 오브젝트 시스템의 중대한 구성요소가 
+클래스 이름에는 있습니다.
+클래스 이름은 상속, 다형성, 캡슐화도 확실하게 합니다. 
+오브젝트에 이 이상 무엇을 바랄 수 있을까요?
+
+=begin original
+
+To understand object orientation in Perl, it's important to recognize the
+unification of what other programming languages might think of as class
+methods and object methods into just plain methods.  "Class methods"
+and "object methods" are distinct only in the compartmentalizing mind
+of the Perl programmer, not in the Perl language itself.
+
+=end original
+
+Perl 에서 오브젝트 지향을 이해하기 위해, 다른 프로그래밍 언어가 
+클래스 메소드로 오브젝트 메소드에 대해 생각하는 것을 단지 단순한 
+메소드에 통일하는 것을 인식하는 것이 중요합니다.
+"클래스 메소드"와 "오브젝트메소드"는 Perl 프로그래머가 마음 속에서 
+구분하고 있는 것뿐으로 Perl 언어 자체에서는 구분짓지 않습니다.
+
+=begin original
+
+Along those same lines, a constructor is nothing special either, which
+is one reason why Perl has no pre-ordained name for them.  "Constructor"
+is just an informal term loosely used to describe a method that returns
+a scalar value that you can make further method calls against.  So long
+as it's either a class name or an object reference, that's good enough.
+It doesn't even have to be a reference to a brand new object.
+
+=end original
+
+이런 같은 줄사이에서 생성자는 어떤 특별한 것이 아닙니.
+Perl 에는 그런 줄에 신에 의해서 정해진 이름은 없는 것이 그 이유입니다.
+"생성자" 는 공식적이지 않은 술어이며, 뒤에 메소드를 호출할 수 있는 
+스칼라 값을 반환하는 메소드를 설명하는 것을 사용합ㅣ다.
+클래스 이름도 오브젝트 리퍼런스라면 충분히 좋습니다.
+수직의 오브젝트가 리퍼런스일 필요조차 없습니다.
+
+=begin original
+
+You can have as many--or as few--constructors as you want, and you can
+name them whatever you care to.  Blindly and obediently using new()
+for each and every constructor you ever write is to speak Perl with
+such a severe C++ accent that you do a disservice to both languages.
+There's no reason to insist that each class have but one constructor,
+or that a constructor be named new(), or that a constructor be
+used solely as a class method and not an object method.
+
+=end original
+
+자신이 원하는 것과 같은 정도의 많은 -- 또는 거의 없는 --, 생성자를 
+가질 수 있고, 자신이 하고싶은 대로 어떤 이름을 붙일 수 있습니다. 
+지금까지 무턱대고 썼던 어떠한 생성자에게 new(을ㄹ 사용하는 것은 
+양쪽의 언어에 엄청난 파장을 주는, 엄격한 C++ 의 
+접근자같은 것으로 Perl 을 연결하는 것입니다. 
+각각의 클래스에 하나의 생성자가 있다든가, 혹은 생성자는 
+new() 라고 이름지어졌다든가, 생성자는 오브젝트 메소드가 아니고 
+단지 클래스 메소드로 사용된다든가 하는 것을 강력하게 주장하는 이유는 
+결코 없습니다.
+
+=begin original
+
+The next section shows how useful it can be to further distance ourselves
+from any formal distinction between class method calls and object method
+calls, both in constructors and in accessor methods.
+
+=end original
+
+다음의 섹션에서는, 생성자와 액세러리 메소드 양쪽에서 
+클래스 메소드와 오브젝트 메소드의 호출 사이에서 
+정식적인 구별에서 우리 자신이 더욱 멀리까지 있을 듯한 것이 
+어떻게 유익한 가를 나타냅니다.
+
+=head2 Translucent Attributes
+
+(반투명 속성)
+
+=begin original
+
+A package's eponymous hash can be used for more than just containing
+per-class, global state data.  It can also serve as a sort of template
+containing default settings for object attributes.  These default
+settings can then be used in constructors for initialization of a
+particular object.  The class's eponymous hash can also be used to
+implement I<translucent attributes>.  A translucent attribute is one
+that has a class-wide default.  Each object can set its own value for the
+attribute, in which case C<< $object->attribute() >> returns that value.
+But if no value has been set, then C<< $object->attribute() >> returns
+the class-wide default.
+
+=end original
+
+패키지의 이름의 해쉬는, 단순히 클래스 단위의 글로벌한 상태의 데이터를 
+가지는 것 이상의 것에 사용할 수 있습니다.
+오브젝트 속성의 기본값의 설정을 가지고 일종의 템플레이트로써의 역할도 
+가능합니다.
+이 기본값의 설정은 생성자에서 특정의 오브젝트의 초기화를 위해
+사용할 수 있습니다.
+클래스의 이름 해쉬는, I<반투명의 속성>을 구성하는 것에도 사용할 수 있습니다.
+반투명의 속성이라는 것은 클래스 와이드의 기본값을 가지는 속성입니다.
+각각의 오브젝트는 속성에 그 자신의 값을 정의할 수 있습니다.
+거기에서는 C<< $object->attribute() >> 에서, 값을 반환합니다.
+하지만, 값이 아직 정의되어 있지 않으면, C<< $object->attribute() >> 는 
+클래스 와이드의 기본값을 반환합니다.
+
+=begin original
+
+We'll apply something of a copy-on-write approach to these translucent
+attributes.  If you're just fetching values from them, you get
+translucency.  But if you store a new value to them, that new value is
+set on the current object.  On the other hand, if you use the class as
+an object and store the attribute value directly on the class, then the
+meta-object's value changes, and later fetch operations on objects with
+uninitialized values for those attributes will retrieve the meta-object's
+new values.  Objects with their own initialized values, however, won't
+see any change.
+
+=end original
+
+이 반투명 속성들에 copy-on-right 어프로치의 뭔가를 적용한다고 합시다. 
+이런 속성들에게서 단지 값을 얻어내고 싶다면 반투명 속성을 얻습니다.
+하지만, 이런 속성에 새로운 값을 넣으면, 새로운 값은 현재의 오브젝트에 
+설ㅓㅇ됩니다.
+한편, 클래스를 오브젝트로써 사용하고 직접 클래스에서 속성값을 넣으면, 
+메타오브젝트의 값이 변경되어, 그 뒤에 그 속성들의 값이 
+메타 오브젝트의 새로운 값을 얻어내게 됩니다.
+초기값을 가진 메소드는 어떠한 변경도 없을 겁니다.
+
+=begin original
+
+Let's look at some concrete examples of using these properties before we
+show how to implement them.  Suppose that a class named Some_Class
+had a translucent data attribute called "color".  First you set the color
+in the meta-object, then you create three objects using a constructor
+that happens to be named &spawn.
+
+=end original
+
+어떻게 구성하는 가를 보이기 전에, 이 속성들을 사용해서 구체적인 예를 
+봅시다.
+Some_Class 라는 이름의 클래스에 "color" 라고 하는 반투명의 클래스 속성이
+있다고 합시다.
+우선 메타오브젝트의 색을 정합니다. 
+그리고 생성자를 사용해서, 3개의 오브젝트를 만듭니다.
+생성자는 때로는 &spawn 이라는 이름입니다. 
+
+    use Vermin;
+    Vermin->color("vermilion");
+
+    $ob1 = Vermin->spawn();   	# so that's where Jedi come from
+    $ob2 = Vermin->spawn();   
+    $ob3 = Vermin->spawn();  
+
+    print $obj3->color();  	# prints "vermilion"
+
+=begin original
+
+Each of these objects' colors is now "vermilion", because that's the
+meta-object's value for that attribute, and these objects do not have
+individual color values set.
+
+=end original
+
+각각의 오브젝트의 색은 현재 "vermilion" 입니다. 
+메타오브젝트의 그 속성의 값이 그것이며, 각각의 오브젝트에 개별의 
+색의 갑싱 정의되어 있지 않기 때문입니다.
+
+=begin original
+
+Changing the attribute on one object has no effect on other objects
+previously created.
+
+=end original
+
+어떤 오브젝트의 속성을 변경해서도, 앞서 만들어진 다른 오브젝트의 값에는 
+영향을 주지 않습니다.
+
+    $ob3->color("chartreuse");		
+    print $ob3->color();  	# prints "chartreuse"
+    print $ob1->color();  	# prints "vermilion", translucently
+
+=begin original
+
+If you now use $ob3 to spawn off another object, the new object will
+take the color its parent held, which now happens to be "chartreuse".
+That's because the constructor uses the invoking object as its template
+for initializing attributes.  When that invoking object is the
+class name, the object used as a template is the eponymous meta-object.
+When the invoking object is a reference to an instantiated object, the
+&spawn constructor uses that existing object as a template.  
+
+=end original
+
+$ob3 를 사용해서 다른 오브젝트를 spawn 해보면, 새로운 오브젝트는 
+그 부모가 가지고 있는 색을 얻을 겁니다.
+지금은 그냥 "chartreuse" 가 될 겁니다.
+생성자가 초기화의 속성의 템플레이트로써 호출한 오브젝트를 사용하기 때문입니다.
+호출한 오브젝트가 클래스 이름인 경우, 오브젝트는 클래스의 메타 오브젝트를 
+참조합니다.
+호출한 오브젝트가 설명된 오브젝트로의 리퍼런스인 경우,
+&spawn 생성자는 템플레이트로써 존재하는 오브젝트를 사용합니다.
+
+    $ob4 = $ob3->spawn();	# $ob3 now template, not %Vermin
+    print $ob4->color();  	# prints "chartreuse"
+
+=begin original
+
+Any actual values set on the template object will be copied to the
+new object.  But attributes undefined in the template object, being
+translucent, will remain undefined and consequently translucent in the
+new one as well.
+
+=end original
+
+템플레이트 오브젝트에 설정된 실제의 값은 어떤 것이라도,
+새로운 오브젝트로 복사됩니다. 
+하지만 템플레이트 오브젝트의 정의되지 않은 속성은, 반투명에 의해 
+정의되지 않은 상태가 되고, 그 결과 새로운 것도 이처럼 반투명입니다.
+
+=begin original
+
+Now let's change the color attribute on the entire class:
+
+=end original
+
+이번에는 클래스 전체의 color 속성을 변경해봅시다:
+
+    Vermin->color("azure");	
+    print $ob1->color();  	# prints "azure"
+    print $ob2->color();  	# prints "azure"
+    print $ob3->color();  	# prints "chartreuse"
+    print $ob4->color();  	# prints "chartreuse"
+
+=begin original
+
+That color change took effect only in the first pair of objects, which
+were still translucently accessing the meta-object's values.  The second
+pair had per-object initialized colors, and so didn't change.
+
+=end original
+
+이 색의 변경은 오브젝트의 맨처음의 2가지만 영향을 끼칩니다.
+이 2개는 아직 반투명으로 메타오브젝트의 값에 접근합니다.
+뒤의 2개는 오브젝트마다 초기화된 색이 있습니다.
+그 때문에 변경되지 않습니다.
+
+=begin original
+
+One important question remains.  Changes to the meta-object are reflected
+in translucent attributes in the entire class, but what about
+changes to discrete objects?  If you change the color of $ob3, does the
+value of $ob4 see that change?  Or vice-versa.  If you change the color
+of $ob4, does then the value of $ob3 shift?
+
+=end original
+
+하나의 중요한 의문이 있습니다.
+메타 오브젝트의 값을 바꾸는 것은 클래스 전체의 분투명 속성에 반영됩니다.
+하지만 오브젝트를 아끼는 변경은 어떨까요?
+$ob3 의 색을 바꾸ㄴ면 $ob4 에는 그 변경을 알수 있을까요?
+또 그 반대도 마찬가지.
+만약, $ob4 의 색을 변경하면, $ob4 의 값은 바뀔 까요?
+
+    $ob3->color("amethyst");		
+    print $ob3->color();  	# prints "amethyst"
+    print $ob4->color();  	# hmm: "chartreuse" or "amethyst"?
+
+=begin original
+
+While one could argue that in certain rare cases it should, let's not
+do that.  Good taste aside, we want the answer to the question posed in
+the comment above to be "chartreuse", not "amethyst".  So we'll treat
+these attributes similar to the way process attributes like environment
+variables, user and group IDs, or the current working directory are
+treated across a fork().  You can change only yourself, but you will see
+those changes reflected in your unspawned children.  Changes to one object
+will propagate neither up to the parent nor down to any existing child objects.
+Those objects made later, however, will see the changes.
+
+=end original
+
+While one could argue that .. 확실히 이런 케이스에서는 그래야하지만 
+그렇게 하지 않도록 합시다.
+Good taste aside, "chartreuse" "amethyst"
+환경변수처럼 속성을 처리하는 것과 비슷한 방법으로 그 속성들을 다룹시다.
+유저가 그룹이나 현재의 워킹디렉토리는 fork 를 넘어서 다룰 수 있습니다.
+자기 자신만 변경할 수 있어도, 그 변경들이 spawn 되지 않은 자식에게
+반영하는 것을 알까요?
+하나의 오브젝트의 변경은 부모에게도 올라가 존재하는 자신에게 내려와 
+오브젝트에 전달합니다. 
+이런 오브젝트는 뒤에 만들어도 변경을 알겠죠.
+
+=begin original
+
+If you have an object with an actual attribute value, and you want to
+make that object's attribute value translucent again, what do you do?
+Let's design the class so that when you invoke an accessor method with
+C<undef> as its argument, that attribute returns to translucency.
+
+=end original
+
+실제 속성값으로 오브젝트를 가지고 오브젝트의 속성값을 다시금 반투명으로 
+했다면 어떨까요?
+클래스를 그 인수에 C<undef> 로 접근자 메소드를 호출할 때, 
+그 속성은 반투명속성에 
+
+    $ob4->color(undef);		# back to "azure"
+
+=begin original
+
+Here's a complete implementation of Vermin as described above.
+
+=end original
+
+위에 설명한 Vermin 의 완전한 구성입니다.
+
+    package Vermin;
+
+    # here's the class meta-object, eponymously named.
+    # it holds all class attributes, and also all instance attributes 
+    # so the latter can be used for both initialization 
+    # and translucency.
+
+    our %Vermin = (   		# our() is new to perl5.6
+	PopCount => 0,		# capital for class attributes
+	color    => "beige",    # small for instance attributes		
+    );
+
+    # constructor method
+    # invoked as class method or object method
+    sub spawn {
+	my $obclass = shift;
+	my $class   = ref($obclass) || $obclass;
+	my $self = {};
+	bless($self, $class);
+	$class->{PopCount}++;
+	# init fields from invoking object, or omit if 
+	# invoking object is the class to provide translucency
+	%$self = %$obclass if ref $obclass;
+	return $self;
+    } 
+
+    # translucent accessor for "color" attribute
+    # invoked as class method or object method
+    sub color {
+	my $self  = shift;
+	my $class = ref($self) || $self;
+
+	# handle class invocation
+	unless (ref $self) {
+	    $class->{color} = shift if @_;
+	    return $class->{color}
+	}
+
+	# handle object invocation
+	$self->{color} = shift if @_;
+	if (defined $self->{color}) {  # not exists!
+	    return $self->{color};
+	} else {
+	    return $class->{color};
+	} 
+    } 
+
+    # accessor for "PopCount" class attribute
+    # invoked as class method or object method
+    # but uses object solely to locate meta-object
+    sub population {
+	my $obclass = shift;
+	my $class   = ref($obclass) || $obclass;
+	return $class->{PopCount};
+    } 
+
+    # instance destructor
+    # invoked only as object method
+    sub DESTROY {
+	my $self  = shift;
+	my $class = ref $self;
+	$class->{PopCount}--;
+    }
+
+=begin original
+
+Here are a couple of helper methods that might be convenient.  They aren't
+accessor methods at all.  They're used to detect accessibility of data
+attributes.  The &is_translucent method determines whether a particular
+object attribute is coming from the meta-object.  The &has_attribute
+method detects whether a class implements a particular property at all.
+It could also be used to distinguish undefined properties from non-existent
+ones.
+
+=end original
+
+2, 3 의 편리한 헬퍼 메소드가 있습니다. 
+데이터 속성의 접근성을 파악하는 것에 사용됩니다.
+이 &is_translucent 메소드는 특별한 오브젝트 속성이 
+메타오브젝트에서 오는지 어떤지를 결정하고 있습니다.
+&has_attribute 메소드는 클래스가 특별한 속성을 조금만이라도 구성하고 있는지 
+어떤지를 파악합니다.
+존재하지 않는 속성에서 정의되지 않은 속성을 구별하는 것에도 사용됩니다.
+
+    # detect whether an object attribute is translucent
+    # (typically?) invoked only as object method
+    sub is_translucent {
+	my($self, $attr)  = @_;
+	return !defined $self->{$attr};  
+    }
+
+    # test for presence of attribute in class
+    # invoked as class method or object method
+    sub has_attribute {
+	my($self, $attr)  = @_;
+	my $class = ref($self) || $self;
+	return exists $class->{$attr};  
+    } 
+
+=begin original
+
+If you prefer to install your accessors more generically, you can make
+use of the upper-case versus lower-case convention to register into the
+package appropriate methods cloned from generic closures.
+
+=end original
+
+보다 일반적으로 접근자를 설치하고 싶다면,
+패키지에 일반적인 클로져에서 클로닝된 적절한 메소드를
+등록하는 것에 대문자 대 소문자의 관습을 이용할 수 있습니다.
+
+    for my $datum (keys %{ +__PACKAGE__ }) {
+	*$datum = ($datum =~ /^[A-Z]/)
+	    ? sub {  # install class accessor
+		    my $obclass = shift;
+		    my $class   = ref($obclass) || $obclass;
+		    return $class->{$datum};
+		  }
+	    : sub { # install translucent accessor
+		    my $self  = shift;
+		    my $class = ref($self) || $self;
+		    unless (ref $self) {
+			$class->{$datum} = shift if @_;
+			return $class->{$datum}
+		    }
+		    $self->{$datum} = shift if @_;
+		    return defined $self->{$datum}
+			? $self  -> {$datum}
+			: $class -> {$datum}
+		  } 
+    }
+
+=begin original
+
+Translations of this closure-based approach into C++, Java, and Python
+have been left as exercises for the reader.  Be sure to send us mail as
+soon as you're done.
+
+=end original
+
+이 클로져베이스의 어프로치를 C++, Java, Python 으로 
+전환하는 것은 독자의 과제로 남겨두겠습니다.
+해결하면 꼭 보내주세요.
+
+=head1 Class Data as Lexical Variables
+
+(렉시컬 변수의 클래스 데이터)
+
+=head2 Privacy and Responsibility 
+
+(프라이버시와 책임)
+
+=begin original
+
+Unlike conventions used by some Perl programmers, in the previous
+examples, we didn't prefix the package variables used for class attributes
+with an underscore, nor did we do so for the names of the hash keys used
+for instance attributes.  You don't need little markers on data names to
+suggest nominal privacy on attribute variables or hash keys, because these
+are B<already> notionally private!  Outsiders have no business whatsoever
+playing with anything within a class save through the mediated access of
+its documented interface; in other words, through method invocations.
+And not even through just any method, either.  Methods that begin with
+an underscore are traditionally considered off-limits outside the class.
+If outsiders skip the documented method interface to poke around the
+internals of your class and end up breaking something, that's not your
+fault--it's theirs.
+
+=end original
+
+Perl 프로그래머의 몇 명에게 사용되는 습관이라는 것은 다르고 앞의 예제에서는
+클래스 속성에 사ㅇ되는 패키지 변수의 앞에 언더바를 붙이지 않았고,
+인스턴스 속성에 사용되는 해쉬 키의 이름에도 그렇게 하지 않았습니다.
+데이터 이름에 작은 마크를 붙여서 속성 변수나 해쉬의 키에 명목상의 
+프라이버시를 암시할 필요는 없습니다.
+이런 것은 B<항상> 개념적으로 프라이베이트이기 때문입니다!
+외부 사람이 클래스 안에서 무엇인가를 건드리는 것은 조금이라도 신경쓰지 않아도
+괜찮기때문입니다. 
+그 문서의 인터페이스를 통한 것을 빼고; 바꿔 말하면 메소드의 실행을 통한 것을
+제외하고. 
+메소드 언더바에서 시작하는 메소드는 전통적으로 클래스의 바깥쪽에서 출입금지로
+여겨지고 있습니다.
+만약 외부 사람이 문서에 쓰여진 멧드 인터페이스를 넘겨읽고 클래스 내부를 
+돌아다니고 무엇인가를 망가뜨리려고 해도, 클래스의 제작자는 상관없습니다.
+-- 그것은 그런 짓을 한 바깥 사람은 쓸데없는 짓입니다.
+
+=begin original
+
+Perl believes in individual responsibility rather than mandated control.
+Perl respects you enough to let you choose your own preferred level of
+pain, or of pleasure.  Perl believes that you are creative, intelligent,
+and capable of making your own decisions--and fully expects you to
+take complete responsibility for your own actions.  In a perfect world,
+these admonitions alone would suffice, and everyone would be intelligent,
+responsible, happy, and creative.  And careful.  One probably shouldn't
+forget careful, and that's a good bit harder to expect.  Even Einstein
+would take wrong turns by accident and end up lost in the wrong part
+of town.
+
+=end original
+
+Perl 은 위임통치에 지정된 컨트롤보다도 오히려, 개인책무를 믿고 있습니다. 
+Perl 은 충분히 당신을 존경하기 때문에, 당신에게 자신에게 있는 레벨의 
+고통과 기쁨을 선택하게 합니다.
+Perl 은 당신이 창조적으며 지성적이고 자기 자신이 결정할 수 있다고 믿으며,
+자신의 행동에 완전한 책임을 지기를 기대하고 있습니다. 
+완전한 세계에서는 이런 권고만으로 충분할 겁니다.
+그리고 모든 사람이 지성적이고 신뢰할 수 있고, 행복하며 창조적이겠죠.
+그리고 신중할 겁니다.
+아마 어떤 사람이 신중함을 잊어도 그것은 꽤 예측하기 어려울 겁니다.
+이인슈타인이라도 뭔가 잘못해서 다른 지역의 마을을 헤매는 경우가 있겠죠.
+
+=begin original
+
+Some folks get the heebie-jeebies when they see package variables
+hanging out there for anyone to reach over and alter them.  Some folks
+live in constant fear that someone somewhere might do something wicked.
+The solution to that problem is simply to fire the wicked, of course.
+But unfortunately, it's not as simple as all that.  These cautious
+types are also afraid that they or others will do something not so
+much wicked as careless, whether by accident or out of desperation.
+If we fire everyone who ever gets careless, pretty soon there won't be
+anybody left to get any work done.
+
+=end original
+
+Some folks get the heebie-jeebies when they see package variables
+hanging out there for anyone to reach over and alter them.  Some folks     
+live in constant fear that someone somewhere might do something wicked.        
+The solution to that problem is simply to fire the wicked, of course.     
+But unfortunately, it's not as simple as all that.  These cautious    
+types are also afraid that they or others will do something not so    
+much wicked as careless, whether by accident or out of desperation.     
+If we fire everyone who ever gets careless, pretty soon there won't be 
+anybody left to get any work done. (TBT)
+
+=begin original
+
+Whether it's needless paranoia or sensible caution, this uneasiness can
+be a problem for some people.  We can take the edge off their discomfort
+by providing the option of storing class attributes as lexical variables
+instead of as package variables.  The my() operator is the source of
+all privacy in Perl, and it is a powerful form of privacy indeed.
+
+=end original
+
+그것이 필요없는 파라노이어가 현명한 경고인지 어떤지 
+그 부안은 사람에 따라서는 문제가 될 수 있습니다.
+패키지 변수 대신에 렉시컬 변수에 클래스 속성을 넣는 옵션을 
+부여하는 것으로 그런 사람들의 불안을 해소할 수 있습니다.
+my() 연산자는 Perl 의 모든 프라이버시의 근본입니다.
+그리고 실제로 my() 는 프라이버시의 강력한 형태입니다.
+
+=begin original
+
+It is widely perceived, and indeed has often been written, that Perl
+provides no data hiding, that it affords the class designer no privacy
+nor isolation, merely a rag-tag assortment of weak and unenforceable
+social conventions instead.  This perception is demonstrably false and
+easily disproven.  In the next section, we show how to implement forms
+of privacy that are far stronger than those provided in nearly any
+other object-oriented language.
+
+=end original
+
+다음은 널리 인정받았고, 실제 잘 쓰여지는 겁니다.
+Perl 은 데이터 숨김을 제공하지 않고, 
+Perl 은 클래스의 설계자에게 프라이버시도 독립도 제공하지 않습니다.
+단지 약점의 결합하고 있고, 대신할 수 없는 사회적 습관이 대신 있을 뿐입니다.
+이 인식은 확실히 틀렸고, 조금 자세히 조사되어 있지 않습니다.
+다음의 섹션에서는 대부분 어떤 다른 오브젝트 지향에서 제공되는 것보다도 
+보다더 강력한 프라이버시의 형태를 구성하는 것을 보여줍니다.
+
+=head2 File-Scoped Lexicals
+
+(파일 영역의 렉시컬 변수)
+
+=begin original
+
+A lexical variable is visible only through the end of its static scope.
+That means that the only code able to access that variable is code
+residing textually below the my() operator through the end of its block
+if it has one, or through the end of the current file if it doesn't.
+
+=end original
+
+렉시컬 변수는 그 정적인 영역의 끝까지밖에 보이지 않습니다.
+이것은 블록이 있으면 그 블록의 끝까지의, 블록이 없으면 
+현재의 파일의 끝까지의, my() 연산자의 아래에 있는 텍스트에 존재하는 
+코드만이 이 변수에 접근할 수 있는 유일한 코드입니다.
+
+=begin original
+
+Starting again with our simplest example given at the start of this
+document, we replace our() variables with my() versions.
+
+=end original
+
+이 문서에 최초에 있었던 제일 간단한 예제로 시작해봅시다.
+our() 변수를 my() 버젼으로 바꿨습니다.
+
+    package Some_Class;
+    my($CData1, $CData2);   # file scope, not in any package
+    sub CData1 {
+	shift;	# XXX: ignore calling class/object
+	$CData1 = shift if @_;
+	return $CData1;
+    } 
+    sub CData2 {
+	shift;	# XXX: ignore calling class/object
+	$CData2 = shift if @_;
+	return $CData2;
+    } 
+
+=begin original
+
+So much for that old $Some_Class::CData1 package variable and its brethren!
+Those are gone now, replaced with lexicals.  No one outside the
+scope can reach in and alter the class state without resorting to the
+documented interface.  Not even subclasses or superclasses of
+this one have unmediated access to $CData1.  They have to invoke the &CData1
+method against Some_Class or an instance thereof, just like anybody else.
+
+=end original
+
+저 낡은, $Some_Class::CData1 버젼 변수들에 대해서는 이것만으로 해두겠습니다.
+그것들은 지금에 이러서는 렉시컬 변수로 바뀌었습니다.
+영역의 바깥쪽에 있는 누구도, 문서에 쓰여진 인터페이스의 수단 이외에 
+클래스의 상태에 영향을 끼치지 못하고, 바꿀 수 없습니다.
+이 서브클래스나 수퍼클래스에서도 $CData1로 접근을 중개하지 않습니다.
+Some_Class 가, 그 인스턴스인지 다른 닯은 것으로, 
+&CData1 메소드를 호출할 필요가 있습니다.
+
+=begin original
+
+To be scrupulously honest, that last statement assumes you haven't packed
+several classes together into the same file scope, nor strewn your class
+implementation across several different files.  Accessibility of those
+variables is based uniquely on the static file scope.  It has nothing to
+do with the package.  That means that code in a different file but
+the same package (class) could not access those variables, yet code in the
+same file but a different package (class) could.  There are sound reasons
+why we usually suggest a one-to-one mapping between files and packages
+and modules and classes.  You don't have to stick to this suggestion if
+you really know what you're doing, but you're apt to confuse yourself
+otherwise, especially at first.
+
+=end original
+
+매우 정직해지면, 마지막 상태메소드는 같은 파일 영역에 
+복수의 클래스를 함께 팩하지 않고, 복수의 다른 파일에 따라서, 클래스의 
+구성해제도 하지 않는 다고 상정해봅시다.
+이 변수의 접근성은 정적인 파일영역에서 유니크한 베이스 됩니다.
+
+=begin original
+
+If you'd like to aggregate your class attributes into one lexically scoped,
+composite structure, you're perfectly free to do so.
+
+=end original
+
+클래스 속성을 하나의 렉시컬 영역의 변수에 집약해서, 구조체를 만들고 싶으면,
+그렇게 하는 것은 완전히 자유입니다.
+
+    package Some_Class;
+    my %ClassData = (
+	CData1 => "",
+	CData2 => "",
+    );
+    sub CData1 {
+	shift;	# XXX: ignore calling class/object
+	$ClassData{CData1} = shift if @_;
+	return $ClassData{CData1};
+    } 
+    sub CData2 {
+	shift;	# XXX: ignore calling class/object
+	$ClassData{CData2} = shift if @_;
+	return $ClassData{CData2};
+    } 
+
+=begin original
+
+To make this more scalable as other class attributes are added, we can
+again register closures into the package symbol table to create accessor
+methods for them.
+
+=end original
+
+다른 클래스 속성을 추가하도록, 보다 확장성을 가지게하고 싶다면, 
+다시금 패키지의 심볼 테이블에 클로져를 등록하고,
+그것들을 위해 접근자 메소드도 만듭니다.
+
+    package Some_Class;
+    my %ClassData = (
+	CData1 => "",
+	CData2 => "",
+    );
+    for my $datum (keys %ClassData) { 
+	no strict "refs";
+	*$datum = sub { 
+	    shift;	# XXX: ignore calling class/object
+	    $ClassData{$datum} = shift if @_;
+	    return $ClassData{$datum};
+	};
+    }
+
+=begin original
+
+Requiring even your own class to use accessor methods like anybody else is
+probably a good thing.  But demanding and expecting that everyone else,
+be they subclass or superclass, friend or foe, will all come to your
+object through mediation is more than just a good idea.  It's absolutely
+critical to the model.  Let there be in your mind no such thing as
+"public" data, nor even "protected" data, which is a seductive but
+ultimately destructive notion.  Both will come back to bite at you.
+That's because as soon as you take that first step out of the solid
+position in which all state is considered completely private, save from the
+perspective of its own accessor methods, you have violated the envelope.
+And, having pierced that encapsulating envelope, you shall doubtless
+someday pay the price when future changes in the implementation break
+unrelated code.  Considering that avoiding this infelicitous outcome was
+precisely why you consented to suffer the slings and arrows of obsequious
+abstraction by turning to object orientation in the first place, such
+breakage seems unfortunate in the extreme.
+
+=end original
+
+뭔가 다른 접근자를 사용하는 자기자신의 클래스를 필요로 하는 것은
+아마도 좋은 일입니다. 하지만, 다른 것 모두 서브클래스, 수퍼클래스, 
+적아군, 모든것이 중개를 통해서 당신의 오브젝트에 오는 것을 
+여구하거나 예측하는 것은 단순히 좋은 생각을 넘는 것입니다.
+이것은 그 모델에 따라 중요합니다.
+"public" 데이터, "protected" 데이터 어느 쪽이라도 
+그런 것은 마음 속에서 지워버리죠.
+그것들은 매혹적이지만 묶을 때는 좋지 않은 생각입니다.
+양쪽다 돌아와서 당신에게 안좋은 영향을 끼칠 겁니다.
+모든 상태가 완전하게 프라이베이트라고 생각하고 그 자신의 접근자 메소드의 
+관점에서 보존된 안정한 위치에서 벗어나 곧, 그 envelope 를 
+파괴하는 것이 되기 때문입니다.
+캡슐화된 envelope 에 구멍을 열면, 
+미래에 구성 변경이 관계없는 코드를 없앨 때, 누군가가 대가를 지불하는 것은 
+틀림없을 겁니다.
+이 불완전한 결과를 피하는 생각은 더욱 최초의 장소에서 오브젝트 지향으로 
+변화하는 것에 의해 비굴한 추상화의 비판을 피하는 것으로 납득하는 이유이며
+그런 파손은 매우 유감으 생각할 수 있습니다.
+
+=head2 More Inheritance Concerns
+
+(보다 많은 상속의 개념)
+
+=begin original
+
+Suppose that Some_Class were used as a base class from which to derive
+Another_Class.  If you invoke a &CData method on the derived class or
+on an object of that class, what do you get?  Would the derived class
+have its own state, or would it piggyback on its base class's versions
+of the class attributes?
+
+=end original
+
+Some_Class 가, 파생의 Another_Class 에서 기본 클래스로써 
+사용된다고 합시다.
+&CData 메소드를 파생클래스나 패상클래스의 오브젝트로 호출하면 
+무엇을 얻을까요?
+파생 클래스는 그 자신의 상태가 있는 지, 그렇지 않으면 
+기본 클래스의 클래스 속성의 변수에 
+Would the derived class           
+have its own state, or would it piggyback on its base class's versions  
+of the class attributes?                     (TBT)
+
+=begin original
+
+The answer is that under the scheme outlined above, the derived class
+would B<not> have its own state data.  As before, whether you consider
+this a good thing or a bad one depends on the semantics of the classes
+involved.
+
+=end original
+
+그 답은 위에서 요점을 정리한 곳에 있습니다.
+파생 클래스는 그 자신의 상태 데이터가 B<없습니다>.
+앞에서 처럼 이것을 좋은 것이고 생각하든, 나쁜 것으로 생각하든,
+관계하는 클래스의 의미에 따라 다릅니다.
+
+=begin original
+
+The cleanest, sanest, simplest way to address per-class state in a
+lexical is for the derived class to override its base class's version
+of the method that accesses the class attributes.  Since the actual method
+called is the one in the object's derived class if this exists, you
+automatically get per-class state this way.  Any urge to provide an
+unadvertised method to sneak out a reference to the %ClassData hash
+should be strenuously resisted.
+
+=end original
+
+렉시컬에서 클래스마다의 상태를 다루루는 제일 아름답고 건전하고 
+단순한 방법은 클래스 속성에 접근하는 메소드의 기본 클래스의 버젼을 
+파생 클래스용으로 어브라이드하는 것입니다.
+호출되는 실제의 메소드가 오브젝트의 파생 클래스의 것이기에 
+혹시라도 이 방법으로 클래스 뒤와의 상태를 시동적으로 얻습니다. 
+%ClassData 해쉬로의 리퍼런스를 제대로 밖에서 가져나오기위한 
+비공식적인 메소드를 제공하는 충동에 격렬하게 저항해야 합니다.
+
+=begin original
+
+As with any other overridden method, the implementation in the
+derived class always has the option of invoking its base class's
+version of the method in addition to its own.  Here's an example:
+
+=end original
+
+다른 오버라이드된 메소드처럼 파생 클래스의 구성에는 항상 
+자기 자신의 버젼과는 달리 그 기본 클래스 버젼의 메소드를 
+호출하는 옵션이 있습니다.
+그 예는 이와 같습니다:
+
+    package Another_Class;
+    @ISA = qw(Some_Class);
+
+    my %ClassData = (
+	CData1 => "",
+    );
+
+    sub CData1 {
+	my($self, $newvalue) = @_;
+	if (@_ > 1) { 
+	    # set locally first
+	    $ClassData{CData1} = $newvalue;  
+
+	    # then pass the buck up to the first 
+	    # overridden version, if there is one
+	    if ($self->can("SUPER::CData1")) { 
+		$self->SUPER::CData1($newvalue);
+	    }
+	}
+	return $ClassData{CData1};
+    }
+
+=begin original
+
+Those dabbling in multiple inheritance might be concerned
+about there being more than one override.  
+
+=end original
+
+오버라이드보다도 다중상속에 관련이 있는 것이라고 생각됩니다.
+
+    for my $parent (@ISA) {
+	my $methname = $parent . "::CData1";
+	if ($self->can($methname)) { 
+	    $self->$methname($newvalue);
+	}
+    } 
+
+=begin original
+
+Because the &UNIVERSAL::can method returns a reference
+to the function directly, you can use this directly
+for a significant performance improvement:
+
+=end original
+
+&UNIVERSAL::can 메소드는 함수로의 리퍼런스를 직접 반환합니다.
+그렇기에 중요한 퍼포먼스의 개량을 위해 이것을 직접 사용할 수 있습니다.
+
+    for my $parent (@ISA) {
+	if (my $coderef = $self->can($parent . "::CData1")) {
+	    $self->$coderef($newvalue);
+	}
+    }
+
+=begin original
+
+If you override C<UNIVERSAL::can> in your own classes, be sure to return the
+reference appropriately.
+
+=end original
+
+If you override C<UNIVERSAL::can> in your own classes, be sure to return the
+reference appropriately.
+(TBT)
+
+=head2 Locking the Door and Throwing Away the Key
+
+(문을 잠그고 열쇠를 던지기)
+
+=begin original
+
+As currently implemented, any code within the same scope as the
+file-scoped lexical %ClassData can alter that hash directly.  Is that
+ok?  Is it acceptable or even desirable to allow other parts of the
+implementation of this class to access class attributes directly?
+
+=end original
+
+현재 임플리먼트된 것처럼 파일 영역의 렉시컬 변수의 
+%ClassData 처럼 범위 안의 어느 코드에서도 그 해쉬를 직접 변경할 수 있습니다.
+이것은 좋은 것일까요?
+이 클래스 구성의 다른 부분이 직접 클래스 속성에 접근하는 것을 허락하는 것은
+받아들일는 것을 원하는 것일까요?
+
+=begin original
+
+That depends on how careful you want to be.  Think back to the Cosmos
+class.  If the &supernova method had directly altered $Cosmos::Stars or
+C<$Cosmos::Cosmos{stars}>, then we wouldn't have been able to reuse the
+class when it came to inventing a Multiverse.  So letting even the class
+itself access its own class attributes without the mediating intervention of
+properly designed accessor methods is probably not a good idea after all.
+
+=end original
+
+이 것은 당신이 어느정도 주의 깊게 하고 싶가에 의존합니다.
+Cosmo 클래스로 돌아가서 생각해주세요.
+&supernova 메소가 직접 $Cosmose::Starts 가 
+C<$colsmos::Cosmos{stars}> 를 변경했다면, Multiverse 를 고안할 때에 
+클래스를 재이용하는 것이 불가능했겠죠.
+클래스 그 자신에서도 그 클래스 속성에 적절하게 설계된 접근자 메소드가 
+중개하고 있는 개입없이 접근하는 것은 결국 좋은 생각이 아닐겁니다.
+
+=begin original
+
+Restricting access to class attributes from the class itself is usually
+not enforceable even in strongly object-oriented languages.  But in Perl,
+you can.
+
+=end original
+
+클래스 자신에게서 클래스 속성으로 접근을 제한하는 것은 보통 
+강력한 오브젝트 지향언어에서도 강제로 제한하고 있지 않습니다.
+하지만 Perl 에서는 가능합니다.
+
+=begin original
+
+Here's one way:
+
+=end original
+
+一つの方法です:
+
+    package Some_Class;
+
+    {  # scope for hiding $CData1
+	my $CData1;
+	sub CData1 {
+	    shift;	# XXX: unused
+	    $CData1 = shift if @_;
+	    return $CData1;
+	} 
+    }
+
+    {  # scope for hiding $CData2
+	my $CData2;
+	sub CData2 {
+	    shift;	# XXX: unused
+	    $CData2 = shift if @_;
+	    return $CData2;
+	} 
+    }
+
+=begin original
+
+No one--absolutely no one--is allowed to read or write the class
+attributes without the mediation of the managing accessor method, since
+only that method has access to the lexical variable it's managing.
+This use of mediated access to class attributes is a form of privacy far
+stronger than most OO languages provide.
+
+=end original
+
+누구도 -- 절대 누구라도 -- 클래스 속성에, 지배하고 있는 접근자 메소드의
+중개없이는 클래스 속성을 읽고 쓰는 것을 허락하지 않습니다. 
+메소드만이 지배하고 있는 렉시컬 변수에 접근하기 때문입니다.
+이 클래스 속성으로 중개하는 접근자의 사용은 대부분의 오브젝트 지향 언어가
+제공하는 것보다도 보다 강력한 프라이버시의 형태입니다.
+
+=begin original
+
+The repetition of code used to create per-datum accessor methods chafes
+at our Laziness, so we'll again use closures to create similar
+methods.
+
+=end original
+
+데이터 마다 접근자 메소드를 만들기 위해 사용되는 코드를 
+반복하는 것은 쓸데없기 때문에,
+닮은 메소드를 작성하는 것에 다시금 클로져를 사용합시다.
+
+    package Some_Class;
+
+    {  # scope for ultra-private meta-object for class attributes
+	my %ClassData = ( 
+	    CData1 => "",
+	    CData2 => "",
+	);
+
+	for my $datum (keys %ClassData ) { 
+	    no strict "refs";    
+	    *$datum = sub {
+		use strict "refs";    
+		my ($self, $newvalue) = @_;
+		$ClassData{$datum} = $newvalue if @_ > 1;
+		return $ClassData{$datum};
+	    }
+	}
+
+    }
+
+=begin original
+
+The closure above can be modified to take inheritance into account using
+the &UNIVERSAL::can method and SUPER as shown previously.
+
+=end original
+
+위의 클로져는, 이전에 보인 &UNIVERSAL::can 메소드와 SUPER 를 사용해서, 
+상속을 고려해두기 위해 수정할 수 있습니다.
+
+=head2 Translucency Revisited
+
+(다시 반투명성)
+
+=begin original
+
+The Vermin class demonstrates translucency using a package variable,
+eponymously named %Vermin, as its meta-object.  If you prefer to
+use absolutely no package variables beyond those necessary to appease
+inheritance or possibly the Exporter, this strategy is closed to you.
+That's too bad, because translucent attributes are an appealing
+technique, so it would be valuable to devise an implementation using
+only lexicals.
+
+=end original
+
+Vermin 클래스는 그 메타 오브젝트로써, 패키지 변수, 
+클래스의 이름의 %Vermin 을 사용해서, 분투명성을 보았습니다.
+상속이나 혹시나 Exporter 를 해소하는 그 필수품 이상으로, 
+절대 패키지가 아닌 변수를 사용하고 싶다면 이 작전은 익숙한 것입니다.
+아쉬운 곳에 반투명 속성은 어플하는 테크닉이기에 
+렉시컬 변수만을 사용하는 구성을 생각해낼 가치가 있는 것입니다.
+
+=begin original
+
+There's a second reason why you might wish to avoid the eponymous
+package hash.  If you use class names with double-colons in them, you
+would end up poking around somewhere you might not have meant to poke.
+
+=end original
+
+여기에 클래스의 이름의 해쉬를 피하고 싶다고 생각하는 2 번째 이유가 있습니다.
+그것들에게 더블 콜론의 클래스 이름을 사용하면, 
+집어낼리 없는 곳을 결국 집어내게 될 것입니다.
+
+    package Vermin;
+    $class = "Vermin";
+    $class->{PopCount}++;	
+    # accesses $Vermin::Vermin{PopCount}
+
+    package Vermin::Noxious;
+    $class = "Vermin::Noxious";
+    $class->{PopCount}++;	
+    # accesses $Vermin::Noxious{PopCount}
+
+=begin original
+
+In the first case, because the class name had no double-colons, we got
+the hash in the current package.  But in the second case, instead of
+getting some hash in the current package, we got the hash %Noxious in
+the Vermin package.  (The noxious vermin just invaded another package and
+sprayed their data around it. :-) Perl doesn't support relative packages
+in its naming conventions, so any double-colons trigger a fully-qualified
+lookup instead of just looking in the current package.
+
+=end original
+
+맨 처음의 케이스에서는 클래스의 이름에는 더블콜론이 없기때문에 현재의 
+패키지의 해쉬를 얻습니다.
+하지만, 다음의 케이스에서는 현재의 패키지 해쉬를 얻는 대신에 
+Vermin 패키지의 해쉬 %Noxious 를 얻씁니다.
+(유독한 해충은 다른 패키지에 침입해서 그 대신에 자신의 데이터를 
+뿌립니다 :-) Perl 의 명명규칙은 상대 패키지를 지원하지 않습니다.
+그렇기에 더블콜론은 현재의 패키지의 안을 보는 것만 아니라
+완전수식된 검색을 발생시킵니다.
+
+=begin original
+
+In practice, it is unlikely that the Vermin class had an existing
+package variable named %Noxious that you just blew away.  If you're
+still mistrustful, you could always stake out your own territory
+where you know the rules, such as using Eponymous::Vermin::Noxious or
+Hieronymus::Vermin::Boschious or Leave_Me_Alone::Vermin::Noxious as class
+names instead.  Sure, it's in theory possible that someone else has
+a class named Eponymous::Vermin with its own %Noxious hash, but this
+kind of thing is always true.  There's no arbiter of package names.
+It's always the case that globals like @Cwd::ISA would collide if more
+than one class uses the same Cwd package.
+
+=end original
+
+실제 문제, Vermin 클래스에는 넘겨버린 %Noxious 이라는 이름이라는
+존재하는 패키지 변수는 있을 듯하지도 않습니다.
+아직 신용할 수 없다면, 룰을 알 있는 자신의 영역을 이미 
+넓혀 볼 수 있습니다.
+Eponymous::Vermin::Noxious 나 Hieronymus::Vermin::Boschious 나
+Leave_Me_Alone::Vermin::Noxious 를 클래스 이름으로써 대신에 사용하도록. 
+확실히 다른 누군가가 Eponymous::Vermin 이라는 이름의 클래스를
+그 자신의 %Noxious 해쉬와 함께 가지는 것은 이론상은 가능하지만,
+이 종류는 이미 진실입니다. 
+패키지의 이름의 결정자는 없습니다.
+2 개 이상의 클래스가 같은 Cwd 패키지를 사용하면, @Cwd::ISA 같은 글로벌 변수가
+충돌하는 것은 있을 지도 모르는 케이스 입니다.
+
+=begin original
+
+If this still leaves you with an uncomfortable twinge of paranoia,
+we have another solution for you.  There's nothing that says that you
+have to have a package variable to hold a class meta-object, either for
+monadic classes or for translucent attributes.  Just code up the methods
+so that they access a lexical instead.
+
+=end original
+
+파라노이어의 불쾌한 고통이 아직 남아있다면, 다른 해결법이 있습니다.
+monadic 클래스를 위해 혹은 반투명 속성을 위해
+클래스의 메타오브젝트를 얻는 것에 패키지 변수를 
+가지지 않으면 안된다고 하는 것은 아무것도 없습니다.
+대신에, 렉시컬에 접근하는 것같은 메소드를 코드로 해주세요.
+
+=begin original
+
+Here's another implementation of the Vermin class with semantics identical
+to those given previously, but this time using no package variables.
+
+=end original
+
+Vermin 클래스의 별도의 구성입니다.
+이전에 주어진 것과 같은 의미이지만, 이번에는 패키지 변수를 
+사용하지는 않습니다.
+
+    package Vermin;
+
+
+    # Here's the class meta-object, eponymously named.
+    # It holds all class data, and also all instance data 
+    # so the latter can be used for both initialization 
+    # and translucency.  it's a template.
+    my %ClassData = (   		
+	PopCount => 0,		# capital for class attributes
+	color    => "beige",    # small for instance attributes		
+    );
+
+    # constructor method
+    # invoked as class method or object method
+    sub spawn {
+	my $obclass = shift;
+	my $class   = ref($obclass) || $obclass;
+	my $self = {};
+	bless($self, $class);
+	$ClassData{PopCount}++;
+	# init fields from invoking object, or omit if 
+	# invoking object is the class to provide translucency
+	%$self = %$obclass if ref $obclass;
+	return $self;
+    } 
+
+    # translucent accessor for "color" attribute
+    # invoked as class method or object method
+    sub color {
+	my $self  = shift;
+
+	# handle class invocation
+	unless (ref $self) {
+	    $ClassData{color} = shift if @_;
+	    return $ClassData{color}
+	}
+
+	# handle object invocation
+	$self->{color} = shift if @_;
+	if (defined $self->{color}) {  # not exists!
+	    return $self->{color};
+	} else {
+	    return $ClassData{color};
+	} 
+    } 
+
+    # class attribute accessor for "PopCount" attribute
+    # invoked as class method or object method
+    sub population {
+	return $ClassData{PopCount};
+    } 
+
+    # instance destructor; invoked only as object method
+    sub DESTROY {
+	$ClassData{PopCount}--;
+    }
+
+    # detect whether an object attribute is translucent
+    # (typically?) invoked only as object method
+    sub is_translucent {
+	my($self, $attr)  = @_;
+	$self = \%ClassData if !ref $self;
+	return !defined $self->{$attr};  
+    }
+
+    # test for presence of attribute in class
+    # invoked as class method or object method
+    sub has_attribute {
+	my($self, $attr)  = @_;
+	return exists $ClassData{$attr};  
+    } 
+
+=head1 NOTES
+
+(주의)
+
+=begin original
+
+Inheritance is a powerful but subtle device, best used only after careful
+forethought and design.  Aggregation instead of inheritance is often a
+better approach.
+
+=end original
+
+계승은 강력하지만 미세한 구성입니다.
+주의 깊은 통찰과 설계를 바탕으로 사용하는 것이 중요합니다.
+상속 대신에 집약이 보다 좋은 어프로치일 경우가 종종 있습니다.
+
+=begin original
+
+You can't use file-scoped lexicals in conjunction with the SelfLoader
+or the AutoLoader, because they alter the lexical scope in which the
+module's methods wind up getting compiled.
+
+=end original
+
+SelfLoader 나, AutoLoader 와의 접속에서는 파일 영역의 렉시컬 변수를
+사용할 수 없습니다.
+모듈의 메소드가 결국 컴파일되는 렉시컬영역을 변경하기 때문입니다.
+
+=begin original
+
+The usual mealy-mouthed package-munging doubtless applies to setting
+up names of object attributes.  For example, C<< $self->{ObData1} >>
+should probably be C<< $self->{ __PACKAGE__ . "_ObData1" } >>, but that
+would just confuse the examples.
+
+=end original
+
+보통 패키지 먼징은 확실히 오브젝트 속성의 이름을 설정하는 것에 적합합니다.
+예를 들면, C<< $self->{ObData1} >> 은 아마도 
+C<< $self->{ __PACKAGE__ . "_ObData1" } >> 이어야 합니다.
+하지만 그것은 예제를 혼란시킬 뿐이죠.
+
+=head1 SEE ALSO
+
+=begin original
+
+L<perltoot>, L<perlobj>, L<perlmod>, and L<perlbot>.
+
+=end original
+
+L<perltoot>, L<perlobj>, L<perlmod>, L<perlbot>。
+
+=begin original
+
+The Tie::SecureHash and Class::Data::Inheritable modules from CPAN are
+worth checking out.
+
+=end original
+
+CPAN 에 있는 Tie::SecureHash Class::Data::Inheritable 모듈은
+알아볼 가치가 있습니다.
+
+=head1 AUTHOR AND COPYRIGHT
+
+Copyright (c) 1999 Tom Christiansen.
+All rights reserved.
+
+This documentation is free; you can redistribute it and/or modify it
+under the same terms as Perl itself.
+
+Irrespective of its distribution, all code examples in this file
+are hereby placed into the public domain.  You are permitted and
+encouraged to use this code in your own programs for fun
+or for profit as you see fit.  A simple comment in the code giving
+credit would be courteous but is not required.
+
+=head1 ACKNOWLEDGEMENTS
+
+Russ Allbery, Jon Orwant, Randy Ray, Larry Rosler, Nat Torkington,
+and Stephen Warren all contributed suggestions and corrections to this
+piece.  Thanks especially to Damian Conway for his ideas and feedback,
+and without whose indirect prodding I might never have taken the time
+to show others how much Perl has to offer in the way of objects once
+you start thinking outside the tiny little box that today's "popular"
+object-oriented languages enforce.
+
+=head1 HISTORY
+
+Last edit: Sun Feb  4 20:50:28 EST 2001
+
