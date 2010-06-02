@@ -280,7 +280,7 @@ Well Pack indeed is a cute name, but Perl has a built-in function pack
 so it's a little confusing, especially when speaking instead of writing.
 
 	글쎄여 Pack 은 사실 귀여운 이름입니다. 그러나 펄은 내장된 함수 pack을 가지고 있습니다.
-	그래서 조금 헛갈립니다. 특히 쓰는 것보다 말할때 헷갈립니다. (pack : Pack)
+	그래서 조금 헛갈립니다. 특히 쓸때 보다 말할때 헷갈립니다. (pack : Pack)
 
 =head3 What namespaces should I use to implement PSGI support? - PSGI를 구현하기 위해서 어떤 네임스페이스를 사용해야 하나여?
 
@@ -308,7 +308,7 @@ however you want. You can optionally support L<Plack::Server>'s
 abstract interface, which is:
 
 	PSGI 인터페이스를 지원하는 웹서버를 작성한다면, 당신이 원하는 이름을 지을 수 있다.
-	옵션으로 'Plack::Server'의 추상적인 인터페이스를 지원할 수 있다, 그게 뭐냐면: 
+	당신은 선택적으로 'Plack::Server'의 추상적인 인터페이스를 지원할 수 있다, 어느 것이냐면:
 
   my $server = Plack::Server::FooBar->new(%opt);
   $server->run($app);
@@ -318,9 +318,16 @@ plackup compatible, so users can run your app via C<plackup>. You're
 recommended to, but not required to follow this API, in which case you
 have to provide your own PSGI app launcher.
 
-=head3 I have a CGI or mod_perl application that I want to run on PSGI/Plack. What should I do?
+	이러한 'new' 와 'run' 을 서버안에 지원함으로써, plackup이 호환됩니다, 그래서 사용자들은
+	당신의 애플리케이션을 'plackup'으로 실행 시킬 수 있습니다. 이렇게 하기를 추천하지만, 
+	이 API를 따르는게 필수적인 것은 아닙니다, 당신이 만든 PSGI 실행기를 당신이 제공해야 하는 경우도
+	있습니다.
+
+=head3 I have a CGI or mod_perl application that I want to run on PSGI/Plack. What should I do? - 제가 가지고 있는 CGI 또는 mod_perl 애플리케이션을 PSGI/Plack 위에서 돌리고 싶어여. 어떻해야 하나여?
 
 You have several choices:
+
+	몇가지 방법이 있습니다:
 
 =over 4
 
@@ -331,6 +338,10 @@ query parameters, L<CGI::PSGI> can help you migrate to PSGI.  You'll
 need to change how you create CGI objects and how to return the response
 headers and body, but the rest of your code will work unchanged.
 
+	CGI.pm 을 사용해서 쿼리 파라미터를 취급하는 웹애플리케이션(혹은 프레임워크)을 가지고 있다면, 
+	'CGI::PSGI' 모듈이 PSGI로 이전하는데 도움을 줄 수 있습니다. 당신은 CGI 객체를 만드는 방법과,
+	헤더와 본문을 리턴하는 방법을 바꿀 필요가 있습니다, 그러나 코드의 나머지 부분은 그대로 동작합니다.
+
 =item CGI::Emulate::PSGI
 
 If you have a dead old CGI script that you want to change as little as
@@ -338,6 +349,11 @@ possible (or even no change at all, by running it with C<do>), then
 L<CGI::Emulate::PSGI> can wrap it up as a PSGI application.  Compared
 to L<CGI::PSGI>, this is less efficient, but should work with any CGI
 implementation, not just CGI.pm.
+
+	늙어죽은 CGI 스크립트를 가지고 있고 가능한한 조금만 바꿔서 돌리길 원한다면(혹은 'do'를 사용해서 돌게
+	함으로써, 전혀 안바꾸고), 'CGI::Emulate::PSGI' 가 그것을 PSGI 애플리케이션으로 포장할 수 있습니다.
+	'CGI::PSGI' 와 비교했을때, 이건 덜 효율적이지만, 어떠한 CGI 구현물과도 함께 동작할 수 있을 겁니다.
+	CGI.pm 만 빼고.
 
 =item Plack::Request and Plack::Response
 
@@ -348,6 +364,11 @@ L<Plack::Response> might be what you want. It gives you a nice
 Request/Response object API on top of the PSGI env hash and response
 array.
 
+	'HTTP::Engine' 기반의 애플리케이션(프레임워크)를 가지고 있거나, 'CGI' 보다 더 나은 인터페이스로
+	스크래치로부터 애플리케이션을 작성하기를 원한다거나, 'Apache::Request' 를 사용하는데 익숙하다면, 
+	'Plack::Request' 와 'Plack::Response' 가 당신이 원하는 것일 수 있습니다. 이것은 당신에게 PSGI
+	env 해쉬와 응답 어레이의 최상단 위에 좋은 요청/응답 API 객체를 줍니다. * FIXME *
+
 =back
 
 NOTE: Don't forget that whenever you have a CGI script that runs once
@@ -356,6 +377,11 @@ cleanup that needs to happen after every request -- variables that need
 to be reset, files that need to be closed or deleted, etc.  PSGI can do
 nothing about that (you have to fix it) except give you this friendly
 reminder.
+
+	주의: 잊지마세요, 어디서든지 당신은 한번 실행되고(run) 나가는(exit) CGI 스크립트 가집니다, 
+	그리고 당신이 그것을 영구적인 프로세스로 돌리게 되면, 그것에는 각 요청 후에 일어날 필요가 있는 대청소가
+	있을지도 모릅니다. -- 변수는 리셋이 필요하고, 파일은 닫히거나, 지워져야 하고, 기타등등. PSGI는 그러한 
+	것들에 대해 이러한 친절하게 알려주는 것 이외에는 아무것도 할 수 없습니다.(당신이 고쳐야 합니다) 
 
 =head2 HTTP::Engine
 
