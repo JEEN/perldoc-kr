@@ -240,6 +240,11 @@ run PSGI applications on. Plack is a reference PSGI implementation
 that supports environments like prefork standalone server, CGI,
 FastCGI, mod_perl, AnyEvent and Coro.
 
+	PSGI는 명세서입니다. 그래서 PSGI라고 불리우는 소프트웨어나 모듈이 없습니다.
+	엔드유저는 PSGI 애플리케이션 구동에 PSGI 서버 구현물중 한개를 선택할 필요가 있습니다.
+	Plack은 PSGI 레퍼런스 구현물 입니다. 이것은 prefork 된 독립적인 서버, CGI, FastCGI, mod_perl, AnyEvent, 
+	Coro와 같은 환경을 지원합니다. * FIXME * - PSGI 레퍼런스 구현물이 뭔말인가?
+
 Plack also has useful APIs and helpers on top of PSGI, such as
 L<Plack::Request> to provide a nice object-oriented API on request
 objects, L<plackup> that allows you to run an PSGI application from
@@ -248,7 +253,14 @@ Rackup), and L<Plack::Test> that allows you to test your application
 using standard L<HTTP::Request> and L<HTTP::Response> pair through
 mocked HTTP or live HTTP servers. See L<Plack> for details.
 
-=head3 What kind of server backends would be available?
+	Plack은 또한 유용한 API와 헬퍼를 PSGI 최상위층 위에 가지고 있습니다.
+	'Plack::Request' 와 같이 요청 개체들 위에 좋은 객체지향 API를 제공 합니다.
+	'plackup' 은 당신의 PSGI 애플리케이션을 'app.psgi'를 사용해서 구성하고 
+	커맨드 라인으로 수행 할 수 있도록 허용합니다.(a la Rack's Rackup) * FIXME * - 뭔말인감?
+	그리고, 'Plack::Test'는 당신의 애플리케이션을 'HTTP::Request', 'HTTP::Response' 표준 모듈
+	사용을 통해 HTTP 모형 또는 실시간 HTTP 서버로 테스트 하도록 허용합니다. 자세한 내용은 'Plack' 을 참고하세요
+
+=head3 What kind of server backends would be available? - 백엔드로 사용가능한 서버의 종류는 먼가여?
 
 In Plack, we already support most web servers like Apache2, and also the
 ones that supports standard CGI or FastCGI, but also want to support
@@ -257,27 +269,46 @@ be really nice if Apache module mod_perlite and Google AppEngine
 supported PSGI too, so that you could run your PSGI/Plack based perl app
 in the cloud.
 
-=head3 Ruby is Rack and JavaScript is Jack. Why is it not called Pack?
+	Plack 에서는, 이미 대부분의 웹서버(Apache2, 표준 CGI 또는 FastCGI를 지원하는)를 지원합니다.
+	그러나 펄을 임베드 시킬 수 있는 특별한 웹서버 역시 지원하길 원합니다. nginx 처럼요.
+	만약에 아파치 모듈 mod_perlite 와 구글 AppEngine 이 PSGI를 지원하게 된다면, 그래서 당신의 PSGI/Plack
+	기반의 펄 애플리케이션을 클라우드에서 동작하게 된다면 정말 좋을 것이라고 생각합니다.
+
+=head3 Ruby is Rack and JavaScript is Jack. Why is it not called Pack? - 루비에선 Rack, 자바스크립트에선 Jack입니다. 왜 Pack 이라고 안부르나여?
 
 Well Pack indeed is a cute name, but Perl has a built-in function pack
 so it's a little confusing, especially when speaking instead of writing.
 
-=head3 What namespaces should I use to implement PSGI support?
+	글쎄여 Pack 은 사실 귀여운 이름입니다. 그러나 펄은 내장된 함수 pack을 가지고 있습니다.
+	그래서 조금 헛갈립니다. 특히 쓰는 것보다 말할때 헷갈립니다. (pack : Pack)
+
+=head3 What namespaces should I use to implement PSGI support? - PSGI를 구현하기 위해서 어떤 네임스페이스를 사용해야 하나여?
 
 B<Do not use the PSGI:: namespace to implement PSGI backends
 or adapters>.
+
+	PSGI 백엔드 또는 아답터 구현에 있어서 PSGI 네임스페이스를 사용하지 마세요
 
 The PSGI namespace is reserved for PSGI specifications and reference
 unit tests that implementors have to pass. It should not be used by
 particular implementations.
 
+	PSGI 네임스페이스는 PSGI 명세서와 통과 되어야만 하는 레퍼런스 유닛 테스트 도구를 위해 예약되어 있습니다.
+	부분적인 구현에 사용되어서는 안됩니다. * FIXME *
+
 If you write a plugin or an extension to support PSGI for an
 (imaginary) web application framework called C<Camper>, name the code
 such as C<Camper::Engine::PSGI>.
 
+	만약에 'Camper'(가상의 이름) 라고 불리우는 웹애플리케이션 프레임워크를 위해 PSGI 플러그인 또는 
+	확장을 만들려고 한다면, 'Camper::Engine::PSGI' 처럼 적을 수 있습니다.
+
 If you write a web server that supports PSGI interface, then name it
 however you want. You can optionally support L<Plack::Server>'s
 abstract interface, which is:
+
+	PSGI 인터페이스를 지원하는 웹서버를 작성한다면, 당신이 원하는 이름을 지을 수 있다.
+	옵션으로 'Plack::Server'의 추상적인 인터페이스를 지원할 수 있다, 그게 뭐냐면: 
 
   my $server = Plack::Server::FooBar->new(%opt);
   $server->run($app);
