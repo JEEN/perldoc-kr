@@ -227,9 +227,12 @@ Users of your framework can choose which backend is the best for their
 needs.  You, as a web application framework developer, don't need to
 think about lots of different users with different needs.
 
+	당신의 프레임워크 사용자들은 어떤 백엔드가 그들의 가장 필요한 것인지 고를 수 있습니다.
+	당신이 웹애플리케이션 프레임워크 개발자라면, 수많은 사용자가 필요로하는 needs 를 생각할 필요가 없습니다.
+
 =head2 Plack
 
-=head3 What is Plack? What is the difference between PSGI and Plack?
+=head3 What is Plack? What is the difference between PSGI and Plack? - Plack인 먼가여? PSGI와 Plack의 차이점은 먼가여?
 
 PSGI is a specification, so there's no software or module called PSGI.
 End users will need to choose one of PSGI server implementations to
