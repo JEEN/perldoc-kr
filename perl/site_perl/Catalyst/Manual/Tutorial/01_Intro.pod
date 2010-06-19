@@ -1,0 +1,765 @@
+=head1 NAME
+
+Catalyst::Manual::Tutorial::01_Intro - Catalyst Tutorial - Chapter 1: Introduction
+
+
+=head1 OVERVIEW
+
+This is B<Chapter 1 of 10> for the Catalyst tutorial.
+
+L<Tutorial Overview|Catalyst::Manual::Tutorial>
+
+=over 4
+
+=item 1
+
+B<01_Introduction>
+
+=item 2
+
+L<Catalyst Basics|Catalyst::Manual::Tutorial::02_CatalystBasics>
+
+=item 3
+
+L<More Catalyst Basics|Catalyst::Manual::Tutorial::03_MoreCatalystBasics>
+
+=item 4
+
+L<Basic CRUD|Catalyst::Manual::Tutorial::04_BasicCRUD>
+
+=item 5
+
+L<Authentication|Catalyst::Manual::Tutorial::05_Authentication>
+
+=item 6
+
+L<Authorization|Catalyst::Manual::Tutorial::06_Authorization>
+
+=item 7
+
+L<Debugging|Catalyst::Manual::Tutorial::07_Debugging>
+
+=item 8
+
+L<Testing|Catalyst::Manual::Tutorial::08_Testing>
+
+=item 9
+
+L<Advanced CRUD|Catalyst::Manual::Tutorial::09_AdvancedCRUD>
+
+=item 10
+
+L<Appendices|Catalyst::Manual::Tutorial::10_Appendices>
+
+=back
+
+
+=head1 DESCRIPTION
+
+This tutorial provides a multi-part introduction to the Catalyst web
+framework. It seeks to provide a rapid overview of many of its most
+commonly used features. The focus is on the real-world best practices
+required in the construction of nearly all Catalyst applications.
+
+Although the primary target of the tutorial is users new to the Catalyst
+framework, experienced users may wish to review specific sections (for
+example, how to use DBIC for their model classes, how to add
+authentication and authorization to an existing application, or form
+management).
+
+You can obtain the code for all the tutorial examples from the
+catalyst subversion repository by issuing the command:
+
+    svn co http://dev.catalyst.perl.org/repos/Catalyst/trunk/examples/Tutorial/ CatalystTutorial
+
+This will download the most recent code for each chapter of the
+tutorial into the CatalystTutorial directory on your machine.
+
+B<These reference implementations are provided so that when you follow
+the tutorial, you can use the code from the subversion repository to
+ensure that your system is set up correctly, and that you have not
+inadvertently made any typographic errors, or accidentally skipped
+part of the tutorial.>
+
+B<NOTE: You can use any Perl-supported OS and environment to run 
+Catalyst.> It should make little or no difference to Catalyst's 
+operation, B<but this tutorial has been written using the Debian 5 
+live CD> because that represents a quick and easy way for most people to 
+try out Catalyst with virtually zero setup time and hassles.  Also, 
+the tutorial has been tested to work correctly with the versions of 
+Catalyst and all the supporting modules in Debian 5 (see "VERSIONS 
+AND CONVENTIONS USED IN THIS TUTORIAL" below for the specific versions 
+for some of the key modules), so B<if you think you might be running 
+into an issue related to versions> (for example, a module changed its 
+behavior in a newer version or a bug was introduced), B<it might be 
+worth giving Debian 5 a try>.
+
+If you plan to follow along with Debian 5, you can jump down to the 
+"Debian" section under L</"CATALYST INSTALLATION"> below and it will walk you 
+though the setup of a fully functional Catalyst environment. If you 
+would prefer to install directly from CPAN, you can download the example 
+program and all the necessary dependencies to your local machine by 
+installing the C<Task::Catalyst::Tutorial> distribution: 
+
+     cpan Task::Catalyst::Tutorial
+
+This will also test to make sure the dependencies are working.  If you
+have trouble installing these, please ask for help on the #catalyst
+IRC channel, or the Catalyst mailing list.
+
+Subjects covered by the tutorial include:
+
+=over 4
+
+=item * 
+
+A simple application that lists and adds books.
+
+=item *
+
+The use of L<DBIx::Class|DBIx::Class> (DBIC) for the model (including 
+some of the more advanced techniques you will probably want to use in 
+your applications).
+
+=item * 
+
+How to write CRUD (Create, Read, Update, and Delete) operations in
+Catalyst.
+
+=item *
+
+Authentication ("auth").
+
+=item * 
+
+Role-based authorization ("authz").
+
+=item * 
+
+Attempts to provide an example showing current (5.8XXX) Catalyst
+practices. For example, the use of 
+L<Catalyst::Action::RenderView|Catalyst::Action::RenderView>,
+DBIC, L<Catalyst::Plugin::ConfigLoader|Catalyst::Plugin::ConfigLoader> 
+with C<myapp.conf>, the use of C<lib/MyApp/Controller/Root.pm> 
+vs. C<lib/MyApp.pm>, etc.
+
+=item * 
+
+The use of Template Toolkit (TT).
+
+=item * 
+
+Useful techniques for troubleshooting and debugging Catalyst
+applications.
+
+=item * 
+
+The use of SQLite as a database (with code also provided for MySQL and
+PostgreSQL).  (Note: Because we make use of the DBIx::Class Object 
+Relational Mapping [ORM] layer, out our application will be database
+agnostic and can easily be used by any of the databases supported
+by DBIx::Class.)
+
+=item * 
+
+The use of L<HTML::FormFu|HTML::FormFu> or L<HTML::FormHandler|HTML::FormHandler>
+for automated form processing and validation.
+
+=back
+
+This tutorial makes the learning process its main priority.  For
+example, the level of comments in the code found here would likely be
+considered excessive in a "normal project."  Because of their contextual
+value, this tutorial will generally favor inline comments over a
+separate discussion in the text.  It also deliberately tries to
+demonstrate multiple approaches to various features (in general, you
+should try to be as consistent as possible with your own production
+code).
+
+Furthermore, this tutorial tries to minimize the number of controllers,
+models, TT templates, and database tables.  Although this does result in
+things being a bit contrived at times, the concepts should be applicable
+to more complex environments.  More complete and complicated example
+applications can be found in the C<examples> area of the Catalyst
+Subversion repository at
+L<http://dev.catalyst.perl.org/repos/Catalyst/trunk/examples/>.
+
+
+=head1 QUICK START
+
+For those who want to get going quickly, here is a short "cookbook-style 
+recipe" to quickly get you up and running. Although there are many 
+different ways to get a Catalyst environment going, this tutorial has 
+been written with and tested against Debian 5 Live CD, using the steps 
+in this Quick Start. 
+
+If you want, you can follow the directions in this section and then jump 
+right to L<Chapter 2|Catalyst::Manual::Tutorial::02_CatalystBasics> of 
+the tutorial. However, it would be a good idea to come back and read the 
+sections below the Quick Start when you have time. Or, continue reading 
+those other sections for suggestions if you do not wish to use the 
+Debian 5 Live CD. 
+
+
+=over 4
+
+=item 1 
+
+Download the C<debian-live-503-i386-rescue.iso> image from
+L<http://cdimage.debian.org/cdimage/release/current-live/i386/iso-cd/>.
+
+=item 2
+
+Boot this disk, either in a physical machine, or possibly some sort
+of virtual machine (can be a very handy way to practice).
+
+=item 3
+
+Select "C<Live>" from the initial boot menu.
+
+=item 4
+
+At the "C<user@debian:~$>" prompt, type:
+
+    sudo aptitude -y install subversion
+
+=item 5
+
+If you want to be able to remotely SSH to this system, set a
+password for root:
+
+    sudo passwd
+    ...
+
+=item 6
+
+Add the "unstable" Debian package repository:
+
+    sudo vi /etc/apt/sources.list
+
+Add the following line to the bottom of this file:
+
+    deb http://ftp.us.debian.org/debian/ unstable main
+
+=item 7
+
+Install Catalyst and related libraries:
+
+    sudo aptitude update
+    sudo aptitude -y install sqlite3 libdbd-sqlite3-perl libcatalyst-perl \
+        libcatalyst-modules-perl libdbix-class-timestamp-perl \
+        libdatetime-format-sqlite-perl libconfig-general-perl \
+        libhtml-formfu-model-dbic-perl libterm-readline-perl-perl \
+        libdbix-class-encodedcolumn-perl libperl6-junction-perl \
+        libtest-pod-perl
+    sudo aptitude clean
+
+=item 8
+
+Test example code:
+
+    mkdir test
+    cd test
+    svn co http://dev.catalystframework.org/repos/Catalyst/trunk/examples/Tutorial/MyApp_Chapter8
+    cd MyApp_Chapter8/MyApp
+    CATALYST_DEBUG=0 prove -wl t
+    cd
+
+=back
+
+
+=head1 VERSIONS AND CONVENTIONS USED IN THIS TUTORIAL
+
+This tutorial was built using the following resources. Please note that
+you may need to make adjustments for different environments and
+versions (note that trailing zeros in version numbers are not 
+significant and may get dropped with techniques for viewing them;
+for example, Catalyst v5.80020 might show up as 5.8002):
+
+=over 4
+
+=item * 
+
+Debian 5 (Lenny)
+
+=item * 
+
+Catalyst v5.80020 (note: may show up as '5.8002' without the trailing zero)
+
+=item *
+
+Catalyst::Devel v1.26
+
+=item * 
+
+DBIx::Class v0.08115
+
+=item *
+
+Catalyst::Model::DBIC::Schema v0.40
+
+=item *
+
+Template Toolkit v2.20
+
+
+=item * 
+
+Catalyst Plugins
+
+The plugins used in this tutorial all have sufficiently stable APIs that
+you shouldn't need to worry about versions. However, there could be
+cases where the tutorial is affected by what version of plugins you
+use. This tutorial has been tested against the following set of plugins:
+
+=over 4
+
+=item * 
+
+Catalyst::Plugin::Authentication -- v0.10016
+
+=item *
+
+Catalyst::Plugin::Authorization::Roles -- v0.08
+
+=item *
+
+Catalyst::Plugin::ConfigLoader -- v0.27
+
+=item *
+
+Catalyst::Plugin::Session -- v0.29
+
+=item *
+
+Catalyst::Plugin::Session::State::Cookie -- v0.17
+
+=item *
+
+Catalyst::Plugin::Session::Store::FastMmap -- v0.13
+
+=item *
+
+Catalyst::Plugin::StackTrace -- v0.11
+
+=item *
+
+Catalyst::Plugin::Static::Simple -- v0.29
+
+=back
+
+=item *
+
+HTML::FormFu -- v0.06001
+
+=item * 
+
+B<NOTE:> You can check the versions you have installed with the
+following command:
+
+    perl -M<_mod_name_> -e '"print $<_mod_name_>::VERSION\n"'
+
+For example:
+
+    perl -MCatalyst -e 'print "$Catalyst::VERSION\n";'
+
+or:
+
+    perl -MCatalyst::Devel -e 'print "$Catalyst::Devel::VERSION\n";'
+
+=item * 
+
+This tutorial will assume that the web browser is located on the same 
+system where the Catalyst development server is running, and 
+therefore use a URL of C<http://localhost:3000> (the Catalyst 
+development server defaults to port 3000).  If you are running Perl on 
+a different box than where your web browser is located (or using a 
+different port number via the C<-p> I<port_number> option to the 
+development server), then you will need to update the URL you use 
+accordingly.
+
+Please Note: Depending on the web browser you are using, you might 
+need to hit C<Shift+Reload> or C<Ctrl+Reload> to pull a fresh page 
+when testing your application at various points (see 
+L<http://en.wikipedia.org/wiki/Bypass_your_cache> for a comprehensive 
+list of options for each browser).  Also, the C<-k> keepalive option 
+to the development server can be necessary with some browsers 
+(especially Internet Explorer).
+
+=back
+
+
+=head1 CATALYST INSTALLATION
+
+Although Catalyst installation has been a challenge in the past, the 
+good news is that there are a growing number of options to eliminate 
+(or at least dramatically simplify) this concern.  Although a 
+compelling strength of Catalyst is that it makes use of many of the 
+modules in the vast repository that is CPAN, this can complicate the 
+installation process if you approach it in the wrong way.  Consider 
+the following suggestions on the most common ways to get started with 
+a Catalyst development environment:
+
+=over 4
+
+=item *
+
+Debian
+
+The Debian 5 live CD represents a great way for newcomers to 
+experiment with Catalyst.  As a "live CD," you can simple boot from 
+the CD, run a few commands, and in a matter of minutes you should have 
+a fully function environment in which do this tutorial. B<The tutorial 
+was fully tested to work under Debian 5.  Although it SHOULD work 
+under any Catalyst installation method you might choose, it can be 
+hard to guarantee this.>
+
+=over 4
+
+=item * 
+
+Download one of the ISO files from 
+L<http://cdimage.debian.org/cdimage/release/current-live/i386/iso-cd/>
+(the current version at the time this was written was 5.0.3). 
+You can pick any one of the live CD variations will work, but 
+you may wish to consider the following points:
+
+=over 4
+
+=item *
+
+"C<debian-live-503-i386-rescue.iso>" is probably the best all-around 
+option for most people because it includes many extra tools such as 
+the GCC compiler, therefore saving RAM (every package you need to 
+install when running from live CD consumes memory because RAM disk is 
+being used in lieu of real disk space).  When initially booting under 
+this image, you may see some cryptic warning messages having to do 
+with various diagnostic tools it tries to load or enable, but you 
+should be able to safely ignore these.
+
+=item *
+
+"C<debian-live-503-i386-standard.iso>" is a great option because of 
+its compact size, but you will probably need approximately 1 GB of RAM 
+in the computer where you will run the tutorial.  Because the 
+"standard" live CD comes with with a minimal set of tools, we will 
+have to install extra packages (such as the GCC compiler), all of 
+which will require RAM when running from a live CD. 
+
+=item *
+
+The other ISO images include different flavors of X-Windows desktop 
+managers.  You can select one of these if you don't mind the larger 
+download size and prefer a graphical environment.  Be aware that these 
+disks do not come with the extra tools found on the "rescue" image, so 
+you will need adequate RAM to be able to install them just as you 
+would under the "standard" image. B<Use one of the "graphical" ISO 
+images if you want a graphical web browser on the same machine as 
+where you will run the tutorial.>  (If you are using one of the non-
+graphical images discussed above, you can still use a graphical web 
+browser from another machine and point it to your Catalyst development 
+machine.)
+
+=back
+
+=item *
+
+Boot off the CD.
+
+=item *
+
+Select "C<Live>" from the initial boot menu.
+
+=item *
+
+Once the system has booted to a "C<user@debian:~$>" prompt, first
+install the Subversion client in case you want to check out the
+completed chapter example code:
+
+    sudo aptitude -y install subversion
+
+If you want to be able to remotely SSH to this system, set a
+password for root:
+
+    sudo passwd
+    ...
+
+Then enter the following command to add the more current "unstable" 
+package repository so we get the latest versions of Catalyst and
+related packages:
+
+    sudo vi /etc/apt/sources.list
+
+Add the following line to the bottom of this file:
+
+    deb http://ftp.us.debian.org/debian/ unstable main
+
+If you are not familiar with VI, you can move to the bottom of this 
+file and press the "o" key to insert a new line and type the line 
+above.  Then press the "Esc" key followed by a colon (":"), the 
+letters "wq" and then the "Enter" key.  The rest of the tutorial will 
+assume that you know how to use some editor that is available from the 
+Linux command-line environment.
+
+=item *
+
+Install Catalyst:
+
+    sudo aptitude update
+    sudo aptitude -y install sqlite3 libdbd-sqlite3-perl libcatalyst-perl \
+        libcatalyst-modules-perl libdbix-class-timestamp-perl \
+        libdatetime-format-sqlite-perl libconfig-general-perl \
+        libhtml-formfu-model-dbic-perl libterm-readline-perl-perl \
+        libdbix-class-encodedcolumn-perl libperl6-junction-perl \
+        libtest-pod-perl
+
+Let it install (normally about a 30 to 90-second operaton) and you are 
+done. (Note the '\' above.  Depending on your environment, you might 
+be able to cut and paste the text as shown or need to remove the '\' 
+characters to that the command is all on a single line.)
+
+If you are using an image other than the "rescue" ISO, you will also need
+to run the following command to install additional packages:
+
+    sudo aptitude -y install gcc make libc6-dev
+
+If you are running from the Live CD, you probably also want to free up 
+some RAM disk space with the following:
+
+    sudo aptitude clean
+
+NOTE: While the instructions above mention the Live CD because that 
+makes it easy for people new to Linux, you can obviously pick a 
+different Debian ISO image and install it to your hard drive. 
+Although there are many different ways to download and install Debian, 
+the "netinst" ISO image (such as "C<debian-500-i386-netinst.iso>" 
+represents a great option because it keeps your initial download small 
+(but still let's you install anything you want "over the network").
+
+Here are some tips if you are running from a live CD and are running
+out of disk space (which really means you are running out of RAM):
+
+=over 4
+
+=item *
+
+Always run "C<aptitude clean>" after you install new packages to 
+delete the original .deb files (the files installed B<by> the .deb 
+package B<will> remain available, just the .deb package itself is 
+deleted).
+
+=item *
+
+If you are installing modules from CPAN, you can free up some space 
+with "C<rm -rf /root/.cpan/*>" (change "/root/" in the previous 
+command to match your home directory or the location where CPAN
+has been configured to perform build operations).
+
+=item *
+
+If necessary, you can remove the cached package information with the 
+command "C<rm -f /var/lib/apt/lists/*>".  You can later pull this 
+information again via the command "C<aptitude update>".
+
+=item * 
+
+You can save a small amount of space by commenting out the lines in 
+C</etc/apt/sources.list> that reference "deb-src" and 
+"security.debian.org".  If you have already done an "C<aptitude 
+update>" with these repositories enabled, you can use the tip in the 
+previous bullet to free the space up (and then do another "C<aptitude 
+update>").
+
+=item *
+
+Although you can free up space by removing packages you installed 
+since you last booted (check out "C<aptitude remove _pkg_name>"), 
+don't bother trying to remove packages already available at the time 
+of boot. Instead of freeing up space, it will actual I<consume> some 
+space. (The live CD uses these "burn in" packages right from the CD 
+disk vs. first loading them on the virtual RAM disk. However, if you 
+remove them, the system has to update various files, something that 
+I<does> consume some space on the virtual RAM disk.)
+
+=back
+
+=back
+
+=item *
+
+Ubuntu
+
+Ubuntu is an extremely popular offshoot of Debian.  It provides 
+cutting edge versions of many common tools, application and libraries 
+in an easy-to-run live CD configuration (and because a single download 
+option can be used for both live CD and install-to-disk usage, it 
+keeps your download options nice and simple).  As with Debian 5, you 
+should be able to generate a fully function Catalyst environment in a 
+matter of minutes.  Here are quick instructions on how to use Ubuntu 
+to prepare for the tutorial:
+
+=over 4
+
+=item * 
+
+Download the Ubuntu Desktop edition and boot from the CD and/or image 
+file, select your language, and then "Try Ubuntu without any changes 
+to your computer."
+
+=item *
+
+Open a terminal session (click "Applications" in the upper-left 
+corner, then "Accessories," then "Terminal").
+
+=item *
+
+Add the 'universe' repositories:
+
+    sudo gedit /etc/apt/sources.list
+
+And remove the comments from the lines under the comments about the
+'universe' repositories.
+
+=item *
+
+Install Catalyst:
+
+    sudo aptitude update
+    sudo aptitude install libdbd-sqlite3-perl libcatalyst-perl libcatalyst-modules-perl libconfig-general-perl
+
+Accept all of the dependencies.  Done.  
+
+If you are running from the Live CD, you probably also want to free up 
+some disk space with the following:
+
+    sudo aptitude clean
+
+NOTE: While the instructions above mention the live CD because that 
+makes it easy for people new to Linux, you can obviously also use one 
+of the options to install Ubuntu on your drive.
+
+=back
+
+=item * 
+
+Matt Trout's C<cat-install>
+
+Available at L<http://www.shadowcat.co.uk/static/cat-install>, 
+C<cat-install> can be a fairly painless way to get Catalyst up and 
+running.  Just download the script from the link above and type C<perl 
+cat-install>.  Depending on the speed of your Internet connection and 
+your computer, it will probably take 30 to 60 minutes to install because 
+it downloads, makes, compiles, and tests every module.  But this is an 
+excellent way to automate the installation of all the latest modules 
+used by Catalyst from CPAN.
+
+
+=item * 
+
+Other Possibilities
+
+=over 4
+
+=item *
+
+OpenBSD Packages
+
+The 2008 Advent Day 4 entry has more information on using OpenBSD 
+packages to quickly build a system: 
+L<http://www.catalystframework.org/calendar/2008/4>.
+
+=item *
+
+NetBSD Package Collection on Solaris
+
+The 2008 Advent Day 15 entry has more information on using C<pkgsrc> and 
+NetBSD packages on Solaris: 
+L<http://www.catalystframework.org/calendar/2008/15>.
+
+=item * 
+
+CatInABox
+
+You can get more information at 
+L<http://www.catalystframework.org/calendar/2008/7>
+or L<Perl::Dist::CatInABox|Perl::Dist::CatInABox>.
+
+=item * 
+
+Frank Speiser's Amazon EC2 Catalyst SDK
+
+There are currently two flavors of publicly available Amazon Machine
+Images (AMI) that include all the elements you'd need to begin
+developing in a fully functional Catalyst environment within minutes.
+See L<Catalyst::Manual::Installation|Catalyst::Manual::Installation>
+for more details.
+
+=back
+
+=back
+
+For additional information and recommendations on Catalyst installation,
+please refer to 
+L<Catalyst::Manual::Installation|Catalyst::Manual::Installation>.
+
+
+=head1 DATABASES
+
+This tutorial will primarily focus on SQLite because of its simplicity
+of installation and use; however, modifications in the script required
+to support MySQL and PostgreSQL will be presented in Appendix.
+
+B<Note:> One of the advantages of the MVC design patterns is that
+applications become much more database independent.  As such, you will
+notice that only the C<.sql> files used to initialize the database
+change between database systems: the Catalyst code generally remains the
+same.
+
+
+=head1 WHERE TO GET WORKING CODE
+
+Each chapter of the tutorial has complete code available as a tarball in 
+the main Catalyst Subversion repository (see the note at the beginning 
+of each part for the appropriate svn command to use).
+
+B<NOTE:> You can run the test cases for the final code through Chapter 8 
+with the following commands:
+
+    svn co http://dev.catalystframework.org/repos/Catalyst/trunk/examples/Tutorial/MyApp_Chapter8
+    cd MyApp_Chapter8/MyApp
+    CATALYST_DEBUG=0 prove -wl t
+
+If you wish to include the L<HTML::FormFu|HTML::FormFu> section in your tests,
+substitute C<MyApp_Chapter9_FormFu> for C<MyApp_Chapter8> in the URL
+above (don't forget to "cd" out of the Ch8 directory if you ran the code above).
+
+    svn co http://dev.catalystframework.org/repos/Catalyst/trunk/examples/Tutorial/MyApp_Chapter9_FormFu
+    cd MyApp_Chapter9_FormFu/MyApp
+    CATALYST_DEBUG=0 prove -wl t
+
+You can also fire up the application under the development server that is conveniently
+built in to Catalyst.  Just issue this command from the C<MyApp> directory where you
+ran the test suite above:
+
+    script/myapp_server.pl
+
+And the application will start.  You can try out the application by 
+pulling up C<http://localhost:3000> in your web browser (as mentioned 
+earlier, change C<localhost> to a different IP address or DNS name if 
+you are running your web browser and your Catalyst development on 
+different boxes).  We will obviously see more about how to use the 
+application as we go through the remaining chapters of the tutorial, but 
+for now you can log in using the username "test01" and a password of 
+"mypass".
+
+
+=head1 AUTHOR
+
+Kennedy Clark, C<hkclark@gmail.com>
+
+Please report any errors, issues or suggestions to the author.  The
+most recent version of the Catalyst Tutorial can be found at
+L<http://dev.catalyst.perl.org/repos/Catalyst/Catalyst-Manual/5.80/trunk/lib/Catalyst/Manual/Tutorial/>.
+
+Copyright 2006-2008, Kennedy Clark, under Creative Commons License
+(L<http://creativecommons.org/licenses/by-sa/3.0/us/>).
