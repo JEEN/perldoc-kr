@@ -1,14 +1,14 @@
 =encoding utf8
 
-=head1 NAME
+=head1 NAME - 이름
 
 PSGI::FAQ - Frequently Asked Questions and answers
 
 	PSGI::FAQ - 자주 묻는 질문과 답변
 
-=head1 QUESTIONS
+=head1 QUESTIONS - 질문들
 
-=head2 General
+=head2 General - 일반
 
 =head3 How do you pronounce PSGI? - 어떻게 발음 하나여?
 
@@ -33,29 +33,28 @@ avoid using it to maximize the performance and to access low-level
 APIs. So they end up writing adapters for all of those different
 environments, some of which may be well tested while others are not.
 
-	펄의 코어 모듈인 'CGI'는 CGI, mod_perl 그리고 FastCGI 사이에서 약간 
-	추상적인 차이점을 가지고 있습니다. 하지만, 대부분의 웹애플리케이션
-	프레임워크 개발자들 (예를들어 Catalyst 와 Jifty) 은 보통 최대한의 성능과 
-	저수준의 API 접근 때문에 이것의 사용을 기피하고 있습니다.  그래서 그들은
-	그것들의 다른 환경마다의 아답터를 만들고 있습니다.  어떤것들은 테스트가 잘
-	되었을 수 있지만, 그렇지 않은 것도 있을 수 있습니다.
+	펄의 코어 모듈인 'CGI'는 CGI, mod_perl 그리고 FastCGI 사이의 차이점을 약간 추상화 합니다.
+	하지만, 대부분의 웹애플리케이션 프레임워크 개발자들 (예를들어 Catalyst 와 Jifty) 은 
+	보통 최대한의 성능과 저수준의 API 접근 때문에 이것의 사용을 기피하고 있습니다. 
+	그래서 그들은 그것들의 다른 환경마다의 아답터를 만들고 있습니다. 
+	어떤것들은 테스트가 잘 되었을 수 있지만, 그렇지 않은 것도 있을 수 있습니다.
 
 PSGI allows web application framework developers to only write an
 adapter for PSGI.  End users can choose from among all the backends that
 support the PSGI interface.
 
 	PSGI는 웹애플리케이션 프레임워크 개발자가 PSGI용 아답터 한개만 작성해도 되게끔 해줍니다.
-	엔드유저(End User)는 PSGI 인터페이스를 지원하는 프레임워크를 선택 할 수 있습니다.
+	말단 사용자는 PSGI 인터페이스를 지원하는 백엔드(backend)들 사이에서 선택 할 수 있습니다.
 
-=head3 You said PSGI is similar to CGI. How is the PSGI interaface different from CGI? - 당신은 PSGI가 CGI와 비슷하다고 했습니다. PSGI와 인터페이스와 CGI는 어떻게 다른가여?
+=head3 You said PSGI is similar to CGI. How is the PSGI interaface different from CGI? - 당신은 PSGI가 CGI와 비슷하다고 했습니다. PSGI 와 CGI 는 어떻게 다른가여? *FIXME* 왜 PSGI interface 라고 했을까?
 
 The PSGI interface is intentionally designed to be very similar to CGI so
 that supporting PSGI in addition to CGI would be extremely easy. Here's
 a highlight of the key differences between CGI and PSGI:
 
-	PSGI 인터페이스는 의도적으로 CGI와 매우 유사하게 디자인 되었습니다.
-	그래서 PSGI에 CGI를 더해서 지원하는 것은 무지하게 쉬울 것입니다. 
-	CGI와 PSGI의 차이점의 가장 중요한 열쇠가 여기에 있습니다.
+	PSGI 인터페이스는 의도적으로 CGI와 매우 유사하게 디자인 되었습니다. *FIXME* 왜 PSGI interface라고 했을까?
+	그래서 CGI에 추가로 PSGI를 지원하는 것은 무지하게 쉬울 것입니다. 
+	CGI와 PSGI의 차이점의 가장 중요한 열쇠가 여기에 있습니다:
 
 =over 4
 
@@ -65,15 +64,15 @@ In CGI, servers are the actual web servers written in any languages
 but mostly in C, and script is a script that can be written in any
 language such as C, Perl, Shell scripts, Ruby or Python.
 
-	CGI 에서는, 서버는 실제 웹서버이고 어떤 언어로든 작성될 수 있지만, 대부분 'C' 언어로 되어있습니다.
-	그리고 스크립트는 'C', 'Perl', 'Shell', 'Ruby', 'Python'과 같은 어떤 언어로도 작성될 수 있습니다. 
+	CGI 에서, 서버는 실제 웹서버입니다. 어떤 언어로든 작성될 수 있지만, 대부분 'C' 언어로 되어있습니다.
+	그리고 스크립트는 스크립트입니다. 'C', 'Perl', 'Shell', 'Ruby', 'Python'과 같은 어떠한 언어로도 작성될 수 있습니다. 
 
 In PSGI, servers are still web servers, but they're perl processes that
 are usually embedded in the web server (like mod_perl) or a perl daemon
 process called by a web server (like FastCGI), or an entirely perl based
 web server.
 
-	PSGI 에서는, 서버는 같은 웹서버이지만, 펄프로세스가 웹서버 안에 임베디드 되어 있거나(mod_perl 처럼)
+	PSGI 에서, 서버는 같은 웹서버이지만, 펄프로세스가 웹서버 안에 임베디드 되어 있거나(mod_perl 처럼)
 	펄 데몬 프로세스가 웹서버에 의해 호출 되거나(FastCGI 처럼), 또는 웹서버가 완전히 펄 기반으로 이루어져 
 	있습니다.
 
@@ -83,8 +82,8 @@ In CGI, we use STDIN, STDERR, and environment variables to read
 parameters and the HTTP request body and to send errors from the
 application.
 
-	CGI 에서는, 애플리케이션으로부터 STDIN, STDERR, 환경변수를 파라미터를 읽고 HTTP 
-	요청과 에러를 전송하는데 사용합니다.
+	CGI 에서, 우리는 STDIN, STDERR와 환경변수를 애플리케이션으로부터 파라미터를 읽고 HTTP 
+	본문 요청과 에러를 전송하는데 사용합니다.
 
 In PSGI, we use the C<$env> hash references and the I<psgi.input> and
 I<psgi.errors> streams to pass that data between servers and applications.
@@ -97,18 +96,18 @@ I<psgi.errors> streams to pass that data between servers and applications.
 In CGI, applications are supposed to print HTTP headers and body to
 STDOUT to pass it back to the web server.
 
-	CGI 에서는, 애플리케이션은 HTTP 헤더와 본문 출력을 STDOUT을 통해 웹서버로 돌려준다고 가정합니다
+	CGI 에서는, 애플리케이션이 HTTP 헤더와 본문 출력을 STDOUT을 통해 웹서버로 돌려준다고 가정합니다
 
 In PSGI, applications are supposed to return a HTTP status code,
 headers, and body (as an array ref or a filehandle-like object) to the
 application as an array reference.
 
-	PSGI 에서는, 애플리케이션은 HTTP 상태 코드(status code), 헤더, 본문(어레이 레퍼런스 혹은 파일핸들같은 객체로)을
-	애플리케이션(* Plack 과 같은 PSGI 구현물을 말하는 듯)에 어레이 레퍼런스로 돌려준다고 가정합니다.
+	PSGI 에서는, 애플리케이션이 HTTP 상태 코드(역주: 200 OK 같은거), 헤더, 본문(어레이 레퍼런스 혹은 파일핸들같은 객체로)을
+	애플리케이션에 어레이 레퍼런스로 돌려준다고 가정합니다.
 
 =back
 
-=head3 My framework already does CGI, FCGI and mod_perl. Why do I want to support PSGI? - 내 프레임워크는 이미 CGI, FCGI, mod_perl에서 동작하고 있습니다. 왜 PSGI를 지원해야 하나여?
+=head3 My framework already does CGI, FCGI and mod_perl. Why do I want to support PSGI? - 내 프레임워크는 이미 CGI, FCGI, mod_perl에서 동작하고 있습니다. 왜 PSGI를 지원하길 바래야 하나여?
 
 If your web application framework already supports most server
 environments, performance is good, and the backends are well tested,
@@ -119,9 +118,9 @@ PSGI in addition should be extremely easy, and the benefit you and your
 framework users will enjoy is huge.
 
 	만든 웹애플리케이션 프레임워크가 이미 대부분의 서버환경을 지원하고, 뛰어난 성능에, 최종 테스트가 잘 되어있다면
-	당장 PSGI를 지원한다고해서 직접적으로 얻을 수 있는 이익은 없을 수 있습니다. -- 그래도 중복되는 코드를 없앨 수 
-	있습니다. 그러나 현재 CGI 환경만을 지원하고 있다면, PSGI도 지원하는 것이 훨씬 쉬울 것 입니다. 그로인해 당신과 당신의
-	프레임워크를 사용하는 사용자들에게 여유가 생길 것 입니다.
+	당장 PSGI를 지원한다고해서 직접적으로 얻을 수 있는 이익은 없을 수 있습니다. -- 그래도 PSGI 백엔드와 함께라면
+	중복되는 코드는 없앨 수 있습니다. 그러나 현재 CGI 환경만을 지원하고 있다면, PSGI를 추가로 지원하는 것이 훨씬 쉬울
+	것 입니다. 그로인해 당신과, 당신의 프레임워크 사용자들은 긴 휴식을 얻을 수 있습니다.
 
 =head3 I'm writing a web application. What's the benefit of PSGI for me? - 저는 웹애플리케이션을 만들고 있어요. PSGI로 부터 얻는 이익은 뭔가여?
 
@@ -132,8 +131,8 @@ application, the end users of your application should be able to
 configure and run your application in a bunch of different ways.
 
 	당신이 사용하고 있는 프레임워크가 PSGI를 지원하고 있다면, 당신의 애플리케이션은 만들어져 있거나 만들어질 PSGI구현물
-	위에서 실행될 수 있습니다. 당신은 PSGI 를 return 하는 '.psgi' 파일을 제공할 수 있습니다. 당신의 애플리케이션 사용자는
-	다양한 방법으로 당신의 애플리케이션을 구성(configure)할 수 있고, 실행할 수 있습니다.
+	위에서 실행될 수 있습니다. 당신은 PSGI 를 return 하는 '.psgi' 파일을 제공할 수 있습니다. 당신의 애플리케이션 말단
+	사용자는 다양한 방법으로 당신의 애플리케이션을 구성(configure)할 수 있고, 실행할 수 있습니다.
 
 =head3 But I'm writing a web application in CGI and it works well. Should I switch to PSGI? - 근데 내가 만들고 있는 웹애플리케이션은 CGI이고, 잘 동작합니다. 그래도 PSGI로 바꾸어야 할까요?
 
@@ -161,8 +160,8 @@ full-stack ones or micro ones), or use L<Plack::Request> if you are
 anti frameworks, to make your application PSGI aware, to be more
 future proof.
 
-	당신은 PSGI 호환 가능한 프레임워크(아주작은거 또는 전체 둘중한개)중 하나를 사용해서 시작할 수 있습니다.
-	당신이 안티프레임워크 라면 'Plack::Request' 를 사용할 수도 있습니다. 애플리케이션을 PSGI가 알아차리도록 하고, 
+	당신은 PSGI 호환 가능한 프레임워크(아주작은거 또는 풀-스택)중 하나를 사용해서 시작할 수 있습니다.
+	당신이 안티프레임워크 라면 'Plack::Request' 를 사용할 수도 있습니다. 애플리케이션을 PSGI가 알아차리도록 만들고, 
 	미래를 대비하세요. * FIXME *
 
 Even if you ignore PSGI today and write applications in palin CGI, you
@@ -177,8 +176,8 @@ If you're a web server developer, write a PSGI implementation that
 calls a PSGI application. Or join the development on Plack, the
 reference implementation of PSGI, to add backends for more web servers.
 
-	웹서버 개발자라면, PSGI 애플리케이션을 호출하는 구현물을 작성합니다. 또는 Plack 개발에 참여하세요.
-	PSGI 구현의 레퍼런스는 더많은 웹서버를 백엔드에 추가하는 것입니다. * FIXME *
+	웹서버 개발자라면, PSGI 애플리케이션을 호출하는 구현물을 작성합니다. 또는 더많은 웹서버를 백엔드에 추가하기 위한
+	PSGI 참조 구현물 Plack 개발에 참여하세요.
 
 If you're a web application framework developer, write an adapter for
 PSGI. Now you're freed from supporting all different server
@@ -212,16 +211,15 @@ backend that doesn't load any modules at all and runs pretty quickly
 without eating so much memory under the CGI environment.
 
 	다시 말하지만, PSGI는 구현물이 아닙니다, 하지만 굉장히 빠른 PSGI 구현물이 가능합니다.
-	모든 것을 미리 로드하고 충분히 최적화된 코드로 XS 파서와 sendfail(2) 커널 호출을 사용한 prefork 되고 독립적인, 
-	이벤트 기반의 'C' 로 작성된 아주작은 웹서버가 펄에 임베디드 되어 있는 구현물이 PSGI를 지원할 수 있습니다. 
-	또는 평범하고 나이많은 CGI.pm 기반의 백엔드가 CGI 환경에서 많은 메모리를 소비하지 않고 한번에 모듈을 로드하지않으며
-	빠르게 실행 할 수도 있습니다. * FIXME *
-	*** 닥치고 빠르니까 걱정하지 말란 뜻인 듯..
+	모든 것을 미리 로드하고 충분히 최적화된 코드로 XS 파서와 sendfile(2) 커널 호출을 사용한 prefork 되고 독립적인, 
+	이벤트 기반의 'C' 로 작성된 아주작은 웹서버에 펄이 임베디드 되어 있는 구현물이 PSGI를 지원할 수 있습니다. 
+	또는 평범하고 오래된 CGI.pm 기반에 한번에 아무런 모듈도 로드하지 않으며, CGI 환경에서 너무 많은 메모리를 잡아먹지않고
+	아주 빠르게 동작하는 백엔드도 있을 수 있습니다.
 
 The reference implementation Plack already has very fast backends like
 Standalone::Prefork and Coro.
 
-	구현물 Plack 은 'Standalone::Prefork' 와 'Coro' 처럼 이미 매우 빠른 백엔드를 가지고 있다는걸 참고하세요. 
+	참조 구현물 Plack 은 'Standalone::Prefork' 와 'Coro' 처럼 이미 매우 빠른 백엔드를 가지고 있습니다.
 
 Users of your framework can choose which backend is the best for their
 needs.  You, as a web application framework developer, don't need to
