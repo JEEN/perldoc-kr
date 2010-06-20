@@ -384,7 +384,7 @@ reminder.
 
 =head2 HTTP::Engine
 
-=head3 Why PSGI/Plack instead of HTTP::Engine?
+=head3 Why PSGI/Plack instead of HTTP::Engine? - 왜 PSGI/Plack이 HTTP::Engine을 대신 하나여?
 
 HTTP::Engine was a great experiment, but it mixed the application
 interface (the C<request_handler> interface) with implementations, and
@@ -394,21 +394,37 @@ it into three parts: The interface specification (PSGI), Reference
 server implementations (Plack::Server) and Standard APIs and Tools
 (Plack).
 
-=head3 Will HTTP::Engine be dead?
+	'HTTP::Engine' 은 훌륭한 실험이었습니다, 그러나 그것은 구현물에 애플리케이션 인터페이스가
+	섞여 있습니다 ('request_handler' 인터페이스), 그리고 커다란 클래스 계층구조와 규칙기반(role-based)
+	인터페이스는 새로운 백엔드를 작성하기 정말 어렵게 만들었습니다. 우리는 'HTTP::Engine'을 유지하면서
+	그것을 세부분으로 쪼갯습니다: 인터페이스 명세서(PSGI), 참조 서버 구현물(Plack::Server) 그리고 표준
+	API와 도구(Plack)
+	
+
+=head3 Will HTTP::Engine be dead? - HTTP::Engine은 죽게 되나여?
 
 It won't be dead. HTTP::Engine will stay as it is and still be useful
 if you want to write a micro webserver application rather than a
 framework.
 
-=head3 Do I have to rewrite my HTTP::Engine application to follow PSGI interface?
+	안 죽을 겁니다. 당신이 프레임워크보다는 아주작은 웹서버 애플리케이션을 작성할때  HTTP::Engine은
+	여전히 유용합니다.
+
+=head3 Do I have to rewrite my HTTP::Engine application to follow PSGI interface? - 제 HTTP::Engine 애플리케이션을 PSGI 인터페이스를 따르도록 재작성 해야만 하나여?
 
 No, you don't need to rewrite your existing HTTP::Engine application.
 It can be easily turned into a PSGI application using
 L<HTTP::Engine::Interface::PSGI>.
 
+	아닙니다, 당신의 HTTP::Engine 애플리케이션을 재작성할 필요가 없습니다.
+	'HTTP::Engine::Interface::PSGI'를 사용하면, PSGI 애플리케이션으로 쉽게 전환 할 수 있습니다.
+
 Alternatively, you can use L<Plack::Request> and L<Plack::Response>
 which gives compatible APIs to L<HTTP::Engine::Request> and
 L<HTTP::Engine::Response>:
+
+	'Plack::Request'와 'Plack::Response'를 사용해서 'HTTP::Engine::Request' 와 'HTTP::Engine::Response'에 
+	호환 가능한 API를 얻을 수 있습니다.
 
   use Plack::Request;
   use Plack::Response;
@@ -422,7 +438,9 @@ L<HTTP::Engine::Response>:
 
 And this C<request_handler> is a PSGI application now.
 
-=head3 What's the benefit of converting my HTTP::Engine app to run on PSGI?
+	그리고 지금 여기의 'request_handler' 는 PSGI 애플리케이션입니다.
+
+=head3 What's the benefit of converting my HTTP::Engine app to run on PSGI? - 제 HTTP::Engine 앱을 PSGI위에 돌릴 수 있도록 변환해서 얻을 수 있는 이익은 먼가여?
 
 As of today most web server implementations and middlewares
 implemented by Plack are mostly available on HTTP::Engine as well, so
