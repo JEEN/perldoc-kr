@@ -438,7 +438,7 @@ L<HTTP::Engine::Response>:
 
 And this C<request_handler> is a PSGI application now.
 
-	그리고 지금 여기의 'request_handler' 는 PSGI 애플리케이션입니다.
+	그리고 여기의 'request_handler' 는 PSGI 애플리케이션입니다.
 
 =head3 What's the benefit of converting my HTTP::Engine app to run on PSGI? - 제 HTTP::Engine 앱을 PSGI위에 돌릴 수 있도록 변환해서 얻을 수 있는 이익은 먼가여?
 
@@ -450,10 +450,20 @@ future we'll have a pretty fast server environments (think of Passenger
 for Ruby Rack) and/or plenty of useful middlewares that HTTP::Engine
 doesn't have today.
 
+	오늘로 대부분의 웹 서버 구현물과 미들웨어는 대부분 'Plack'으로 구현되어졌습니다.
+	뿐만 아니라 'HTTP::Engine' 위에서 사용가능합니다, 그래서 PSGI로 변환한다고 해도 
+	당장 직접적으로 얻는 이익은 없을 수 있습니다. 그러나 PSGI는 미래에도 좀 더 경쟁력을
+	갖출 수 있습니다, 그리고 가까운 미래에 우리는 매우빠른 서버 환경(Ruby Rack을 위한 
+	승객들을 생각해 보세요)을 가질 수 있다는 희망사항이 있습니다. 그리고/또는 유용한 미들웨어 
+	'HTTP::Engine'은 오늘날 사용하는 걸로 충분합니다. * FIXME *
+
 See the question I<My framework already does CGI, FCGI and
 mod_perl. Why do I want to support PSGI?> for more details.
+
+	더 자세한 내용은 '내 프레임워크는 이미 CGI, FCGI, mod_perl에서 동작하고 있습니다.
+	왜 PSGI를 지원하길 바래야 하나여?' 라는 질문을 참고하세요.
   
-=head2 API Design
+=head2 API Design - API 디자인
 
 Keep in mind that most design choices made in the PSGI spec are to
 minimize the requirements on backends so they can optimize things.
@@ -463,7 +473,9 @@ backends have to support, which would end up getting in the way of
 optimizations, or introducing more bugs. What makes a fancy API to
 attract web application developers is your framework, not PSGI.
 
-=head3 Why a big env hash instead of objects with APIs?
+	* FIXME * 어려워잉
+
+=head3 Why a big env hash instead of objects with APIs? - 왜 객체 대신에 큰 env 해시를 API에 사용했나여?
 
 The simplicity of the interface is the key that made WSGI and Rack
 successful. PSGI is a low-level interface between backends and web
@@ -471,6 +483,11 @@ application framework developers. If we define an API on what type of
 objects should be passed and which method they need to implement,
 there will be so much duplicated code in the backends, some of
 which may be buggy.
+
+	인터페이스의 간단함은 WSGI와 Rack을 성공적으로 만든 열쇠입니다. 
+	PSGI는 백엔드와 웹애플리케이션 프레임워크 개발자 사이의 저수준 인터페이스 입니다.
+	우리가 구현에 필요한 메소드를 통과해야만 하는 무슨 객체 타입의 API를 정의 햇다면,
+	백엔드 에는 너무 많은 중복된 코드가 들어가게 됩니다. 그 중 일부는 버그덩어리 일수도 있습니다.
 
 For instance, PSGI defines C<< $env->{REMOTE_ADDR} >> as a
 string. What if the PSGI spec required it to be an instance of Net::IP?
@@ -480,21 +497,39 @@ Backends depending on specific modules or having to reinvent lots
 of stuff is considered harmful and that's why the interface is as minimal
 as possible.
 
+	예를들어, PSGI는 '$env->{REMOTE_ADDR}' 이라는 스트링을 정의합니다.
+	만약에 PSGI 스펙이 'Net::IP' 개체를 요구한다면?
+	백엔드 코드는 'Net::IP' 모듈에 의존하게됩니다, 그렇지 않다면 'Net::IP'의 모든 메소드를
+	흉내내서 모형 객체를 구현해야 합니다. 백엔드는 구체적인 모듈에 의존하거나 많은 것들을 
+	다시 만들어야 합니다 이것은 해로운 일이며 이것이 왜 인터페이스를 가능한한 작게 만드는지에 대한
+	이유 입니다.
+
 Making a nice API for the end users is a job that web application
 frameworks (adapter developers) should do, not something PSGI needs to
 define.
 
-=head3 Why is the application a code ref rather than an object with a ->call method?
+	말단 사용자를 위해 나이스한 API를 만드는 것은 웹애플리케이션 프레임워크(어댑터 개발자)의
+	일이며, PSGI가 정의하지 않습니다.
+
+=head3 Why is the application a code ref rather than an object with a ->call method? - 왜 객체의 ->call 메소드 보다 애플리케이션 코드 레퍼런스 인가여? * FIXME *
 
 Requiring an object I<in addition to> a code ref would make EVERY
 backend's code a few lines more tedious, while requiring an object
 I<instead of> a code ref would make application developers write
 another class and instanciate an object.
 
+	'in addition to' 코드 레퍼런스를 객체에 요구하는건 모든 백엔드의 코드를
+	아주 조금 지루하게 만들 수 있습니다, 'instead of' 코드 레퍼런스를 요구하는
+	것은 애플리케이션 개발자가 또다른 클래스를 객체화 하도록 할 수 있습니다. * FIXME *
+
 In other words, yes an object with a C<call> method could work, but
 again PSGI was designed to be as simple as possible, and making a code
 reference out of class/object is no brainer but the other way round
 always requires a few lines of code and possibly a new file.
+
+	다르게 말하면, 객체가 'call' 메소드를 가지고 있고 동작해도, PSGI는 가능하면 간단하게
+	다시 디자인합니다, 그리고 코드 레퍼런스를 클래스/오브젝트 바깥에서 생각할 필요없지만
+	* FIXME *
 
 =head3 Why are the headers returned as an array ref and not a hash ref?
 
